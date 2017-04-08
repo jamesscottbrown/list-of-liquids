@@ -1,24 +1,27 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Directed Graph Editor</title>
-    <link rel="stylesheet" href="app.css">
-  </head>
-  
-  <body>
 
-  	<div id="network"></div>
+{% extends "layout.html" %}
 
-  	<div id="controls">
-  		<button onclick="addWellNode();">Add Well</button>
-  		<button onclick="addVolumeNode();">Add Volume</button>
-  		<button onclick="clearEverything();">Clear</button>
-  	</div>
 
-  </body>
+{% block css %}
+    {% assets "css_network_editor" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock %}
 
-  <script src="http://d3js.org/d3.v3.min.js"></script>
-  <script src="cola.v3.min.js"></script>
-  <script src="app.js"></script>
-</html>
+
+{% block content %}
+    <div id="network"></div>
+
+    <div id="controls">
+      <button onclick="addWellNode();">Add Well</button>
+      <button onclick="addVolumeNode();">Add Volume</button>
+      <button onclick="clearEverything();">Clear</button>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+  {% assets "js_network_editor" %}
+      <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock %}
