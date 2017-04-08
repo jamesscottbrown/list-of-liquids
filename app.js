@@ -88,6 +88,14 @@ function tick() {
 
 // update graph (called when needed)
 function restart() {
+
+  var constraints = [];
+  for (var i=0; i<links.length; i++){
+    var link = links[i];
+    constraints.push({"axis":"y", "left":link.source.id, "right":link.target.id, "gap":25})
+  }
+  force.constraints(constraints);
+
   // path (link) group
   path = path.data(links);
 
