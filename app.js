@@ -9,7 +9,11 @@ var svg = d3.select('#network')
   .attr('height', height);
 
 // set up initial nodes and links
-var nodes = [{id: 0, type: "well"}, {id: 1, type: "volume"}, {id: 2, type: "cross"}, {id: 3, type: "aliquot"}],
+var nodes = [
+    {id: 0, type: "well", label: "Sample"}, 
+    {id: 1, type: "volume", label: "10 ml"}, 
+    {id: 2, type: "cross", label: "cross"}, 
+    {id: 3, type: "aliquot", label: "Aliquot"}],
 
   lastNodeId = nodes.length - 1,
   links = [
@@ -18,7 +22,6 @@ var nodes = [{id: 0, type: "well"}, {id: 1, type: "volume"}, {id: 2, type: "cros
     {source: nodes[2], target: nodes[3] }
   ];
 
-// init force layout
 var force = cola.d3adaptor()
     .linkDistance(150)
     .size([width, height])
@@ -199,7 +202,7 @@ function restart() {
       .attr('x', 0)
       .attr('y', 4)
       .attr('class', 'id')
-      .text(function(d) { return d.id; });
+      .text(function(d) { return d.label; });
 
   // remove old nodes
   circle.exit().remove();
@@ -261,8 +264,13 @@ function keyup() {
   lastKeyDown = -1;
 }
 
-function addNode(nodeType){
-  nodes.push({id: ++lastNodeId, type: nodeType, x: width/2, y: height/2});
+function addWellNode(){
+  nodes.push({id: ++lastNodeId, type: 'well', x: width/2, y: height/2, label: prompt('Name:')});
+  restart();
+}
+
+function addVolumeNode(){
+  nodes.push({id: ++lastNodeId, type: 'volume', x: width/2, y: height/2, label: 'Volume', data: prompt('Volumes:')});
   restart();
 }
 
