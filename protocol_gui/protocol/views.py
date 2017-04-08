@@ -6,6 +6,8 @@ from protocol_gui.utils import flash_errors
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, current_user
 
+from urllib import unquote_plus
+
 blueprint = Blueprint('protocol', __name__, url_prefix='/protocols', static_folder='../static')
 
 
@@ -78,3 +80,24 @@ def new_protocol():
     else:
         flash_errors(form)
     return render_template('protocols/new_protocol.html', form=form)
+
+
+
+@blueprint.route('/<int:protocol_id>/save', methods=['POST'])
+@login_required
+def save_protocol(protocol_id):
+    """Update stored string-representation of a protocol."""
+
+    current_protocol = Protocol.query.filter_by(id=protocol_id).first()
+    if not current_protocol:
+        flash('No such specification!', 'danger')
+        return redirect('.')
+
+    if current_protocol.user != current_user:
+        flash('Not your project!', 'danger')
+        return redirect('.')
+
+    current_protocol.protocol = unquote_plus(request.get_data())
+    current_protocol.save()
+
+    return "SUCCESS"

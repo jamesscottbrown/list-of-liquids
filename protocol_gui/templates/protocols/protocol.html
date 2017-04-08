@@ -26,12 +26,17 @@
       <button onclick="networkEditor.addWellNode();">Add Well</button>
       <button onclick="networkEditor.addVolumeNode();">Add Volume</button>
       <button onclick="networkEditor.clearEverything();">Clear</button>
+      <button onclick="networkEditor.save();">Save</button>
     </div>
 {% endblock %}
 
 
 {% block js %}
   {% assets "js_network_editor" %}
+      <script type="text/javascript">
+        var csrf_token = "{{ csrf_token() }}";
+    </script>
+
       <script type="text/javascript" src="{{ ASSET_URL }}"></script>
   {% endassets %}
 {% endblock %}

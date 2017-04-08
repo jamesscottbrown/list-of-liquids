@@ -331,6 +331,38 @@ function network_editor () {
       restart();
     }
 
+    function save(){
+
+        // note that we cannot serialise {nodes: nodes, links: links} because of cyclic references
+        var node_list = [];
+        for (i=0; i<nodes.length; i++){
+            var node = nodes[i];
+            node_list.push({id: node.id, type: node.id, x: node.x, y: node.y, label: node.label});
+        }
+
+        var link_list = [];
+        for (i=0; i<links.length; i++){
+            var link = links[i];
+            link_list.push({source_id: link.source.id, target_id: link.target.id});
+        }
+
+        var protocol_string = JSON.stringify({nodes: node_list, links: link_list});
+        $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: window.location.href + "/save",
+        dataType: 'html',
+        async: true,
+        data: protocol_string,
+        beforeSend: function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrf_token);
+         },
+        success: function (data) { console.log("SUCCESS")},
+        error: function (result, textStatus) { console.log(result); console.log(textStatus); }
+        })
+    }
+
+
   // app starts here
     svg.on('mousemove', mousemove)
         .on('mouseup', mouseup);
@@ -341,5 +373,5 @@ function network_editor () {
 
     restart();
 
-    return {addWellNode: addWellNode, addVolumeNode: addVolumeNode, clearEverything: clearEverything};
+    return {addWellNode: addWellNode, addVolumeNode: addVolumeNode, clearEverything: clearEverything, save: save};
 }
