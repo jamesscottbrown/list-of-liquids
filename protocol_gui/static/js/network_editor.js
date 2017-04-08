@@ -10,18 +10,40 @@ function network_editor () {
         .attr('height', height);
 
   // set up initial nodes and links
-    var nodes = [
+    var nodes, lastNodeId, links;
+
+    if (protocol_string){
+
+        console.log(protocol_string);
+        var obj = JSON.parse(protocol_string);
+
+        nodes = obj.nodes;
+
+        var nodePosition = [];
+        for (var i = 0; i < nodes.length; i++){
+            nodePosition[ nodes[i].id ] = i;
+        }
+
+        links = [];
+        for (i=0; i<obj.links.length; i++){
+            var link = obj.links[i];
+            links.push({source: nodes[nodePosition[link.source_id]], target: nodes[nodePosition[link.target_id]]});
+        }
+
+    } else {
+        nodes = [
           {id: 0, type: "well", label: "Sample"},
           {id: 1, type: "volume", label: "10 ml"},
           {id: 2, type: "cross", label: "cross"},
-          {id: 3, type: "aliquot", label: "Aliquot"}],
+          {id: 3, type: "aliquot", label: "Aliquot"}];
 
-        lastNodeId = nodes.length - 1,
         links = [
           {source: nodes[0], target: nodes[2]},
           {source: nodes[1], target: nodes[2]},
           {source: nodes[2], target: nodes[3]}
         ];
+    }
+    lastNodeId = nodes.length - 1;
 
     var force = cola.d3adaptor()
         .linkDistance(150)
@@ -337,7 +359,7 @@ function network_editor () {
         var node_list = [];
         for (i=0; i<nodes.length; i++){
             var node = nodes[i];
-            node_list.push({id: node.id, type: node.id, x: node.x, y: node.y, label: node.label});
+            node_list.push({id: node.id, type: node.type, x: node.x, y: node.y, label: node.label});
         }
 
         var link_list = [];

@@ -7,6 +7,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, current_user
 
 from urllib import unquote_plus
+import json
 
 blueprint = Blueprint('protocol', __name__, url_prefix='/protocols', static_folder='../static')
 
@@ -27,7 +28,13 @@ def protocol(protocol_id):
         flash('Not your protocol!', 'danger')
         return redirect('.')
 
-    return render_template('protocols/protocol.html', protocol=current_protocol)
+    if current_protocol.protocol:
+        protocol_obj = json.loads(current_protocol.protocol)
+    else:
+        protocol_obj = None
+
+    return render_template('protocols/protocol.html', protocol=current_protocol,
+                           protocol_obj=protocol_obj)
 
 @blueprint.route('/<int:protocol_id>/edit', methods=['GET', 'POST'])
 @login_required

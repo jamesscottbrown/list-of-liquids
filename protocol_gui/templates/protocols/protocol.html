@@ -32,11 +32,12 @@
 
 
 {% block js %}
-  {% assets "js_network_editor" %}
-      <script type="text/javascript">
+    <script type="text/javascript">
         var csrf_token = "{{ csrf_token() }}";
+        var protocol_string = {{ protocol.protocol | tojson}};
     </script>
 
+  {% assets "js_network_editor" %}
       <script type="text/javascript" src="{{ ASSET_URL }}"></script>
   {% endassets %}
 {% endblock %}
