@@ -236,6 +236,15 @@ function spliceLinksForNode(node) {
   });
 }
 
+function clearEverything(){
+  nodes = [];
+  links = [];
+  lastNodeId = 0;
+
+  force.nodes(nodes).links(links);
+  restart();
+}
+
 // only respond once per keydown
 var lastKeyDown = -1;
 
