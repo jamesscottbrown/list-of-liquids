@@ -17,8 +17,7 @@ var nodes = [{id: 0}, {id: 1}, {id: 2}],
     {source: nodes[1], target: nodes[2], left: false, right: true }
   ];
 
-// init D3 force layout
-
+// init force layout
 var force = cola.d3adaptor()
     .linkDistance(150)
     .size([width, height])
@@ -75,17 +74,17 @@ function resetMouseVars() {
 function tick() {
   // draw directed edges with proper padding from node centers
   path.attr('d', function(d) {
-    var deltaX = d.target.x - d.source.x,
-        deltaY = d.target.y - d.source.y,
-        dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY),
-        normX = deltaX / dist,
-        normY = deltaY / dist,
-        sourcePadding = d.left ? 17 : 12,
-        targetPadding = d.right ? 17 : 12,
-        sourceX = d.source.x + (sourcePadding * normX),
-        sourceY = d.source.y + (sourcePadding * normY),
-        targetX = d.target.x - (targetPadding * normX),
-        targetY = d.target.y - (targetPadding * normY);
+  var deltaX = d.target.x - d.source.x,
+      deltaY = d.target.y - d.source.y,
+      dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY),
+      normX = deltaX / dist,
+      normY = deltaY / dist,
+      sourcePadding = d.left ? 17 : 12,
+      targetPadding = d.right ? 17 : 12,
+      sourceX = d.source.x + (sourcePadding * normX),
+      sourceY = d.source.y + (sourcePadding * normY),
+      targetX = d.target.x - (targetPadding * normX),
+      targetY = d.target.y - (targetPadding * normY);
     return 'M' + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
   });
 
@@ -103,7 +102,6 @@ function restart() {
   path.classed('selected', function(d) { return d === selected_link; })
     .style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
     .style('marker-end', function(d) { return d.right ? 'url(#end-arrow)' : ''; });
-
 
   // add new links
   path.enter().append('svg:path')
@@ -123,7 +121,6 @@ function restart() {
   // remove old links
   path.exit().remove();
 
-
   // circle (node) group
   // NB: the function arg is crucial here! nodes are known by id, not by index!
   circle = circle.data(nodes, function(d) { return d.id; });
@@ -142,13 +139,11 @@ function restart() {
     .style('stroke', function(d) { return d3.rgb(colors(d.id)).darker().toString(); })
     .on('mouseover', function(d) {
       if(!mousedown_node || d === mousedown_node) return;
-      // enlarge target node
-      d3.select(this).attr('transform', 'scale(1.1)');
+      d3.select(this).attr('transform', 'scale(1.1)'); // enlarge target node
     })
     .on('mouseout', function(d) {
       if(!mousedown_node || d === mousedown_node) return;
-      // unenlarge target node
-      d3.select(this).attr('transform', '');
+      d3.select(this).attr('transform', ''); // unenlarge target node
     })
     .on('mousedown', function(d) {
       // select node
@@ -227,13 +222,9 @@ function restart() {
 }
 
 function mousedown() {
-  // prevent I-bar on drag
-  //d3.event.preventDefault();
-
-  // because :active only works in WebKit?
   svg.classed('active', true);
 
-  if(mousedown_node || mousedown_link) return;
+  if (mousedown_node || mousedown_link) return;
 
   // insert new node at point
   var point = d3.mouse(this),
@@ -247,25 +238,17 @@ function mousedown() {
 
 function mousemove() {
   if(!mousedown_node) return;
-
-  // update drag line
   drag_line.attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + d3.mouse(this)[0] + ',' + d3.mouse(this)[1]);
-
   restart();
 }
 
 function mouseup() {
   if(mousedown_node) {
-    // hide drag line
     drag_line
       .classed('hidden', true)
       .style('marker-end', '');
   }
-
-  // because :active only works in WebKit?
   svg.classed('active', false);
-
-  // clear mouse event vars
   resetMouseVars();
 }
 
@@ -288,19 +271,17 @@ function keydown() {
   lastKeyDown = d3.event.keyCode;
 
   if(!selected_node && !selected_link) return;
-  switch(d3.event.keyCode) {
-    case 8: // backspace
-    case 46: // delete
-      if(selected_node) {
-        nodes.splice(nodes.indexOf(selected_node), 1);
-        spliceLinksForNode(selected_node);
-      } else if(selected_link) {
-        links.splice(links.indexOf(selected_link), 1);
-      }
-      selected_link = null;
-      selected_node = null;
-      restart();
-      break;
+
+  if (d3.event.keyCode == 8 || d3.event.keyCode == 46) { // backspace or delete
+    if(selected_node) {
+      nodes.splice(nodes.indexOf(selected_node), 1);
+      spliceLinksForNode(selected_node);
+    } else if(selected_link) {
+      links.splice(links.indexOf(selected_link), 1);
+    }
+    selected_link = null;
+    selected_node = null;
+    restart();
   }
 }
 
