@@ -1,7 +1,6 @@
 // set up SVG for D3
 var width  = 960,
-    height = 500,
-    colors = d3.scale.category10();
+    height = 500;
 
 var svg = d3.select('body')
   .append('svg')
@@ -10,7 +9,7 @@ var svg = d3.select('body')
   .attr('height', height);
 
 // set up initial nodes and links
-var nodes = [{id: 0}, {id: 1}, {id: 2}, {id: 3}],
+var nodes = [{id: 0, type: "well"}, {id: 1, type: "volume"}, {id: 2, type: "cross"}, {id: 3, type: "aliquot"}],
 
   lastNodeId = 2,
   links = [
@@ -129,16 +128,21 @@ function restart() {
 
   // update existing nodes (selected visual state)
   circle.selectAll('circle')
-    .style('fill', function(d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); });
+    .style('opacity', function(d) { return (d === selected_node) ? '1' : '0.5'; });
 
   // add new nodes
   var g = circle.enter().append('svg:g');
 
   g.append('svg:circle')
     .attr('class', 'node')
+    .classed('well', function(d){ return d.type == "well"})
+    .classed('volume', function(d){ return d.type == "volume"})
+    .classed('cross', function(d){ return d.type == "cross"})
+    .classed('zip', function(d){ return d.type == "zip"})
+    .classed('aliquot', function(d){ return d.type == "aliquot"})
+
     .attr('r', 12)
-    .style('fill', function(d) { return (d === selected_node) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id); })
-    .style('stroke', function(d) { return d3.rgb(colors(d.id)).darker().toString(); })
+    .style('opacity', function(d) { return (d === selected_node) ? '1' : '0.5'; })
     .on('mouseover', function(d) {
       if(!mousedown_node || d === mousedown_node) return;
       d3.select(this).attr('transform', 'scale(1.1)'); // enlarge target node
