@@ -2,7 +2,7 @@
 var width  = 960,
     height = 500;
 
-var svg = d3.select('body')
+var svg = d3.select('#network')
   .append('svg')
   .attr('oncontextmenu', 'return false;')
   .attr('width', width)
@@ -11,7 +11,7 @@ var svg = d3.select('body')
 // set up initial nodes and links
 var nodes = [{id: 0, type: "well"}, {id: 1, type: "volume"}, {id: 2, type: "cross"}, {id: 3, type: "aliquot"}],
 
-  lastNodeId = 2,
+  lastNodeId = nodes.length - 1,
   links = [
     {source: nodes[0], target: nodes[2] },
     {source: nodes[1], target: nodes[2] },
@@ -219,21 +219,6 @@ function restart() {
   force.start();
 }
 
-function mousedown() {
-  svg.classed('active', true);
-
-  if (mousedown_node || mousedown_link) return;
-
-  // insert new node at point
-  var point = d3.mouse(this),
-      node = {id: ++lastNodeId};
-  node.x = point[0];
-  node.y = point[1];
-  nodes.push(node);
-
-  restart();
-}
-
 function mousemove() {
   if(!mousedown_node) return;
   drag_line.attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + d3.mouse(this)[0] + ',' + d3.mouse(this)[1]);
@@ -287,9 +272,13 @@ function keyup() {
   lastKeyDown = -1;
 }
 
+function addNode(nodeType){
+  nodes.push({id: ++lastNodeId, type: nodeType, x: width/2, y: height/2});
+  restart();
+}
+
 // app starts here
-svg.on('mousedown', mousedown)
-  .on('mousemove', mousemove)
+svg.on('mousemove', mousemove)
   .on('mouseup', mouseup);
 
 d3.select(window)
