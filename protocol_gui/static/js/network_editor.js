@@ -90,10 +90,17 @@ function network_editor () {
   // update graph (called when needed)
     function restart() {
 
+        // create an array mapping from node id to index in the nodes array
+        var nodePosition = [];
+        for (var i = 0; i < nodes.length; i++){
+            nodePosition[ nodes[i].id ] = i;
+        }
+
       var constraints = [];
-      for (var i = 0; i < links.length; i++) {
+      for (i = 0; i < links.length; i++) {
         var link = links[i];
-        constraints.push({"axis": "y", "left": link.source.id, "right": link.target.id, "gap": 25})
+        constraints.push({"axis": "y", "left": nodePosition[link.source.id],
+                          "right": nodePosition[link.target.id], "gap": 25})
       }
       force.constraints(constraints);
 
