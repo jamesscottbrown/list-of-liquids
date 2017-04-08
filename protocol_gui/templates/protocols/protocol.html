@@ -8,14 +8,24 @@
   {% endassets %}
 {% endblock %}
 
+{% block body_other %} onload="networkEditor = network_editor();"{% endblock %}
+
 
 {% block content %}
+
+    <h1>{{protocol.name}} <small>(<a href="/protocols/{{protocol.id}}/edit"><i class="fa fa-pencil"></i>Edit</a> or
+    <a href="/protocols/{{protocol.id}}/delete"><i class="fa fa-trash-o"></i>Delete</a>)</small></h1>
+
+    <blockquote>{{protocol.description}}</blockquote>
+
+    <h2>Protocol</h2>
+
     <div id="network"></div>
 
     <div id="controls">
-      <button onclick="addWellNode();">Add Well</button>
-      <button onclick="addVolumeNode();">Add Volume</button>
-      <button onclick="clearEverything();">Clear</button>
+      <button onclick="networkEditor.addWellNode();">Add Well</button>
+      <button onclick="networkEditor.addVolumeNode();">Add Volume</button>
+      <button onclick="networkEditor.clearEverything();">Clear</button>
     </div>
 {% endblock %}
 

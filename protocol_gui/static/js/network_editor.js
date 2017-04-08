@@ -333,4 +333,6 @@ function network_editor () {
         .on('keyup', keyup);
 
     restart();
+
+    return {addWellNode: addWellNode, addVolumeNode: addVolumeNode, clearEverything: clearEverything};
 }
