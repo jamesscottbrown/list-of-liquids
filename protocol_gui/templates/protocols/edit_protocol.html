@@ -1,0 +1,25 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="container-narrow">
+  <h1>Edit protocol</h1>
+    <br/>
+    <form id="protocolForm" class="form" method="POST" action="" role="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="form-group">
+                {{form.name.label}}
+                {{form.name(value=current_protocol.name, class_="form-control")}}
+            </div>
+            <div class="form-group">
+                {{form.description.label}}
+                {{form.description(value=current_protocol.description, class_="form-control")}}
+            </div>
+            <div class="form-group">
+                {{form.public.label}}
+                {{form.public(checked=current_protocol.public, class_="form-control")}}
+            </div>
+            <p><input class="btn btn-default btn-submit" type="submit" value="Update"></p>
+    </form>
+</div>
+{% endblock %}
+

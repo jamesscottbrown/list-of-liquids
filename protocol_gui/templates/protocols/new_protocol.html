@@ -1,0 +1,24 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="container-narrow">
+  <h1>Create new protocol</h1>
+    <br/>
+    <form id="protocolForm" class="form" method="POST" action="" role="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="form-group">
+                {{form.name.label}} (Required)
+                {{form.name(placeholder="Project name", class_="form-control")}}
+            </div>
+            <div class="form-group">
+                {{form.description.label}}
+                {{form.description(placeholder="Project Description", class_="form-control")}}
+            </div>
+            <div class="form-group">
+                {{form.public.label}}
+                {{form.public(class_="form-control")}}
+            </div>
+            <p><input class="btn btn-default btn-submit" type="submit" value="Create"></p>
+    </form>
+</div>
+{% endblock %}

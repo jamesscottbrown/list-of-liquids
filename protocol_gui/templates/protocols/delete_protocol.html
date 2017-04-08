@@ -1,0 +1,19 @@
+
+{% extends "layout.html" %}
+{% block content %}
+
+    <h3>Delete {{current_protocol.name}}</h3>
+
+    Do you really want to delete {{current_protocol.name}}?
+
+    <form id="deleteProjectForm" class="form" method="POST" action="" role="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <p><input class="btn btn-default btn-submit" type="submit" value="Delete"></p>
+    </form>
+
+<a href="/protocols/{{current_protocol.id}}">cancel</a>
+
+
+{% endblock %}
+
