@@ -10,11 +10,13 @@ var svg = d3.select('body')
   .attr('height', height);
 
 // set up initial nodes and links
-var nodes = [{id: 0}, {id: 1}, {id: 2}],
+var nodes = [{id: 0}, {id: 1}, {id: 2}, {id: 3}],
+
   lastNodeId = 2,
   links = [
-    {source: nodes[0], target: nodes[1], left: false, right: true },
-    {source: nodes[1], target: nodes[2], left: false, right: true }
+    {source: nodes[0], target: nodes[2] },
+    {source: nodes[1], target: nodes[2] },
+    {source: nodes[2], target: nodes[3] }
   ];
 
 // init force layout
@@ -79,8 +81,8 @@ function tick() {
       dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY),
       normX = deltaX / dist,
       normY = deltaY / dist,
-      sourcePadding = d.left ? 17 : 12,
-      targetPadding = d.right ? 17 : 12,
+      sourcePadding = 12,
+      targetPadding = 17,
       sourceX = d.source.x + (sourcePadding * normX),
       sourceY = d.source.y + (sourcePadding * normY),
       targetX = d.target.x - (targetPadding * normX),
@@ -100,15 +102,15 @@ function restart() {
 
   // update existing links
   path.classed('selected', function(d) { return d === selected_link; })
-    .style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
-    .style('marker-end', function(d) { return d.right ? 'url(#end-arrow)' : ''; });
+    .style('marker-start', '')
+    .style('marker-end', 'url(#end-arrow)');
 
   // add new links
   path.enter().append('svg:path')
     .attr('class', 'link')
     .classed('selected', function(d) { return d === selected_link; })
-    .style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
-    .style('marker-end', function(d) { return d.right ? 'url(#end-arrow)' : ''; })
+    .style('marker-start', '')
+    .style('marker-end', 'url(#end-arrow)')
     .on('mousedown', function(d) {
       // select link
       mousedown_link = d;
@@ -176,17 +178,9 @@ function restart() {
       d3.select(this).attr('transform', '');
 
       // add link to graph (update if exists)
-      // NB: links are strictly source < target; arrows separately specified by booleans
       var source, target, direction;
-      if(mousedown_node.id < mouseup_node.id) {
-        source = mousedown_node;
-        target = mouseup_node;
-        direction = 'right';
-      } else {
-        source = mouseup_node;
-        target = mousedown_node;
-        direction = 'left';
-      }
+      source = mousedown_node;
+      target = mouseup_node;
 
       var link;
       link = links.filter(function(l) {
@@ -196,7 +190,7 @@ function restart() {
       if(link) {
         link[direction] = true;
       } else {
-        link = {source: source, target: target, left: false, right: false};
+        link = {source: source, target: target};
         link[direction] = true;
         links.push(link);
       }
