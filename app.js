@@ -18,13 +18,13 @@ var nodes = [{id: 0}, {id: 1}, {id: 2}],
   ];
 
 // init D3 force layout
-var force = d3.layout.force()
+
+var force = cola.d3adaptor()
+    .linkDistance(150)
+    .size([width, height])
     .nodes(nodes)
     .links(links)
-    .size([width, height])
-    .linkDistance(150)
-    .charge(-500)
-    .on('tick', tick)
+    .on('tick', tick);
 
 // define arrow markers for graph links
 svg.append('svg:defs').append('svg:marker')
@@ -316,5 +316,5 @@ svg.on('mousedown', mousedown)
 d3.select(window)
   .on('keydown', keydown)
   .on('keyup', keyup);
-  
+
 restart();
