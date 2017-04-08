@@ -34,7 +34,7 @@ svg.append('svg:defs').append('svg:marker')
     .attr('markerWidth', 3)
     .attr('markerHeight', 3)
     .attr('orient', 'auto')
-  .append('svg:path')
+    .append('svg:path')
     .attr('d', 'M0,-5L10,0L0,5')
     .attr('fill', '#000');
 
@@ -45,7 +45,7 @@ svg.append('svg:defs').append('svg:marker')
     .attr('markerWidth', 3)
     .attr('markerHeight', 3)
     .attr('orient', 'auto')
-  .append('svg:path')
+    .append('svg:path')
     .attr('d', 'M10,-5L0,0L10,5')
     .attr('fill', '#000');
 
@@ -112,8 +112,6 @@ function restart() {
     .style('marker-start', function(d) { return d.left ? 'url(#start-arrow)' : ''; })
     .style('marker-end', function(d) { return d.right ? 'url(#end-arrow)' : ''; })
     .on('mousedown', function(d) {
-      if(d3.event.ctrlKey) return;
-
       // select link
       mousedown_link = d;
       if(mousedown_link === selected_link) selected_link = null;
@@ -153,8 +151,6 @@ function restart() {
       d3.select(this).attr('transform', '');
     })
     .on('mousedown', function(d) {
-      if(d3.event.ctrlKey) return;
-
       // select node
       mousedown_node = d;
       if(mousedown_node === selected_node) selected_node = null;
@@ -237,7 +233,7 @@ function mousedown() {
   // because :active only works in WebKit?
   svg.classed('active', true);
 
-  if(d3.event.ctrlKey || mousedown_node || mousedown_link) return;
+  if(mousedown_node || mousedown_link) return;
 
   // insert new node at point
   var point = d3.mouse(this),
@@ -291,12 +287,6 @@ function keydown() {
   if(lastKeyDown !== -1) return;
   lastKeyDown = d3.event.keyCode;
 
-  // ctrl
-  if(d3.event.keyCode === 17) {
-    circle.call(force.drag);
-    svg.classed('ctrl', true);
-  }
-
   if(!selected_node && !selected_link) return;
   switch(d3.event.keyCode) {
     case 8: // backspace
@@ -316,21 +306,15 @@ function keydown() {
 
 function keyup() {
   lastKeyDown = -1;
-
-  // ctrl
-  if(d3.event.keyCode === 17) {
-    circle
-      .on('mousedown.drag', null)
-      .on('touchstart.drag', null);
-    svg.classed('ctrl', false);
-  }
 }
 
 // app starts here
 svg.on('mousedown', mousedown)
   .on('mousemove', mousemove)
   .on('mouseup', mouseup);
+
 d3.select(window)
   .on('keydown', keydown)
   .on('keyup', keyup);
+  
 restart();
