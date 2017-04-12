@@ -71,7 +71,8 @@ function network_editor () {
 
   // handles to link and node element groups
     var path = svg.append('svg:g').selectAll('path'),
-        circle = svg.append('svg:g').selectAll('g');
+        circle = svg.append('svg:g').selectAll('g'),
+        rect = svg.append('svg:g').selectAll('g');
 
   // mouse event vars
     var selected_node = null,
@@ -107,6 +108,11 @@ function network_editor () {
       circle.attr('transform', function (d) {
         return 'translate(' + d.x + ',' + d.y + ')';
       });
+
+        rect.attr('transform', function (d) {
+        return 'translate(' + (d.x -12) + ',' + (d.y-12) + ')';
+      });
+
     }
 
   // update graph (called when needed)
@@ -157,8 +163,12 @@ function network_editor () {
       path.exit().remove();
 
       // circle (node) group
+        var process_node_types = ['zip', 'cross', 'add', 'prod'];
+        var circular_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) == -1 });
+        var process_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) != -1 });
+
       // NB: the function arg is crucial here! nodes are known by id, not by index!
-      circle = circle.data(nodes, function (d) {
+      circle = circle.data(circular_nodes, function (d) {
         return d.id;
       });
 
@@ -202,6 +212,12 @@ function network_editor () {
             d3.select(this).attr('transform', ''); // unenlarge target node
           })
           .on('mousedown', function (d) {
+
+              // ignore right click
+              if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
+                  || ("button" in d3.event && d3.event.button == 2))  // IE
+                   return;
+
             // select node
             mousedown_node = d;
             if (mousedown_node === selected_node) selected_node = null;
@@ -247,8 +263,79 @@ function network_editor () {
             return d.label;
           });
 
+
+        // Add new 'process' nodes
+        // different shape; no ability to drag line from node; context menu
+
+      rect = rect.data(process_nodes, function (d) {
+        return d.id;
+      });
+
+      // update existing nodes (selected visual state)
+      rect.selectAll('rect')
+          .style('opacity', function (d) {
+            return (d === selected_node) ? '1' : '0.5';
+          });
+
+      // add new nodes
+      var g2 = rect.enter().append('svg:g');
+
+      g2.append('svg:rect')
+          .attr('class', 'node')
+          .classed('well', function (d) {
+            return d.type == "well"
+          })
+          .classed('volume', function (d) {
+            return d.type == "volume"
+          })
+          .classed('cross', function (d) {
+            return d.type == "cross"
+          })
+          .classed('zip', function (d) {
+            return d.type == "zip"
+          })
+          .classed('aliquot', function (d) {
+            return d.type == "aliquot"
+          })
+
+          .attr('width', 24)
+          .attr('height', 24)
+
+          .style('opacity', function (d) {
+            return (d === selected_node) ? '1' : '0.5';
+          })
+          .on('mouseover', function (d) {
+            if (!mousedown_node || d === mousedown_node) return;
+            d3.select(this).attr('transform', 'scale(1.1)'); // enlarge target node
+          })
+          .on('mouseout', function (d) {
+            if (!mousedown_node || d === mousedown_node) return;
+            d3.select(this).attr('transform', ''); // unenlarge target node
+          })
+          .on('mousedown', function (d) {
+          })
+          .on('mouseup', function (d) {
+          })
+          .on('contextmenu', d3.contextMenu([{
+                title: "FOO",
+                action: function(elm, d, i) {console.log(d.type)}
+            }]));
+
+
+
+      // show node IDs
+      g2.append('svg:text')
+          .attr('x', 12)
+          .attr('y', 4+12)
+          .attr('class', 'id')
+          .text(function (d) {
+            return d.label;
+          });
+
+
       // remove old nodes
       circle.exit().remove();
+      rect.exit().remove();
 
       // set the graph in motion
       force.start();
