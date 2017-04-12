@@ -210,7 +210,6 @@ function network_editor () {
 
             // reposition drag line
             drag_line
-                .style('marker-end', 'url(#end-arrow)')
                 .classed('hidden', false)
                 .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
 
@@ -235,26 +234,7 @@ function network_editor () {
             d3.select(this).attr('transform', '');
 
             // add link to graph (update if exists)
-            var source, target, direction;
-            source = mousedown_node;
-            target = mouseup_node;
-
-            var link;
-            link = links.filter(function (l) {
-              return (l.source === source && l.target === target);
-            })[0];
-
-            if (link) {
-              link[direction] = true;
-            } else {
-              link = {source: source, target: target};
-              link[direction] = true;
-              links.push(link);
-            }
-
-            // select new link
-            selected_link = link;
-            selected_node = null;
+            addEdge();
             restart();
           });
 
@@ -273,6 +253,27 @@ function network_editor () {
       // set the graph in motion
       force.start();
     }
+
+    function addEdge(){
+        var possible_operations = getPossibleOperators(mousedown_node.type, mouseup_node.type);
+
+        if (possible_operations.length == 0) return;
+
+        var operator = possible_operations[0];
+        var productType = getOperationResult(operator, mousedown_node.type, mouseup_node.type);
+
+        var i = nodes.push({id: ++lastNodeId, type: operator, x: width/2, y: height/2, label: operator, parents: [mousedown_node, mouseup_node]});
+        var j = nodes.push({id: ++lastNodeId, type: productType, x: width/2, y: height/2, label: productType});
+        i--; j--;
+
+        links.push({source: mousedown_node, target: nodes[i]});
+        links.push({source: mouseup_node, target: nodes[i]});
+        links.push({source: nodes[i], target: nodes[j]});
+
+        selected_link = null;
+        selected_node = nodes[i];
+    }
+
 
     function mousemove() {
       if (!mousedown_node) return;
