@@ -24,6 +24,14 @@ function network_editor () {
             nodePosition[ nodes[i].id ] = i;
         }
 
+        for (i = 0; i < nodes.length; i++){
+            if (nodes[i].hasOwnProperty('parentIds')){
+                var ind1 = nodePosition[nodes[i].parentIds[0]];
+                var ind2 =  nodePosition[nodes[i].parentIds[1]];
+                nodes[i].parents = [nodes[ind1], nodes[ind2]];
+            }
+        }
+
         links = [];
         for (i=0; i<obj.links.length; i++){
             var link = obj.links[i];
@@ -285,7 +293,7 @@ function network_editor () {
       rect = rect.data(process_nodes, function (d) {
         return d.id;
       });
-        
+
       // add new nodes
       var g2 = rect.enter().append('svg:g');
 
@@ -472,7 +480,12 @@ function network_editor () {
         var node_list = [];
         for (i=0; i<nodes.length; i++){
             var node = nodes[i];
-            node_list.push({id: node.id, type: node.type, x: node.x, y: node.y, label: node.label});
+            var converted_node = {id: node.id, type: node.type, x: node.x, y: node.y, label: node.label};
+
+            if (node.hasOwnProperty("parents")){
+                converted_node.parentIds = [node.parents[0].id, node.parents[1].id];
+            }
+            node_list.push(converted_node);
         }
 
         var link_list = [];
