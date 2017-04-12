@@ -117,7 +117,6 @@ function network_editor () {
 
   // update graph (called when needed)
     function restart() {
-
         // create an array mapping from node id to index in the nodes array
         var nodePosition = [];
         for (var i = 0; i < nodes.length; i++){
@@ -131,8 +130,21 @@ function network_editor () {
                           "right": nodePosition[link.target.id], "gap": 25})
       }
       force.constraints(constraints);
+        redrawLinks(links);
 
-      // path (link) group
+      // circle (node) group
+        var process_node_types = ['zip', 'cross', 'add', 'prod'];
+        var circular_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) == -1 });
+        var process_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) != -1 });
+
+        redrawCircularNodes(circular_nodes);
+        redrawRectangularNodes(process_nodes);
+
+      force.start();
+    }
+
+    function redrawLinks(links){
+              // path (link) group
       path = path.data(links);
 
       // update existing links
@@ -162,10 +174,9 @@ function network_editor () {
       // remove old links
       path.exit().remove();
 
-      // circle (node) group
-        var process_node_types = ['zip', 'cross', 'add', 'prod'];
-        var circular_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) == -1 });
-        var process_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) != -1 });
+    }
+
+    function redrawCircularNodes(circular_nodes){
 
       // NB: the function arg is crucial here! nodes are known by id, not by index!
       circle = circle.data(circular_nodes, function (d) {
@@ -189,16 +200,9 @@ function network_editor () {
           .classed('volume', function (d) {
             return d.type == "volume"
           })
-          .classed('cross', function (d) {
-            return d.type == "cross"
-          })
-          .classed('zip', function (d) {
-            return d.type == "zip"
-          })
           .classed('aliquot', function (d) {
             return d.type == "aliquot"
           })
-
           .attr('r', 12)
           .style('opacity', function (d) {
             return (d === selected_node) ? '1' : '0.5';
@@ -246,13 +250,17 @@ function network_editor () {
               return;
             }
 
-            // unenlarge target node
+            // un-enlarge target node
             d3.select(this).attr('transform', '');
 
             // add link to graph (update if exists)
             addEdge();
             restart();
           });
+
+        // remove old nodes
+      circle.exit().remove();
+
 
       // show node IDs
       g.append('svg:text')
@@ -263,6 +271,9 @@ function network_editor () {
             return d.label;
           });
 
+    }
+
+    function redrawRectangularNodes(process_nodes){
 
         // Add new 'process' nodes
         // different shape; no ability to drag line from node; context menu
@@ -321,8 +332,6 @@ function network_editor () {
                 action: function(elm, d, i) {console.log(d.type)}
             }]));
 
-
-
       // show node IDs
       g2.append('svg:text')
           .attr('x', 12)
@@ -332,13 +341,8 @@ function network_editor () {
             return d.label;
           });
 
-
       // remove old nodes
-      circle.exit().remove();
       rect.exit().remove();
-
-      // set the graph in motion
-      force.start();
     }
 
     function addEdge(){
