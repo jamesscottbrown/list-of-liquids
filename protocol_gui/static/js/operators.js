@@ -63,3 +63,7 @@ function getOperationResult(operator, arg1, arg2){
 
     return operationResults[arg1][arg2][operator];
 }
+
+function isValidNewOperation(d, operation){
+    return (getPossibleOperators(d.parents[0].type, d.parents[1].type).indexOf('zip') != -1 );
+}

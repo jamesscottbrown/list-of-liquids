@@ -46,7 +46,7 @@ function network_editor () {
     lastNodeId = nodes.length - 1;
 
     var force = cola.d3adaptor()
-        .linkDistance(150)
+        .linkDistance(50)
         .size([width, height])
         .nodes(nodes)
         .links(links)
@@ -275,19 +275,17 @@ function network_editor () {
 
     function redrawRectangularNodes(process_nodes){
 
+        // update existing node labels
+        rect.selectAll("text")
+            .text(function(d){return d.label; });
+
         // Add new 'process' nodes
         // different shape; no ability to drag line from node; context menu
 
       rect = rect.data(process_nodes, function (d) {
         return d.id;
       });
-
-      // update existing nodes (selected visual state)
-      rect.selectAll('rect')
-          .style('opacity', function (d) {
-            return (d === selected_node) ? '1' : '0.5';
-          });
-
+        
       // add new nodes
       var g2 = rect.enter().append('svg:g');
 
@@ -312,9 +310,7 @@ function network_editor () {
           .attr('width', 24)
           .attr('height', 24)
 
-          .style('opacity', function (d) {
-            return (d === selected_node) ? '1' : '0.5';
-          })
+          .style('opacity', '0.5')
           .on('mouseover', function (d) {
             if (!mousedown_node || d === mousedown_node) return;
             d3.select(this).attr('transform', 'scale(1.1)'); // enlarge target node
@@ -327,10 +323,7 @@ function network_editor () {
           })
           .on('mouseup', function (d) {
           })
-          .on('contextmenu', d3.contextMenu([{
-                title: "FOO",
-                action: function(elm, d, i) {console.log(d.type)}
-            }]));
+          .on('contextmenu', d3.contextMenu(createOptionsMenu));
 
       // show node IDs
       g2.append('svg:text')
@@ -343,6 +336,34 @@ function network_editor () {
 
       // remove old nodes
       rect.exit().remove();
+    }
+
+
+    function createOptionsMenu(d){
+        var menu = [];
+
+        var operations = ['zip', 'cross', 'add', 'prod'];
+
+        function changeOperation(operation){
+            return function(elm, d, i){
+               nodes.filter(function(n){return n.id == d.id})[0].type = operation;
+               nodes.filter(function(n){return n.id == d.id})[0].label = operation;
+                restart();
+            }
+        }
+
+        for (var i=0; i<operations.length; i++){
+            var operation = operations[i];
+            if (isValidNewOperation(d, operation)) {
+                menu.push({
+                    title: operation,
+                    disabled: (operation == d.type),
+                    action: changeOperation(operation)
+                })
+            }
+        }
+
+        return menu;
     }
 
     function addEdge(){

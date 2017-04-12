@@ -103,3 +103,10 @@ text.id {
     background-color: #4677f8;
     color: #fefefe;
  }
+
+.d3-context-menu ul li.is-disabled,
+.d3-context-menu ul li.is-disabled:hover {
+	background-color: #f2f2f2;
+	color: #888;
+	cursor: not-allowed;
+}
