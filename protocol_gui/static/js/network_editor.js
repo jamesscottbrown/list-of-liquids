@@ -426,24 +426,30 @@ function network_editor () {
     function createOptionsMenu(d){
         var menu = [];
 
-        var operations = ['zip', 'cross', 'add', 'prod'];
+        if (d.type != "process") {
+            var operations = ['zip', 'cross', 'add', 'prod'];
 
-        function changeOperation(operation){
-            return function(elm, d, i){
-               nodes.filter(function(n){return n.id == d.id})[0].type = operation;
-               nodes.filter(function(n){return n.id == d.id})[0].label = operation;
-                restart();
+            function changeOperation(operation) {
+                return function (elm, d, i) {
+                    nodes.filter(function (n) {
+                        return n.id == d.id
+                    })[0].type = operation;
+                    nodes.filter(function (n) {
+                        return n.id == d.id
+                    })[0].label = operation;
+                    restart();
+                }
             }
-        }
 
-        for (var i=0; i<operations.length; i++){
-            var operation = operations[i];
-            if (isValidNewOperation(d, operation)) {
-                menu.push({
-                    title: operation,
-                    disabled: (operation == d.type),
-                    action: changeOperation(operation)
-                })
+            for (var i = 0; i < operations.length; i++) {
+                var operation = operations[i];
+                if (isValidNewOperation(d, operation)) {
+                    menu.push({
+                        title: operation,
+                        disabled: (operation == d.type),
+                        action: changeOperation(operation)
+                    })
+                }
             }
         }
 
