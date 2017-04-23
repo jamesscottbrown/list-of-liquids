@@ -9,6 +9,8 @@ function network_editor () {
         .attr('width', width)
         .attr('height', height);
 
+    var process_node_types = ['zip', 'cross', 'add', 'prod'];
+
   // set up initial nodes and links
     var nodes, lastNodeId, links;
 
@@ -141,7 +143,6 @@ function network_editor () {
         redrawLinks(links);
 
       // circle (node) group
-        var process_node_types = ['zip', 'cross', 'add', 'prod'];
         var circular_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) == -1 });
         var process_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) != -1 });
 
@@ -264,7 +265,12 @@ function network_editor () {
             // add link to graph (update if exists)
             addEdge();
             restart();
-          });
+          })
+       .on('contextmenu', d3.contextMenu([{
+                    title: 'Delete',
+                    action: function(elm, d, i) { deleteNode(d); }
+                }])
+        );
 
         // remove old nodes
       circle.exit().remove();
@@ -279,6 +285,65 @@ function network_editor () {
             return d.label;
           });
 
+    }
+
+    function deleteNode(d){
+
+         if (process_node_types.indexOf(d.type) == -1) {
+
+            var formationLink = links.filter( function(l){return l.target.id == d.id; });
+            if (formationLink.length){
+                // Case I: if this is an object created by process, call deleteNode on process that created it
+                deleteNode(formationLink[0].source);
+            } else {
+                // Case II: this is an object not created by a process
+             deleteDownFromNode(d);
+            }
+         }
+
+        // Case III: this is a process, so delete links to it, then node and children
+        else if (process_node_types.indexOf(d.type) != -1) {
+
+            // delete arrows to this process node
+            var inLinks = links.filter( function(l){return l.target.id == d.id; });
+            for (var i=0; i<inLinks.length; i++){
+                links.splice(links.indexOf(inLinks[i]), 1);
+            }
+
+            deleteDownFromNode(d);
+        }
+
+        restart();
+    }
+
+
+    function deleteDownFromNode(d){
+
+        // delete this node
+        var index = nodes.indexOf( nodes.filter(function(n){ return n.id == d.id})[0] );
+        nodes.splice(index, 1);
+
+        // delete incoming links
+        var inLinks = links.filter( function(l){return l.target.id == d.id; });
+        for (var i=0; i<inLinks.length; i++){
+            links.splice(links.indexOf(inLinks[i]), 1);
+        }
+
+        // delete outgoing links
+        var children = [];
+
+        var outLinks = links.filter( function(l){return l.source.id == d.id; });
+        for (var i=0; i<outLinks.length; i++){
+            children.push(outLinks[i].target);
+            links.splice(links.indexOf(outLinks[i]), 1);
+        }
+
+        // delete the nodes that outgoing links target
+        for (var i=0; i<children.length; i++){
+            if (nodes.indexOf(children[i] != -1)){
+                deleteDownFromNode(children[i]);
+            }
+        }
     }
 
     function redrawRectangularNodes(process_nodes){
@@ -371,6 +436,13 @@ function network_editor () {
             }
         }
 
+        menu.push({
+				divider: true
+			});
+        menu.push({
+                    title: 'Delete',
+                    action: function(elm, d, i) { deleteNode(d); }
+                });
         return menu;
     }
 
