@@ -507,6 +507,18 @@ function network_editor () {
     }
 
     function addVolumeNode() {
+      var volumeList = prompt('Volumes:').split(',');
+        var label;
+
+        // Label node with volume (if all volumes are equal) or 'Volume' (otherwise)
+        if (volumeList.length >= 1){
+            label = volumeList[0];
+            for (var i=0; i<volumeList.length; i++){
+                if (volumeList[i] != label){ label = "Volume"; }
+            }
+        }
+        if (label != "Volume"){label = label + " μL"; }
+
       nodes.push({
         id: ++lastNodeId,
         type: 'volume',
