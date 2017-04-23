@@ -9,7 +9,7 @@ function network_editor () {
         .attr('width', width)
         .attr('height', height);
 
-    var process_node_types = ['zip', 'cross', 'add', 'prod'];
+    var process_node_types = ['zip', 'cross', 'add', 'prod', 'process'];
 
   // set up initial nodes and links
     var nodes, lastNodeId, links;
@@ -394,8 +394,19 @@ function network_editor () {
           })
           .on('mousedown', function (d) {
           })
-          .on('mouseup', function (d) {
+           .on('mouseup', function (d) {
+               // nb. no mousedown event registered, so no need to check for drag-to-self
+            if (!mousedown_node){ return; }
+            mouseup_node = d;
+
+            // un-enlarge target node
+            d3.select(this).attr('transform', '');
+
+            // add link to graph (update if exists)
+            addEdge();
+            restart();
           })
+
           .on('contextmenu', d3.contextMenu(createOptionsMenu));
 
       // show node IDs
@@ -447,6 +458,14 @@ function network_editor () {
     }
 
     function addEdge(){
+
+        // handle arrow draw from well/aliquot to process (e.g. thermocycle)
+        if (mouseup_node.type == "process" && (mousedown_node.type == "aliquot" || mousedown_node.type == "well")){
+            links.push({source: mousedown_node, target: mouseup_node});
+            selected_node = mouseup_node;
+            return;
+        }
+
         var possible_operations = getPossibleOperators(mousedown_node.type, mouseup_node.type);
 
         if (possible_operations.length == 0) return;
@@ -504,6 +523,12 @@ function network_editor () {
     function addWellNode() {
       nodes.push({id: ++lastNodeId, type: 'well', x: width / 2, y: height / 2, label: prompt('Name:')});
       restart();
+    }
+
+    function addProcessNode(){
+        var operation = prompt('Operation:');
+        nodes.push({id: ++lastNodeId, type: 'process', x: width / 2, y: height / 2, label: operation, data: operation});
+        restart();
     }
 
     function addVolumeNode() {
@@ -576,6 +601,9 @@ function network_editor () {
             },{
                 title: 'Add Volume',
                 action: addVolumeNode
+            },{
+                title: 'Add Process',
+                action: addProcessNode
             },{
 				divider: true
 			},{
