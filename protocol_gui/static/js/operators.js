@@ -41,7 +41,7 @@ var operationResults = [];
 
     addOperations("add", "volume", "volume", "volume");
     addOperations("add", "aliquot", "aliquot", "well");
-    //addOperations("add", "aliquot", "well", "well");
+    addOperations("add", "aliquot", "well", "well");
     addOperations("add", "number", "number", "number");
 
 })();
