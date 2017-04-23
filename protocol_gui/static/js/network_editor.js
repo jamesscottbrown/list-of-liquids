@@ -501,34 +501,6 @@ function network_editor () {
       restart();
     }
 
-  // only respond once per keydown
-    var lastKeyDown = -1;
-
-    function keydown() {
-      d3.event.preventDefault();
-
-      if (lastKeyDown !== -1) return;
-      lastKeyDown = d3.event.keyCode;
-
-      if (!selected_node && !selected_link) return;
-
-      if (d3.event.keyCode == 8 || d3.event.keyCode == 46) { // backspace or delete
-        if (selected_node) {
-          nodes.splice(nodes.indexOf(selected_node), 1);
-          spliceLinksForNode(selected_node);
-        } else if (selected_link) {
-          links.splice(links.indexOf(selected_link), 1);
-        }
-        selected_link = null;
-        selected_node = null;
-        restart();
-      }
-    }
-
-    function keyup() {
-      lastKeyDown = -1;
-    }
-
     function addWellNode() {
       nodes.push({id: ++lastNodeId, type: 'well', x: width / 2, y: height / 2, label: prompt('Name:')});
       restart();
@@ -585,11 +557,25 @@ function network_editor () {
 
   // app starts here
     svg.on('mousemove', mousemove)
-        .on('mouseup', mouseup);
+        .on('mouseup', mouseup)
+       .on('contextmenu', d3.contextMenu([{
+                title: 'Add Well',
+                action: addWellNode
+            },{
+                title: 'Add Volume',
+                action: addVolumeNode
+            },{
+				divider: true
+			},{
+                title: 'Clear',
+                action: clearEverything
+            },{
+                title: 'Save',
+                action: save
+            }
 
-    d3.select(window)
-        .on('keydown', keydown)
-        .on('keyup', keyup);
+       ])
+    );
 
     restart();
 
