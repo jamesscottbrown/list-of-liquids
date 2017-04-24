@@ -500,7 +500,7 @@ function network_editor () {
         var productType = getOperationResult(operator, mousedown_node.type, mouseup_node.type);
 
         var i = nodes.push({id: ++lastNodeId, type: operator, x: width/2, y: height/2, label: operator, parents: [mousedown_node, mouseup_node]});
-        var j = nodes.push({id: ++lastNodeId, type: productType, x: width/2, y: height/2, label: productType});
+        var j = nodes.push({id: ++lastNodeId, type: productType, x: width/2, y: height/2, label: ""});
         i--; j--;
 
         links.push({source: mousedown_node, target: nodes[i]});
