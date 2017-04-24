@@ -27,21 +27,22 @@ var operationResults = [];
 
 
     addOperations("zip", "volume", "well", "aliquot");
-    addOperations("zip", "aliquot", "aliquot", "well");
+    addOperations("zip", "aliquot", "aliquot", "aliquot");
 
 
     addOperations("cross", "volume", "well", "aliquot");
-    addOperations("cross", "aliquot", "aliquot", "well");
+    addOperations("cross", "aliquot", "aliquot", "aliquot");
 
     addOperations("prod", "volume", "well", "aliquot");
     addOperations("prod", "volume", "number", "volume");
     addOperations("prod", "aliquot", "number", "aliquot");
     addOperations("prod", "well", "number", "well");
-    addOperations("add", "aliquot", "aliquot", "well");
+    addOperations("add", "aliquot", "aliquot", "aliquot");
 
     addOperations("add", "volume", "volume", "volume");
-    addOperations("add", "aliquot", "aliquot", "well");
-    addOperations("add", "aliquot", "well", "well");
+    addOperations("add", "aliquot", "aliquot", "aliquot");
+    addOperations("add", "aliquot", "well", "aliquot");
+    addOperations("add", "well", "well", "aliquot");
     addOperations("add", "number", "number", "number");
 
 })();
