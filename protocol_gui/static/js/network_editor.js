@@ -630,7 +630,8 @@ function network_editor () {
 
         var form = info.append("form")
                 .classed("form-horizontal", true)
-                .classed("info-box", true);
+                .classed("info-box", true)
+                .attr("onsubmit", "return false;");
 
         // If top-level well list, give option to change name or number of wells
         if (selected_node.type == "well"){
