@@ -541,7 +541,7 @@ function network_editor () {
       nodes = [];
       links = [];
       lastNodeId = 0;
-
+       d3.select("#info").select("form").remove();
       force.nodes(nodes).links(links);
       restart();
     }
