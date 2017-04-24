@@ -41,8 +41,8 @@ circle.node {
 }
 
 circle.node.well {
-  fill: rgb(31, 119, 180); 
-  stroke: rgb(21, 83, 125);
+      fill: rgb(255, 255, 255);
+      stroke: rgb(255, 255, 255);
 }
 
 circle.node.volume {
@@ -51,18 +51,13 @@ circle.node.volume {
 }
 
 circle.node.aliquot{
-  fill: rgb(255, 127, 14); 
+  fill: rgb(255, 127, 14);
   stroke: rgb(178, 88, 9);
 }
 
-circle.node.zip{
-  fill: rgb(214, 39, 40); 
-  stroke: rgb(149, 27, 28);
-}
-
-circle.node.cross{
-  fill: rgb(214, 39, 40); 
-  stroke: rgb(149, 27, 28);
+rect.node{
+    fill: rgb(255, 255, 255);
+    stroke: rgb(255, 255, 255);
 }
 
 /* Node labels */
