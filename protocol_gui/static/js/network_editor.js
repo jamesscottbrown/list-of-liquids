@@ -442,10 +442,34 @@ function network_editor () {
     }
 
 
+    function testMultipleOutputs(node){
+        var multipleOutputs = false;
+        if (node.type == "volume"){
+
+            var volumeList = node.data;
+            for (var i=0; i<volumeList.length; i++){
+                if (volumeList[i] != volumeList[0]){ multipleOutputs = true; }
+            }
+
+        } else if (node.type == "well") {
+
+            if (node.data.num_wells > 1){ multipleOutputs = true; }
+
+        } else if (node.type == "aliquot") {
+
+            // TODO: test cardinality - but without AJAX?
+            multipleOutputs = true;
+        }
+        return multipleOutputs;
+    }
+
+
     function createOptionsMenu(d){
         var menu = [];
 
-        if (d.type != "process") {
+        var multipleOutputs = testMultipleOutputs(d.parents[0]) || testMultipleOutputs(d.parents[1]);
+
+        if (d.type != "process" && multipleOutputs) {
             var operations = ['zip', 'cross', 'add', 'prod'];
 
             function changeOperation(operation) {
@@ -498,7 +522,10 @@ function network_editor () {
         var operator = possible_operations[0];
         var productType = getOperationResult(operator, mousedown_node.type, mouseup_node.type);
 
-        var i = nodes.push({id: ++lastNodeId, type: operator, x: width/2, y: height/2, label: operator, parents: [mousedown_node, mouseup_node]});
+        var multipleOutputs = (testMultipleOutputs(mousedown_node) || testMultipleOutputs(mouseup_node));
+        var operatorLabel = multipleOutputs ? operator : "*";
+
+        var i = nodes.push({id: ++lastNodeId, type: operator, x: width/2, y: height/2, label: operatorLabel, parents: [mousedown_node, mouseup_node]});
         var j = nodes.push({id: ++lastNodeId, type: productType, x: width/2, y: height/2, label: ""});
         i--; j--;
 
