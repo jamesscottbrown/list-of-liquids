@@ -699,7 +699,7 @@ function network_editor () {
                 });
 
 
-            var div2 = form.append("div").classed("form-group", true);
+            var div2 = form.append("div");
 
             var volumeDivs = div2.selectAll("div")
                 .data(selected_node.data)
@@ -707,11 +707,17 @@ function network_editor () {
                 .append("div")
                 .classed("form-group", true);
 
-            volumeDivs.append("label")
+            var label = volumeDivs.append("label")
                 .classed("control-label", true)
                  .classed("col-sm-2", true)
-                .attr("for", "volume")
-                .text(function(d, i){ return "Volume " + (i + 1) + ":"; });
+                .attr("for", "volume");
+
+            label.append("i").classed("fa", true).classed("fa-minus", true)
+                .on("click", function(d,i){
+                    selected_node.data.splice(i, 1);
+                    updateDescriptionPanel();
+                });
+            label.append("b").text(function(d, i){ return "Volume " + (i + 1) + ":"; });
 
             volumeDivs.append("input")
                 .classed("control-input", true)
@@ -726,6 +732,19 @@ function network_editor () {
                     }
                     selected_node.data = volumes;
                 });
+
+            // adding an extra volume
+            div2.append("div")
+                .classed("form-group", true)
+                .append("label")
+                .classed("control-label", true)
+                .classed("col-sm-2", true)
+                .append("i").classed("fa", true).classed("fa-plus", true)
+                .on("click", function(){
+                    selected_node.data.push(0);
+                    updateDescriptionPanel();
+                });
+
 
         } else if (selected_node.type == "process"){
             var div1 = form.append("div").classed("form-group", true);
