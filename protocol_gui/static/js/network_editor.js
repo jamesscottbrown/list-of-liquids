@@ -587,7 +587,7 @@ function network_editor () {
         var node_list = [];
         for (i=0; i<nodes.length; i++){
             var node = nodes[i];
-            var converted_node = {id: node.id, type: node.type, x: node.x, y: node.y, label: node.label};
+            var converted_node = {id: node.id, type: node.type, x: node.x, y: node.y, label: node.label, data:node.data};
 
             if (node.hasOwnProperty("parents")){
                 converted_node.parentIds = [node.parents[0].id, node.parents[1].id];
