@@ -28,6 +28,7 @@ var operationResults = [];
 
     addOperations("zip", "volume", "well", "aliquot");
     addOperations("zip", "aliquot", "aliquot", "aliquot");
+    addOperations("zip", "volume", "aliquot", "aliquot");
 
 
     addOperations("cross", "volume", "well", "aliquot");
