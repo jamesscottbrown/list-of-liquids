@@ -25,6 +25,7 @@ js_network_editor = Bundle(
 	'libs/d3.v3.min.js',
 	'libs/d3-context-menu.js',
 	'js/network_editor.js',
+	'js/panel.js',
 	'js/operators.js',
 	'libs/cola.v3.min.js'
 )
