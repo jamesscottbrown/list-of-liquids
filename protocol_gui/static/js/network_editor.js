@@ -584,7 +584,14 @@ function network_editor () {
 
     function addProcessNode(){
         var operation = prompt('Operation:');
-        nodes.push({id: ++lastNodeId, type: 'process', x: width / 2, y: height / 2, label: operation, data: operation});
+        var i = nodes.push({id: ++lastNodeId, type: 'process', x: width / 2, y: height / 2, label: operation, data: operation});
+        var j = nodes.push({id: ++lastNodeId, type: 'aliquot', x: width/2, y: height/2, label: ""});
+
+        i--; j--;
+
+        links.push({source: nodes[i], target: nodes[j]});
+        selected_node = nodes[i];
+
         restart();
     }
 
