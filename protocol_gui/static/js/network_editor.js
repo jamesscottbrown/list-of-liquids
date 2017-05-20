@@ -467,7 +467,11 @@ function network_editor () {
     function createOptionsMenu(d){
         var menu = [];
 
-        var multipleOutputs = testMultipleOutputs(d.parents[0]) || testMultipleOutputs(d.parents[1]);
+        // check for potential outputs. An element may not have parents - e.g. a process node that has just been created
+        var multipleOutputs = false;
+        if (d.parents){
+            multipleOutputs = testMultipleOutputs(d.parents[0]) || testMultipleOutputs(d.parents[1]);
+        }
 
         if (d.type != "process" && multipleOutputs) {
             var operations = ['zip', 'cross', 'add', 'prod'];
