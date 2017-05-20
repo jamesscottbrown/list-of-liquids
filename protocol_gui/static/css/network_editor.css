@@ -40,14 +40,9 @@ circle.node {
   cursor: pointer;
 }
 
-circle.node.well {
+circle.node {
       fill: rgb(255, 255, 255);
       stroke: rgb(255, 255, 255);
-}
-
-circle.node.volume {
-  fill: rgb(62, 228, 62); 
-  stroke: rgb(30, 112, 30);
 }
 
 circle.node.aliquot{
