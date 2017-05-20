@@ -5,7 +5,6 @@ function network_editor () {
 
     var svg = d3.select('#network')
         .append('svg')
-        .attr('oncontextmenu', 'return false;')
         .attr('width', width)
         .attr('height', height);
 
