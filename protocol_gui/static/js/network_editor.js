@@ -546,7 +546,8 @@ function network_editor () {
     }
 
     function addWellNode() {
-      nodes.push({id: ++lastNodeId, type: 'well', x: width / 2, y: height / 2, label: prompt('Name:'), data: {num_wells: 1}});
+      nodes.push({id: ++lastNodeId, type: 'well', x: width / 2, y: height / 2, label: prompt('Name:'),
+          data: {num_wells: 1, container_name: '', well_addresses: ''}});
       restart();
     }
 

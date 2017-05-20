@@ -1,5 +1,6 @@
 function updateDescriptionPanel(selected_node, restart) {
 
+    // TODO: rather than calling restart(), redraw single label
     var info = d3.select("#info");
     info.select("form").remove();
 
@@ -12,7 +13,6 @@ function updateDescriptionPanel(selected_node, restart) {
         .classed("info-box", true)
         .attr("onsubmit", "return false;");
 
-    // If top-level well list, give option to change name or number of wells
     var div1, div2;
 
     if (selected_node.type == "well") {
@@ -33,7 +33,7 @@ function updateDescriptionPanel(selected_node, restart) {
             .attr("value", selected_node.label)
             .on("change", function () {
                 selected_node.label = this.value;
-                restart(); // TODO: just redraw single label
+                restart();
                 console.log(nodes)
             });
 
@@ -57,6 +57,46 @@ function updateDescriptionPanel(selected_node, restart) {
                 selected_node.data.num_wells = this.value;
             });
 
+        var div3 = form.append("div").classed("form-group", true);
+        div3.append("label")
+            .classed("control-label", true)
+            .classed("col-sm-2", true)
+            .attr("for", "container-name")
+            .text("Container name:");
+
+        div3.append("div")
+            .classed("col-sm-2", true)
+            .append("input")
+            .attr("type", "text")
+            .attr("id", "container-name")
+            .attr("name", "container-name")
+            .classed("form-control", true)
+            .attr("value", selected_node.data.container_name)
+            .on("change", function () {
+                selected_node.data.container_name = this.value;
+            });
+
+
+        var div4 = form.append("div").classed("form-group", true);
+        div4.append("label")
+            .classed("control-label", true)
+            .classed("col-sm-2", true)
+            .attr("for", "wells")
+            .text("Well locations:");
+
+        div4.append("div")
+            .classed("col-sm-2", true)
+            .append("input")
+            .attr("type", "text")
+            .attr("id", "wells")
+            .attr("name", "wells")
+            .classed("form-control", true)
+            .attr("value", selected_node.data.well_addresses)
+            .on("change", function () {
+                selected_node.data.well_addresses = this.value;
+            });
+
+
 
     } else if (selected_node.type == "volume") {
         div1 = form.append("div").classed("form-group", true);
@@ -76,7 +116,7 @@ function updateDescriptionPanel(selected_node, restart) {
             .attr("value", selected_node.label)
             .on("change", function () {
                 selected_node.label = this.value;
-                restart(); // TODO: just redraw single label
+                restart();
             });
 
 
@@ -148,7 +188,7 @@ function updateDescriptionPanel(selected_node, restart) {
             .attr("value", selected_node.label)
             .on("change", function () {
                 selected_node.label = this.value;
-                restart(); // TODO: just redraw single label
+                restart();
             });
 
         div2 = form.append("div").classed("form-group", true);
@@ -167,15 +207,10 @@ function updateDescriptionPanel(selected_node, restart) {
             .text(selected_node.data)
             .on("change", function () {
                 selected_node.data = this.value;
-                restart(); // TODO: just redraw single label
+                restart();
             });
 
     } else if (selected_node.type == "aliquot") {
 
     }
 }
-
-
-    // If list of Volumes, give option to edit volumes
-    // If an Aliquot, show contents
-    // If a non-top level wellSet, list contents of each well
