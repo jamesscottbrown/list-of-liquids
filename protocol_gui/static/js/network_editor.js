@@ -56,7 +56,6 @@ function network_editor () {
 
     var force = cola.d3adaptor()
         .linkDistance(50)
-        .avoidOverlaps(true)
         .size([width, height])
         .nodes(nodes)
         .links(links)
