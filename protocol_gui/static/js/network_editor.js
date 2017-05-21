@@ -270,6 +270,11 @@ function network_editor () {
        .on('contextmenu', d3.contextMenu([{
                     title: 'Delete',
                     action: function(elm, d, i) { deleteNode(d); }
+                },{
+                    title: 'Process',
+                    action: function(elm, d, i) {
+                        var node = nodes.filter(function(n){ return n.id == d.id})[0];
+                        addProcessNodeToNode(node); }
                 }])
         );
 
@@ -526,6 +531,15 @@ function network_editor () {
                     title: 'Delete',
                     action: function(elm, d, i) { deleteNode(d); }
                 });
+
+        menu.push({
+                    title: 'Process',
+                    action: function(elm, d, i) {
+                        var node = nodes.filter(function(n){ return n.id == d.id})[0];
+                        addProcessNodeToNode(node);
+                    }
+                });
+
         return menu;
     }
 
@@ -598,13 +612,19 @@ function network_editor () {
       restart();
     }
 
+    function addProcessNodeToNode(sourceNode){
+        i = addProcessNode();
+        links.push({source: sourceNode, target: nodes[i]});
+        restart();
+    }
+
     function addProcessNode(){
         var operation = prompt('Operation:');
         var i = nodes.push({id: ++lastNodeId, type: 'process', x: width / 2, y: height / 2, label: operation, data: operation});
         i--;
         selected_node = nodes[i];
-
         restart();
+        return i;
     }
 
     function addVolumeNode() {
