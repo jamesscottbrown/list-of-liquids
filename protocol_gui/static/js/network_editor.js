@@ -178,6 +178,7 @@ function network_editor () {
             else selected_link = mousedown_link;
             selected_node = null;
               d3.selectAll("text").style('fill', 'black');
+              updateDescriptionPanel(selected_node, selected_link, restart);
             restart();
           });
 
@@ -241,7 +242,7 @@ function network_editor () {
             d3.selectAll("text").style('fill', 'black');
             d3.select(this.parentNode).select("text").style('fill', 'red');
 
-            updateDescriptionPanel(selected_node, restart);
+            updateDescriptionPanel(selected_node, selected_link, restart);
 
             // reposition drag line
             drag_line
@@ -422,7 +423,7 @@ function network_editor () {
             d3.selectAll("text").style('fill', 'black');
             d3.select(this.parentNode).select("text").style('fill', 'red');
 
-            updateDescriptionPanel(selected_node, restart);
+            updateDescriptionPanel(selected_node, selected_link, restart);
 
             // reposition drag line
             drag_line
@@ -569,8 +570,8 @@ function network_editor () {
         var i = nodes.push({id: ++lastNodeId, type: operator, x: width/2, y: height/2, label: operatorLabel, parents: [mousedown_node, mouseup_node]});
         i--;
 
-        links.push({source: mousedown_node, target: nodes[i]});
-        links.push({source: mouseup_node, target: nodes[i]});
+        links.push({source: mousedown_node, target: nodes[i], data: {volumes: [1]} });
+        links.push({source: mouseup_node, target: nodes[i], data: {volumes: [1]} });
 
         selected_link = null;
         selected_node = nodes[i];

@@ -1,10 +1,10 @@
-function updateDescriptionPanel(selected_node, restart) {
+function updateDescriptionPanel(selected_node, selected_link, restart) {
 
     // TODO: rather than calling restart(), redraw single label
     var info = d3.select("#info");
     info.select("form").remove();
 
-    if (!selected_node) {
+    if (!selected_node && !selected_link) {
         return;
     }
 
@@ -15,7 +15,8 @@ function updateDescriptionPanel(selected_node, restart) {
 
     var div1, div2;
 
-    if (selected_node.type == "well") {
+
+    if (selected_node && selected_node.type == "well") {
 
         form.append("h2").style().text("Initially present resource");
 
@@ -100,32 +101,16 @@ function updateDescriptionPanel(selected_node, restart) {
 
 
 
-    } else if (selected_node.type == "volume") {
-        div1 = form.append("div").classed("form-group", true);
+    } else if (selected_link) {
 
-        div1.append("label")
-            .classed("control-label", true)
-            .classed("col-sm-2", true)
-            .attr("for", "name")
-            .text("Name:");
+        form.append("h2").style().text("Liquid transfer");
 
-        div1.append("div")
-            .classed("col-sm-2", true)
-
-            .append("input")
-            .attr("type", "text")
-            .attr("name", "name")
-            .attr("value", selected_node.label)
-            .on("change", function () {
-                selected_node.label = this.value;
-                restart();
-            });
-
+        var volumes = selected_link.data.volumes;
 
         div2 = form.append("div");
 
         var volumeDivs = div2.selectAll("div")
-            .data(selected_node.data)
+            .data(volumes)
             .enter()
             .append("div")
             .classed("form-group", true);
@@ -137,8 +122,8 @@ function updateDescriptionPanel(selected_node, restart) {
 
         label.append("i").classed("fa", true).classed("fa-minus", true)
             .on("click", function (d, i) {
-                selected_node.data.splice(i, 1);
-                updateDescriptionPanel(selected_node, restart);
+                volumes.splice(i, 1);
+                updateDescriptionPanel(selected_node, selected_link, restart);
             });
         label.append("b").text(function (d, i) {
             return "Volume " + (i + 1) + ":";
@@ -152,12 +137,12 @@ function updateDescriptionPanel(selected_node, restart) {
                 return d;
             })
             .on("change", function () {
-                var volumes = [];
+                var new_volumes = [];
                 var volumeInputs = volumeDivs.selectAll("input");
                 for (var i = 0; i < volumeInputs.length; i++) {
-                    volumes.push(parseFloat(volumeInputs[i][0].value))
+                    new_volumes.push(parseFloat(volumeInputs[i][0].value))
                 }
-                selected_node.data = volumes;
+                selected_link.data.volumes = new_volumes;
             });
 
         // adding an extra volume
@@ -168,12 +153,12 @@ function updateDescriptionPanel(selected_node, restart) {
             .classed("col-sm-2", true)
             .append("i").classed("fa", true).classed("fa-plus", true)
             .on("click", function () {
-                selected_node.data.push(0);
-                updateDescriptionPanel(selected_node, restart);
+                volumes.push(0);
+                updateDescriptionPanel(selected_node, selected_link, restart);
             });
 
 
-    } else if (selected_node.type == "process") {
+    } else if (selected_node && selected_node.type == "process") {
         form.append("h2").style().text("Processing step");
 
         div1 = form.append("div").classed("form-group", true);
@@ -214,7 +199,7 @@ function updateDescriptionPanel(selected_node, restart) {
                 restart();
             });
 
-    } else if (selected_node.type == "aliquot") {
+    } else if (selected_node && selected_node.type == "aliquot") {
 
         form.append("h2").style().text("Aliquot(s)");
 
