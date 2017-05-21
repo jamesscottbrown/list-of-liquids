@@ -177,6 +177,7 @@ function network_editor () {
             if (mousedown_link === selected_link) selected_link = null;
             else selected_link = mousedown_link;
             selected_node = null;
+              d3.selectAll("text").style('fill', 'black');
             restart();
           });
 
@@ -199,7 +200,7 @@ function network_editor () {
           });
 
       // add new nodes
-      var g = circle.enter().append('svg:g');
+      var g = circle.enter().append('svg:g').attr("id", "group-circle-node");
 
       g.append('svg:circle')
           .attr('class', 'node')
@@ -237,6 +238,9 @@ function network_editor () {
             else selected_node = mousedown_node;
             selected_link = null;
 
+            d3.selectAll("text").style('fill', 'black');
+            d3.select(this.parentNode).select("text").style('fill', 'red');
+
             updateDescriptionPanel(selected_node, restart);
 
             // reposition drag line
@@ -260,9 +264,6 @@ function network_editor () {
               resetMouseVars();
               return;
             }
-
-            // un-enlarge target node
-            d3.select(this).attr('transform', '');
 
             // add link to graph (update if exists)
             addEdge();
@@ -417,6 +418,9 @@ function network_editor () {
             if (mousedown_node === selected_node) selected_node = null;
             else selected_node = mousedown_node;
             selected_link = null;
+
+            d3.selectAll("text").style('fill', 'black');
+            d3.select(this.parentNode).select("text").style('fill', 'red');
 
             updateDescriptionPanel(selected_node, restart);
 

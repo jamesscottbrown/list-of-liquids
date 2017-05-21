@@ -24,7 +24,7 @@ svg:not(.active):not(.ctrl) path.link {
 }
 
 path.link.selected {
-  stroke-dasharray: 10,2;
+  stroke: red;
 }
 
 path.link.dragline {
