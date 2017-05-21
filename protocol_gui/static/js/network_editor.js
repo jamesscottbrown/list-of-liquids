@@ -701,9 +701,6 @@ function network_editor () {
                 title: 'Add Well',
                 action: addWellNode
             },{
-                title: 'Add Volume',
-                action: addVolumeNode
-            },{
                 title: 'Add Process',
                 action: addProcessNode
             },{
