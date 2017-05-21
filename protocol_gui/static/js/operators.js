@@ -49,6 +49,18 @@ var operationResults = [];
 })();
 
 function getPossibleOperators(arg1, arg2){
+
+    // handle the fact that thes *result* of these operation,  which is what will be combined, is an aliquot
+    var processes = ['zip', 'cross', 'prod', 'add', 'process'];
+    if (processes.indexOf(arg1) != -1){
+        arg1 = 'aliquot';
+    }
+
+    if (processes.indexOf(arg2) != -1){
+        arg2 = 'aliquot';
+    }
+
+
      if (!possibleOperations.hasOwnProperty(arg1) || !possibleOperations[arg1].hasOwnProperty(arg2)){
          return [];
      }

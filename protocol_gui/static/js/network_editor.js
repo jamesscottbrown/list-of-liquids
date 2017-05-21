@@ -1,7 +1,7 @@
 function network_editor () {
   // set up SVG for D3
     var width = 960,
-        height = 700;
+        height = 900;
 
     var svg = d3.select('#network')
         .append('svg')
@@ -136,7 +136,7 @@ function network_editor () {
       for (i = 0; i < links.length; i++) {
         var link = links[i];
         constraints.push({"axis": "y", "left": nodePosition[link.source.id],
-                          "right": nodePosition[link.target.id], "gap": 25})
+                          "right": nodePosition[link.target.id], "gap": 10})
       }
       force.constraints(constraints);
         redrawLinks(links);
@@ -226,8 +226,8 @@ function network_editor () {
           .on('mousedown', function (d) {
 
               // ignore right click
-              if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
-                  || ("button" in d3.event && d3.event.button == 2))  // IE
+              if ((this.hasOwnProperty("which") && this.which == 3) // Firefox, WebKit
+                  || (this.hasOwnProperty("button") && this.button == 2))  // IE
                    return;
 
             // select node
@@ -353,6 +353,7 @@ function network_editor () {
         }
     }
 
+
     function redrawRectangularNodes(process_nodes){
 
         // update existing node labels
@@ -410,13 +411,31 @@ function network_editor () {
             if (mousedown_node === selected_node) selected_node = null;
             else selected_node = mousedown_node;
             selected_link = null;
-              restart();
+
             updateDescriptionPanel(selected_node, restart);
+
+            // reposition drag line
+            drag_line
+                .classed('hidden', false)
+                .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
+
+              restart();
           })
            .on('mouseup', function (d) {
                // nb. no mousedown event registered, so no need to check for drag-to-self
             if (!mousedown_node){ return; }
+
+               // needed by FF
+                drag_line
+                    .classed('hidden', true)
+                    .style('marker-end', '');
+
+            // check for drag-to-self
             mouseup_node = d;
+            if (mouseup_node === mousedown_node) {
+              resetMouseVars();
+              return;
+            }
 
             // un-enlarge target node
             d3.select(this).attr('transform', '');
@@ -513,7 +532,7 @@ function network_editor () {
     function addEdge(){
 
         // handle arrow draw from well/aliquot to process (e.g. thermocycle)
-        if (mouseup_node.type == "process" && (mousedown_node.type == "aliquot" || mousedown_node.type == "well")){
+        if (mouseup_node.type == "process" && (mousedown_node.type != "volume")){
             links.push({source: mousedown_node, target: mouseup_node});
             selected_node = mouseup_node;
             return;
@@ -524,23 +543,15 @@ function network_editor () {
         if (possible_operations.length == 0) return;
 
         var operator = possible_operations[0];
-        var productType = getOperationResult(operator, mousedown_node.type, mouseup_node.type);
 
         var multipleOutputs = (testMultipleOutputs(mousedown_node) || testMultipleOutputs(mouseup_node));
         var operatorLabel = multipleOutputs ? operator : "*";
 
-        var data;
-        if (productType == 'aliquot'){
-            data = {container_name: ""};
-        }
-
         var i = nodes.push({id: ++lastNodeId, type: operator, x: width/2, y: height/2, label: operatorLabel, parents: [mousedown_node, mouseup_node]});
-        var j = nodes.push({id: ++lastNodeId, type: productType, x: width/2, y: height/2, label: "", data: data});
-        i--; j--;
+        i--;
 
         links.push({source: mousedown_node, target: nodes[i]});
         links.push({source: mouseup_node, target: nodes[i]});
-        links.push({source: nodes[i], target: nodes[j]});
 
         selected_link = null;
         selected_node = nodes[i];
@@ -590,11 +601,7 @@ function network_editor () {
     function addProcessNode(){
         var operation = prompt('Operation:');
         var i = nodes.push({id: ++lastNodeId, type: 'process', x: width / 2, y: height / 2, label: operation, data: operation});
-        var j = nodes.push({id: ++lastNodeId, type: 'aliquot', x: width/2, y: height/2, label: "", data: {container_name: ""}});
-
-        i--; j--;
-
-        links.push({source: nodes[i], target: nodes[j]});
+        i--;
         selected_node = nodes[i];
 
         restart();
