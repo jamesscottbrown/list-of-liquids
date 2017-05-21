@@ -17,6 +17,8 @@ function updateDescriptionPanel(selected_node, restart) {
 
     if (selected_node.type == "well") {
 
+        form.append("h2").style().text("Initially present resource");
+
         div1 = form.append("div").classed("form-group", true);
         div1.append("label")
             .classed("control-label", true)
@@ -172,6 +174,8 @@ function updateDescriptionPanel(selected_node, restart) {
 
 
     } else if (selected_node.type == "process") {
+        form.append("h2").style().text("Processing step");
+
         div1 = form.append("div").classed("form-group", true);
         div1.append("label")
             .classed("control-label", true)
@@ -211,6 +215,8 @@ function updateDescriptionPanel(selected_node, restart) {
             });
 
     } else if (selected_node.type == "aliquot") {
+
+        form.append("h2").style().text("Aliquot(s)");
 
         // Container
         var div1 = form.append("div").classed("form-group", true);
