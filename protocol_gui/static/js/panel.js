@@ -212,5 +212,28 @@ function updateDescriptionPanel(selected_node, restart) {
 
     } else if (selected_node.type == "aliquot") {
 
+        // Container
+        var div1 = form.append("div").classed("form-group", true);
+        div1.append("label")
+            .classed("control-label", true)
+            .classed("col-sm-2", true)
+            .attr("for", "container-name")
+            .text("Container name:");
+
+        div1.append("div")
+            .classed("col-sm-2", true)
+            .append("input")
+            .attr("type", "text")
+            .attr("id", "container-name")
+            .attr("name", "container-name")
+            .classed("form-control", true)
+            .attr("value", selected_node.data.container_name)
+            .on("change", function () {
+                selected_node.data.container_name = this.value;
+            });
+
+
+
+        // Contents
     }
 }

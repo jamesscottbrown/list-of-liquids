@@ -1,7 +1,7 @@
 function network_editor () {
   // set up SVG for D3
     var width = 960,
-        height = 500;
+        height = 700;
 
     var svg = d3.select('#network')
         .append('svg')
@@ -44,7 +44,7 @@ function network_editor () {
           {id: 0, type: "well", label: "Sample", data: {num_wells: 2}},
           {id: 1, type: "volume", label: "10 ml", data: {}},
           {id: 2, type: "cross", label: "cross", data: {}},
-          {id: 3, type: "aliquot", label: "Aliquot", data: {}}];
+          {id: 3, type: "aliquot", label: "Aliquot", data: {"container_name": ""}}];
 
         links = [
           {source: nodes[0], target: nodes[2]},
@@ -529,8 +529,13 @@ function network_editor () {
         var multipleOutputs = (testMultipleOutputs(mousedown_node) || testMultipleOutputs(mouseup_node));
         var operatorLabel = multipleOutputs ? operator : "*";
 
+        var data;
+        if (productType == 'aliquot'){
+            data = {container_name: ""};
+        }
+
         var i = nodes.push({id: ++lastNodeId, type: operator, x: width/2, y: height/2, label: operatorLabel, parents: [mousedown_node, mouseup_node]});
-        var j = nodes.push({id: ++lastNodeId, type: productType, x: width/2, y: height/2, label: ""});
+        var j = nodes.push({id: ++lastNodeId, type: productType, x: width/2, y: height/2, label: "", data: data});
         i--; j--;
 
         links.push({source: mousedown_node, target: nodes[i]});
@@ -585,7 +590,7 @@ function network_editor () {
     function addProcessNode(){
         var operation = prompt('Operation:');
         var i = nodes.push({id: ++lastNodeId, type: 'process', x: width / 2, y: height / 2, label: operation, data: operation});
-        var j = nodes.push({id: ++lastNodeId, type: 'aliquot', x: width/2, y: height/2, label: ""});
+        var j = nodes.push({id: ++lastNodeId, type: 'aliquot', x: width/2, y: height/2, label: "", data: {container_name: ""}});
 
         i--; j--;
 
