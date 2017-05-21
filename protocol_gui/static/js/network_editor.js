@@ -56,6 +56,7 @@ function network_editor () {
 
     var force = cola.d3adaptor()
         .linkDistance(50)
+        .avoidOverlaps(true)
         .size([width, height])
         .nodes(nodes)
         .links(links)
@@ -136,7 +137,7 @@ function network_editor () {
       for (i = 0; i < links.length; i++) {
         var link = links[i];
         constraints.push({"axis": "y", "left": nodePosition[link.source.id],
-                          "right": nodePosition[link.target.id], "gap": 10})
+                          "right": nodePosition[link.target.id], "gap": 50})
       }
       force.constraints(constraints);
         redrawLinks(links);
