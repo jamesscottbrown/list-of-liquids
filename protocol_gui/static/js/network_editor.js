@@ -566,7 +566,7 @@ function network_editor () {
         var multipleOutputs = (testMultipleOutputs(mousedown_node) || testMultipleOutputs(mouseup_node));
         var operatorLabel = multipleOutputs ? operator : "*";
 
-        var i = nodes.push({id: ++lastNodeId, type: operator, x: width/2, y: height/2, label: operatorLabel, parents: [mousedown_node, mouseup_node]});
+        var i = nodes.push({id: ++lastNodeId, type: operator, x: width * Math.random(), y: height/2, label: operatorLabel, parents: [mousedown_node, mouseup_node]});
         i--;
 
         links.push({source: mousedown_node, target: nodes[i], data: {volumes: [1]} });
@@ -625,7 +625,7 @@ function network_editor () {
 
     function addProcessNode(){
         var operation = prompt('Operation:');
-        var i = nodes.push({id: ++lastNodeId, type: 'process', x: width / 2, y: height / 2, label: operation, data: operation});
+        var i = nodes.push({id: ++lastNodeId, type: 'process', x: width * Math.random(), y: height / 2, label: operation, data: operation});
         i--;
         selected_node = nodes[i];
         restart();
@@ -648,7 +648,7 @@ function network_editor () {
       nodes.push({
         id: ++lastNodeId,
         type: 'volume',
-        x: width / 2,
+        x: width * Math.random(),
         y: height / 2,
         label: label,
         data: volumeList
