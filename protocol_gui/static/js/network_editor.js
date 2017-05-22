@@ -339,21 +339,9 @@ function network_editor () {
 
     function deleteNode(d){
 
-         if (process_node_types.indexOf(d.type) == -1) {
-
-            var formationLink = links.filter( function(l){return l.target.id == d.id; });
-            if (formationLink.length){
-                // Case I: if this is an object created by process, call deleteNode on process that created it
-                deleteNode(formationLink[0].source);
-            } else {
-                // Case II: this is an object not created by a process
+         if (process_node_types.indexOf(d.type) == "well") {
              deleteDownFromNode(d);
-            }
-         }
-
-        // Case III: this is a process, so delete links to it, then node and children
-        else if (process_node_types.indexOf(d.type) != -1) {
-
+         }  else {
             // delete arrows to this process node
             var inLinks = links.filter( function(l){return l.target.id == d.id; });
             for (var i=0; i<inLinks.length; i++){
@@ -362,7 +350,6 @@ function network_editor () {
 
             deleteDownFromNode(d);
         }
-
         restart();
     }
 
