@@ -79,9 +79,17 @@ function network_editor () {
         .attr('d', 'M0,0L0,0');
 
   // handles to link and node element groups
-    var path = svg.append('svg:g').selectAll('path'),
-        circle = svg.append('svg:g').selectAll('g'),
-        rect = svg.append('svg:g').selectAll('g');
+    var path_group = svg.append('svg:g');
+    var path = path_group.selectAll('path');
+
+    var circle_group = svg.append('svg:g');
+    var circle = circle_group.selectAll('g');
+
+    var rect_group = svg.append('svg:g');
+    var rect = rect_group.selectAll('g');
+
+    var path_labels_group = svg.append('svg:g');
+    var path_labels = path_labels_group.selectAll('g');
 
   // mouse event vars
     var selected_node = null,
@@ -114,6 +122,13 @@ function network_editor () {
         return 'M' + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
       });
 
+      path_labels.attr("x", function(d){
+         return 8 + (d.source.x  + d.target.x) / 2;
+      })
+        .attr("y", function(d){
+         return (d.source.y  + d.target.y) / 2;
+      });
+
       circle.attr('transform', function (d) {
         return 'translate(' + d.x + ',' + d.y + ')';
       });
@@ -139,7 +154,8 @@ function network_editor () {
                           "right": nodePosition[link.target.id], "gap": 50})
       }
       force.constraints(constraints);
-        redrawLinks(links);
+        redrawLinks();
+        redrawLinkLabels();
 
       // circle (node) group
         var circular_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) == -1 });
@@ -151,7 +167,7 @@ function network_editor () {
       force.start();
     }
 
-    function redrawLinks(links){
+    function redrawLinks(){
               // path (link) group
       path = path.data(links);
 
@@ -177,12 +193,29 @@ function network_editor () {
             else selected_link = mousedown_link;
             selected_node = null;
               d3.selectAll("text").style('fill', 'black');
-              updateDescriptionPanel(selected_node, selected_link, restart);
+              updateDescriptionPanel(selected_node, selected_link, restart, redrawLinkLabels);
             restart();
           });
 
       // remove old links
       path.exit().remove();
+
+
+    }
+
+    function redrawLinkLabels(){
+        // volume labels
+        path_labels = path_labels.data(links);
+
+        path_labels.enter().append('text');
+
+        path_labels_group
+            .selectAll('text')
+            .text(function (d){
+              return (d.data.volumes.length == 1) ? d.data.volumes[0] : "";
+            });
+
+        path_labels.exit().remove();
 
     }
 
@@ -241,7 +274,7 @@ function network_editor () {
             d3.selectAll("text").style('fill', 'black');
             d3.select(this.parentNode).select("text").style('fill', 'red');
 
-            updateDescriptionPanel(selected_node, selected_link, restart);
+            updateDescriptionPanel(selected_node, selected_link, restart, redrawLinkLabels);
 
             // reposition drag line
             drag_line
@@ -422,7 +455,7 @@ function network_editor () {
             d3.selectAll("text").style('fill', 'black');
             d3.select(this.parentNode).select("text").style('fill', 'red');
 
-            updateDescriptionPanel(selected_node, selected_link, restart);
+            updateDescriptionPanel(selected_node, selected_link, restart, redrawLinkLabels);
 
             // reposition drag line
             drag_line

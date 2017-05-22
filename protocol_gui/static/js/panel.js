@@ -1,4 +1,4 @@
-function updateDescriptionPanel(selected_node, selected_link, restart) {
+function updateDescriptionPanel(selected_node, selected_link, restart, redrawLinkLabels) {
 
     // TODO: rather than calling restart(), redraw single label
     var info = d3.select("#info");
@@ -123,7 +123,8 @@ function updateDescriptionPanel(selected_node, selected_link, restart) {
         label.append("i").classed("fa", true).classed("fa-minus", true)
             .on("click", function (d, i) {
                 volumes.splice(i, 1);
-                updateDescriptionPanel(selected_node, selected_link, restart);
+                updateDescriptionPanel(selected_node, selected_link, restart, redrawLinkLabels);
+                redrawLinkLabels();
             });
         label.append("b").text(function (d, i) {
             return "Volume " + (i + 1) + ":";
@@ -143,6 +144,7 @@ function updateDescriptionPanel(selected_node, selected_link, restart) {
                     new_volumes.push(parseFloat(volumeInputs[i][0].value))
                 }
                 selected_link.data.volumes = new_volumes;
+                redrawLinkLabels();
             });
 
         // adding an extra volume
@@ -154,7 +156,8 @@ function updateDescriptionPanel(selected_node, selected_link, restart) {
             .append("i").classed("fa", true).classed("fa-plus", true)
             .on("click", function () {
                 volumes.push(0);
-                updateDescriptionPanel(selected_node, selected_link, restart);
+                updateDescriptionPanel(selected_node, selected_link, restart, redrawLinkLabels);
+                redrawLinkLabels();
             });
 
 
