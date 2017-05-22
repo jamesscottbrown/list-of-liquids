@@ -146,6 +146,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
             }
 
             selected_link.data.addToThis = (this.value == "Yes");
+            volumeDivs.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
             restart();
         });
 
@@ -246,6 +247,10 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
             selected_link.data.volumes = new_volumes;
             redrawLinkLabels();
         });
+
+    if (selected_link.data.addToThis){
+        volumeDivs.selectAll('input').attr('disabled', true);
+    }
 
     // adding an extra volume
     div2.append("div")

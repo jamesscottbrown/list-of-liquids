@@ -215,7 +215,8 @@ function network_editor () {
             .selectAll('text')
             .text(function (d){
               return (d.data.volumes.length == 1) ? d.data.volumes[0] : "";
-            });
+            })
+            .style("visibility", function(d){ return d.data.addToThis ? 'hidden' : 'visible' });
 
         path_labels.exit().remove();
 
@@ -589,7 +590,7 @@ function network_editor () {
 
         // handle arrow draw from well/aliquot to process (e.g. thermocycle)
         if (mouseup_node.type == "process" && (mousedown_node.type != "volume")){
-            links.push({source: mousedown_node, target: mouseup_node});
+            links.push({source: mousedown_node, target: mouseup_node, data: {volumes: [1], addToThis: true, changeTips: false, mix: false} });
             selected_node = mouseup_node;
             return;
         }
@@ -647,7 +648,7 @@ function network_editor () {
 
     function addProcessNodeToNode(sourceNode){
         i = addProcessNode();
-        links.push({source: sourceNode, target: nodes[i], data: {volumes: [], addToThis: null, changeTips: null, mix: null} });
+        links.push({source: sourceNode, target: nodes[i], data: {volumes: [1], addToThis: null, changeTips: null, mix: null} });
         restart();
     }
 
