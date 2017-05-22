@@ -605,7 +605,7 @@ function network_editor () {
         i--;
 
         links.push({source: mousedown_node, target: nodes[i], data: {volumes: [1], addToThis: false } });
-        links.push({source: mouseup_node, target: nodes[i], data: {volumes: [1], addToThis: false} });
+        links.push({source: mouseup_node, target: nodes[i], data: {volumes: [1], addToThis: true} });
 
         selected_link = null;
         selected_node = nodes[i];
