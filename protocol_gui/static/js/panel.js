@@ -105,6 +105,30 @@ function updateDescriptionPanel(selected_node, selected_link, restart, redrawLin
 
         form.append("h2").style().text("Liquid transfer");
 
+        div1 = form.append("div");
+        var containerDiv = div1.append("div")
+            .classed("form-group", true);
+
+        containerDiv.append("label")
+            .classed("control-label", true)
+            .classed("col-sm-2", true)
+            .attr("for", "container")
+            .text("Add to this container");
+
+        var containerSelect = containerDiv.append("select")
+            .classed("control-input", true)
+            .classed("col-sm-2", true)
+            .attr("name", "container")
+            .attr("id", "container")
+            .on("change", function(d){
+                selected_link.data.addToThis = (this.value == "Yes");
+                restart();
+            });
+
+        containerSelect.append("option").text("Yes");
+        containerSelect.append("option").text("No");
+        containerSelect.node().value = (selected_link.data.addToThis ? "Yes" : "No");
+
         var volumes = selected_link.data.volumes;
 
         div2 = form.append("div");
