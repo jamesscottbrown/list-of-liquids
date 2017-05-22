@@ -36,7 +36,7 @@ function network_editor () {
         links = [];
         for (i=0; i<obj.links.length; i++){
             var link = obj.links[i];
-            links.push({source: nodes[nodePosition[link.source_id]], target: nodes[nodePosition[link.target_id]]});
+            links.push({source: nodes[nodePosition[link.source_id]], target: nodes[nodePosition[link.target_id]], data: link.data});
         }
 
     } else {
@@ -673,7 +673,7 @@ function network_editor () {
         var link_list = [];
         for (i=0; i<links.length; i++){
             var link = links[i];
-            link_list.push({source_id: link.source.id, target_id: link.target.id});
+            link_list.push({source_id: link.source.id, target_id: link.target.id, data: link.data});
         }
 
         var protocol_string = JSON.stringify({nodes: node_list, links: link_list});
