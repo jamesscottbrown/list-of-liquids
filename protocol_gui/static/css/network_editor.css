@@ -17,7 +17,7 @@ path.link {
   stroke: #000;
   stroke-width: 4px;
   cursor: default;
-  stroke-dasharray: 10,2;
+  stroke-dasharray: 4,3;
 }
 
 svg:not(.active):not(.ctrl) path.link {
