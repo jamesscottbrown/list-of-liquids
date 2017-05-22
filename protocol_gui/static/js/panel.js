@@ -137,7 +137,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         .classed("col-sm-2", true)
         .attr("name", "container")
         .attr("id", "container")
-        .on("change", function(d){
+        .on("change", function(){
 
             // ensure that no more than one link incident to the same node has addToThis true
             if (this.value == "Yes"){
@@ -169,7 +169,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         .classed("col-sm-2", true)
         .attr("name", "change-tips")
         .attr("id", "change-tips")
-        .on("change", function(d){
+        .on("change", function(){
             selected_link.data.changeTips = (this.value == "Yes");
             restart();
         });
@@ -194,7 +194,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         .classed("col-sm-2", true)
         .attr("name", "change-tips")
         .attr("id", "change-tips")
-        .on("change", function(d){
+        .on("change", function(){
             selected_link.data.mix = (this.value == "Yes");
             restart();
         });

@@ -306,10 +306,10 @@ function network_editor () {
           })
        .on('contextmenu', d3.contextMenu([{
                     title: 'Delete',
-                    action: function(elm, d, i) { deleteNode(d); }
+                    action: function(elm, d) { deleteNode(d); }
                 },{
                     title: 'Process',
-                    action: function(elm, d, i) {
+                    action: function(elm, d) {
                         var node = nodes.filter(function(n){ return n.id == d.id})[0];
                         addProcessNodeToNode(node); }
                 }])
@@ -368,13 +368,15 @@ function network_editor () {
 
     function deleteDownFromNode(d){
 
+        var i;
+
         // delete this node
         var index = nodes.indexOf( nodes.filter(function(n){ return n.id == d.id})[0] );
         nodes.splice(index, 1);
 
         // delete incoming links
         var inLinks = links.filter( function(l){return l.target.id == d.id; });
-        for (var i=0; i<inLinks.length; i++){
+        for (i = 0; i < inLinks.length; i++){
             links.splice(links.indexOf(inLinks[i]), 1);
         }
 
@@ -382,13 +384,13 @@ function network_editor () {
         var children = [];
 
         var outLinks = links.filter( function(l){return l.source.id == d.id; });
-        for (var i=0; i<outLinks.length; i++){
+        for (i = 0; i < outLinks.length; i++){
             children.push(outLinks[i].target);
             links.splice(links.indexOf(outLinks[i]), 1);
         }
 
         // delete the nodes that outgoing links target
-        for (var i=0; i<children.length; i++){
+        for (i = 0; i < children.length; i++){
             if (nodes.indexOf(children[i] != -1)){
                 deleteDownFromNode(children[i]);
             }
@@ -541,7 +543,7 @@ function network_editor () {
             var operations = ['zip', 'cross', 'add', 'prod'];
 
             function changeOperation(operation) {
-                return function (elm, d, i) {
+                return function (elm, d) {
                     nodes.filter(function (n) {
                         return n.id == d.id
                     })[0].type = operation;
@@ -569,12 +571,12 @@ function network_editor () {
 			});
         menu.push({
                     title: 'Delete',
-                    action: function(elm, d, i) { deleteNode(d); }
+                    action: function(elm, d) { deleteNode(d); }
                 });
 
         menu.push({
                     title: 'Process',
-                    action: function(elm, d, i) {
+                    action: function(elm, d) {
                         var node = nodes.filter(function(n){ return n.id == d.id})[0];
                         addProcessNodeToNode(node);
                     }
@@ -626,15 +628,6 @@ function network_editor () {
       }
       svg.classed('active', false);
       resetMouseVars();
-    }
-
-    function spliceLinksForNode(node) {
-      var toSplice = links.filter(function (l) {
-        return (l.source === node || l.target === node);
-      });
-      toSplice.map(function (l) {
-        links.splice(links.indexOf(l), 1);
-      });
     }
 
     function clearEverything() {
@@ -719,10 +712,10 @@ function network_editor () {
         dataType: 'html',
         async: true,
         data: protocol_string,
-        beforeSend: function(xhr, settings) {
+        beforeSend: function(xhr) {
             xhr.setRequestHeader("X-CSRFToken", csrf_token);
          },
-        success: function (data) { console.log("SUCCESS")},
+        success: function () { console.log("SUCCESS")},
         error: function (result, textStatus) { console.log(result); console.log(textStatus); }
         })
     }
