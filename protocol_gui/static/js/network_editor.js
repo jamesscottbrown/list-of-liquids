@@ -496,39 +496,12 @@ function network_editor () {
     }
 
 
-    function testMultipleOutputs(node){
-        var multipleOutputs = false;
-        if (node.type == "volume"){
-
-            var volumeList = node.data;
-            for (var i=0; i<volumeList.length; i++){
-                if (volumeList[i] != volumeList[0]){ multipleOutputs = true; }
-            }
-
-        } else if (node.type == "well") {
-
-            if (node.data.num_wells > 1){ multipleOutputs = true; }
-
-        } else if (node.type == "aliquot") {
-
-            // TODO: test cardinality - but without AJAX?
-            multipleOutputs = true;
-        }
-        return multipleOutputs;
-    }
-
-
     function createOptionsMenu(d){
         var menu = [];
 
-        // check for potential outputs. An element may not have parents - e.g. a process node that has just been created
-        var multipleOutputs = false;
-        if (d.parents){
-            multipleOutputs = testMultipleOutputs(d.parents[0]) || testMultipleOutputs(d.parents[1]);
-        }
-
-        if (d.type != "process" && multipleOutputs) {
-            var operations = ['zip', 'cross', 'add', 'prod'];
+        var operations = ['zip', 'cross', 'add'];
+        var operationLabels = {'zip': 'zip', 'add': '+', cross: "×"};
+        if (d.type != "process") {
 
             function changeOperation(operation) {
                 return function (elm, d) {
@@ -537,26 +510,27 @@ function network_editor () {
                     })[0].type = operation;
                     nodes.filter(function (n) {
                         return n.id == d.id
-                    })[0].label = operation;
+                    })[0].label = operationLabels[operation];
                     restart();
                 }
             }
 
             for (var i = 0; i < operations.length; i++) {
                 var operation = operations[i];
-                if (isValidNewOperation(d, operation)) {
+
                     menu.push({
                         title: operation,
                         disabled: (operation == d.type),
                         action: changeOperation(operation)
                     })
-                }
             }
-        }
 
-        menu.push({
+            menu.push({
 				divider: true
 			});
+        }
+
+
         menu.push({
                     title: 'Delete',
                     action: function(elm, d) { deleteNode(d); }
@@ -582,16 +556,9 @@ function network_editor () {
             return;
         }
 
-        var possible_operations = getPossibleOperators(mousedown_node.type, mouseup_node.type);
+        var operator = "cross";
 
-        if (possible_operations.length == 0) return;
-
-        var operator = possible_operations[0];
-
-        var multipleOutputs = (testMultipleOutputs(mousedown_node) || testMultipleOutputs(mouseup_node));
-        var operatorLabel = multipleOutputs ? operator : "*";
-
-        var i = nodes.push({id: ++lastNodeId, type: operator, x: width * Math.random(), y: height/2, label: operatorLabel, parents: [mousedown_node, mouseup_node]});
+        var i = nodes.push({id: ++lastNodeId, type: operator, x: width * Math.random(), y: height/2, label: "×", parents: [mousedown_node, mouseup_node]});
         i--;
 
         links.push({source: mousedown_node, target: nodes[i], data: {volumes: [1], addToThis: false, changeTips: false, mix: false } });
