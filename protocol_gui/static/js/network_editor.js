@@ -9,6 +9,7 @@ function network_editor () {
         .attr('height', height);
 
     var process_node_types = ['zip', 'cross', 'add', 'prod', 'process'];
+    var operationLabels = {'zip': 'zip', 'add': '+', cross: "×"};
 
   // set up initial nodes and links
     var nodes, lastNodeId, links;
@@ -30,6 +31,11 @@ function network_editor () {
                 var ind1 = nodePosition[nodes[i].parentIds[0]];
                 var ind2 =  nodePosition[nodes[i].parentIds[1]];
                 nodes[i].parents = [nodes[ind1], nodes[ind2]];
+            }
+
+            var nodeType = nodes[i].type;
+            if (['zip', 'add', 'cross'].indexOf(nodeType) != -1){
+                nodes[i].label = operationLabels[nodeType];
             }
         }
 
@@ -500,7 +506,6 @@ function network_editor () {
         var menu = [];
 
         var operations = ['zip', 'cross', 'add'];
-        var operationLabels = {'zip': 'zip', 'add': '+', cross: "×"};
         if (d.type != "process") {
 
             function changeOperation(operation) {
