@@ -112,8 +112,8 @@ function updateDescriptionPanel(selected_node, selected_link, restart, redrawLin
 
         form.append("h2").style().text(title);
 
-        div1 = form.append("div");
-        var containerDiv = div1.append("div")
+        // Form to set whether we are adding to this
+        var containerDiv = form.append("div").append("div")
             .classed("form-group", true);
 
         containerDiv.append("label")
@@ -136,6 +136,58 @@ function updateDescriptionPanel(selected_node, selected_link, restart, redrawLin
         containerSelect.append("option").text("No");
         containerSelect.node().value = (selected_link.data.addToThis ? "Yes" : "No");
 
+
+        // Form to set whether we are changing tips
+        var changeTipDiv = form.append("div").append("div")
+            .classed("form-group", true);
+
+        changeTipDiv.append("label")
+            .classed("control-label", true)
+            .classed("col-sm-2", true)
+            .attr("for", "change-tips")
+            .text("Change Tips");
+
+        var changeTipSelect = changeTipDiv.append("select")
+            .classed("control-input", true)
+            .classed("col-sm-2", true)
+            .attr("name", "change-tips")
+            .attr("id", "change-tips")
+            .on("change", function(d){
+                selected_link.data.changeTips = (this.value == "Yes");
+                restart();
+            });
+
+        changeTipSelect.append("option").text("Yes");
+        changeTipSelect.append("option").text("No");
+        changeTipSelect.node().value = (selected_link.data.changeTips ? "Yes" : "No");
+
+
+        // Form to set whether we are changing tips
+        var mixDiv = form.append("div").append("div")
+            .classed("form-group", true);
+
+        mixDiv.append("label")
+            .classed("control-label", true)
+            .classed("col-sm-2", true)
+            .attr("for", "change-tips")
+            .text("Mix");
+
+        var mixSelect = mixDiv.append("select")
+            .classed("control-input", true)
+            .classed("col-sm-2", true)
+            .attr("name", "change-tips")
+            .attr("id", "change-tips")
+            .on("change", function(d){
+                selected_link.data.mix = (this.value == "Yes");
+                restart();
+            });
+
+        mixSelect.append("option").text("Yes");
+        mixSelect.append("option").text("No");
+        mixSelect.node().value = (selected_link.data.mix ? "Yes" : "No");
+
+
+        // Form to adjust volumes
         var volumes = selected_link.data.volumes;
 
         div2 = form.append("div");

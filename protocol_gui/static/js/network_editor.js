@@ -604,8 +604,8 @@ function network_editor () {
         var i = nodes.push({id: ++lastNodeId, type: operator, x: width * Math.random(), y: height/2, label: operatorLabel, parents: [mousedown_node, mouseup_node]});
         i--;
 
-        links.push({source: mousedown_node, target: nodes[i], data: {volumes: [1], addToThis: false } });
-        links.push({source: mouseup_node, target: nodes[i], data: {volumes: [1], addToThis: true} });
+        links.push({source: mousedown_node, target: nodes[i], data: {volumes: [1], addToThis: false, changeTips: false, mix: false } });
+        links.push({source: mouseup_node, target: nodes[i], data: {volumes: [1], addToThis: true, changeTips: false, mix: false} });
 
         selected_link = null;
         selected_node = nodes[i];
@@ -654,7 +654,7 @@ function network_editor () {
 
     function addProcessNodeToNode(sourceNode){
         i = addProcessNode();
-        links.push({source: sourceNode, target: nodes[i], data: {volumes: [], addToThis: null} });
+        links.push({source: sourceNode, target: nodes[i], data: {volumes: [], addToThis: null, changeTips: null, mix: null} });
         restart();
     }
 
