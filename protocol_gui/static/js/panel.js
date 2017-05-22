@@ -1,4 +1,4 @@
-function updateDescriptionPanel(selected_node, selected_link, restart, redrawLinkLabels) {
+function updateDescriptionPanel(selected_node, selected_link, links,  restart, redrawLinkLabels) {
 
     // TODO: rather than calling restart(), redraw single label
     var info = d3.select("#info");
@@ -128,6 +128,13 @@ function updateDescriptionPanel(selected_node, selected_link, restart, redrawLin
             .attr("name", "container")
             .attr("id", "container")
             .on("change", function(d){
+
+                // ensure that no more than one link incident to the same node has addToThis true
+                if (this.value == "Yes"){
+                    links.filter(function(x){ return x.target.id == selected_link.target.id })
+                          .map(function(x){x.data.addToThis = false});
+                }
+
                 selected_link.data.addToThis = (this.value == "Yes");
                 restart();
             });
@@ -206,7 +213,7 @@ function updateDescriptionPanel(selected_node, selected_link, restart, redrawLin
         label.append("i").classed("fa", true).classed("fa-minus", true)
             .on("click", function (d, i) {
                 volumes.splice(i, 1);
-                updateDescriptionPanel(selected_node, selected_link, restart, redrawLinkLabels);
+                updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels);
                 redrawLinkLabels();
             });
         label.append("b").text(function (d, i) {
@@ -239,7 +246,7 @@ function updateDescriptionPanel(selected_node, selected_link, restart, redrawLin
             .append("i").classed("fa", true).classed("fa-plus", true)
             .on("click", function () {
                 volumes.push(0);
-                updateDescriptionPanel(selected_node, selected_link, restart, redrawLinkLabels);
+                updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels);
                 redrawLinkLabels();
             });
 
