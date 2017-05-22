@@ -103,7 +103,14 @@ function updateDescriptionPanel(selected_node, selected_link, restart, redrawLin
 
     } else if (selected_link) {
 
-        form.append("h2").style().text("Liquid transfer");
+        var title;
+        if (selected_link.source.type == "well"){
+            title = "Transfer of " + selected_link.source.label;
+        } else {
+            title = "Transfer"
+        }
+
+        form.append("h2").style().text(title);
 
         div1 = form.append("div");
         var containerDiv = div1.append("div")
