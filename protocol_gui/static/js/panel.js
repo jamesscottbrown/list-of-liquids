@@ -145,6 +145,8 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
                       .map(function(x){x.data.addToThis = false});
             }
 
+            selected_link.target.data.container_name = selected_link.source.data.container_name;
+
             selected_link.data.addToThis = (this.value == "Yes");
             volumeDivs.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
             restart();
@@ -310,6 +312,36 @@ function drawProcessPanel(selected_node, restart, form){
 
 function drawOperationPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form){
     form.append("h2").style().text("Operation");
+
+    var div1 = form.append("div").classed("form-group", true);
+    div1.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-2", true)
+        .attr("for", "container")
+        .text("Container:");
+
+    var containerInput = div1.append("div")
+        .classed("col-sm-2", true)
+        .append("input")
+        .attr("type", "text")
+        .attr("name", "container")
+        .attr("value", selected_node.data.container_name)
+        .on("change", function () {
+            selected_node.data.container_name = this.value;
+            restart();
+        });
+
+    // If incident edge has 'addToThis' true, ensure container_name for this is consistent with this
+    // and disable field to prevent it being changed
+    var container = false;
+    for (var i = 0; i < links.length; i++ ){
+        if (links[i].target.id == selected_node.id && links[i].data.addToThis){
+            selected_node.data.container_name = links[i].source.data.container_name;
+            containerInput.node().value = selected_node.data.container_name;
+            containerInput.attr("disabled", "");
+            break;
+        }
+    }
 
     // TODO: options menu to change type (alternative to context menu)
     // TODO: display of resulting aliquots

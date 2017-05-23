@@ -554,7 +554,8 @@ function network_editor () {
 
         var operator = "cross";
 
-        var i = nodes.push({id: ++lastNodeId, type: operator, x: width * Math.random(), y: height/2, label: "×", parents: [mousedown_node, mouseup_node]});
+        var i = nodes.push({id: ++lastNodeId, type: operator, x: width * Math.random(), y: height/2, label: "×",
+                            parents: [mousedown_node, mouseup_node], data: {container_name: ''} });
         i--;
 
         links.push({source: mousedown_node, target: nodes[i], data: {volumes: [1], addToThis: false, changeTips: false, mix: false } });
