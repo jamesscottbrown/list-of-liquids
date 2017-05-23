@@ -11,8 +11,12 @@ function network_editor () {
     var process_node_types = ['zip', 'cross', 'add', 'prod', 'process'];
     var operationLabels = {'zip': 'zip', 'add': '+', cross: "×"};
 
+    var selectingGroup = false;
+    var selectedNodes = [];
+
   // set up initial nodes and links
-    var nodes, lastNodeId, links;
+    var nodes, lastNodeId, links, groups;
+    var color = d3.scale.category20();
 
     if (protocol_string){
 
@@ -45,9 +49,12 @@ function network_editor () {
             links.push({source: nodes[nodePosition[link.source_id]], target: nodes[nodePosition[link.target_id]], data: link.data});
         }
 
+        groups = obj.groups;
+
     } else {
         nodes = [];
         links = [];
+        groups = [];
     }
     lastNodeId = nodes.length - 1;
 
@@ -56,6 +63,7 @@ function network_editor () {
         .size([width, height])
         .nodes(nodes)
         .links(links)
+        .groups(groups)
         .on('tick', tick);
 
   // define arrow markers for graph links
@@ -76,6 +84,9 @@ function network_editor () {
         .attr('d', 'M0,0L0,0');
 
   // handles to link and node element groups
+    var group_group = svg.append('svg:g');
+    var group = group_group.selectAll(".group");
+
     var path_group = svg.append('svg:g');
     var path = path_group.selectAll('path');
 
@@ -134,6 +145,36 @@ function network_editor () {
         return 'translate(' + (d.x -12) + ',' + (d.y-12) + ')';
       });
 
+
+        svg.selectAll(".group")
+            .attr("x", function (d) { return getBounds(d).x; })
+            .attr("y", function (d) { return getBounds(d).y; })
+            .attr("width", function (d) { return getBounds(d).width; })
+            .attr("height", function (d) { return getBounds(d).height; });
+    }
+
+    function getBounds(group){
+        // For some reason, Cola doe snot automatically calculate .bounds for each group,
+        // just each individual leaf of the group
+
+        var bounds = {x: Infinity, X: 0, y: Infinity, Y: 0};
+
+        for (var i=0; i < group.leaves.length; i++){
+            bounds.x = Math.min(bounds.x, group.leaves[i].bounds.x);
+            bounds.y = Math.min(bounds.y, group.leaves[i].bounds.y);
+
+            bounds.X = Math.max(bounds.X, group.leaves[i].bounds.X);
+            bounds.Y = Math.max(bounds.Y, group.leaves[i].bounds.Y);
+        }
+
+        var padding = 10;
+        bounds.x -= padding; bounds.X += padding;
+        bounds.y -= padding; bounds.Y += padding;
+
+        bounds.width = bounds.X - bounds.x;
+        bounds.height = bounds.Y - bounds.y;
+
+        return bounds;
     }
 
   // update graph (called when needed)
@@ -151,6 +192,8 @@ function network_editor () {
                           "right": nodePosition[link.target.id], "gap": 50})
       }
       force.constraints(constraints);
+
+        redrawGroups(); // draw groups ebfore nodes so that they are in the background
         redrawLinks();
         redrawLinkLabels();
 
@@ -160,7 +203,6 @@ function network_editor () {
 
         redrawCircularNodes(circular_nodes);
         redrawRectangularNodes(process_nodes);
-
       force.start();
     }
 
@@ -265,6 +307,18 @@ function network_editor () {
                   || (this.hasOwnProperty("button") && this.button == 2))  // IE
                    return;
 
+          if (selectingGroup){
+
+              var pos = selectedNodes.indexOf(d.id);
+              if (pos == -1){
+                  selectedNodes.push(d.id);
+                  d3.select(this.parentNode).select("text").style('fill', 'red');
+              } else {
+                  selectedNodes.slice(pos, 1);
+                  d3.select(this.parentNode).select("text").style('fill', 'black');
+              }
+
+          } else {
             // select node
             mousedown_node = d;
             if (mousedown_node === selected_node) selected_node = null;
@@ -282,6 +336,9 @@ function network_editor () {
                 .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
 
             restart();
+
+          }
+
           })
           .on('mouseup', function (d) {
             if (!mousedown_node) return;
@@ -332,6 +389,18 @@ function network_editor () {
             return d.label;
           });
 
+    }
+
+    function redrawGroups(){
+        group = group.data(groups);
+
+        group.enter().append("rect")
+            .attr("rx", 8).attr("ry", 8)
+            .attr("class", "group")
+            .style("fill", function (d, i) { return color(i); });
+
+        // remove old groups
+        group.exit().remove();
     }
 
     function deleteNode(d){
@@ -435,23 +504,37 @@ function network_editor () {
                   || ("button" in d3.event && d3.event.button == 2))  // IE
                    return;
 
-            // select node
-            mousedown_node = d;
-            if (mousedown_node === selected_node) selected_node = null;
-            else selected_node = mousedown_node;
-            selected_link = null;
+              if (selectingGroup){
 
-            d3.selectAll("text").style('fill', 'black');
-            d3.select(this.parentNode).select("text").style('fill', 'red');
+                  var pos = selectedNodes.indexOf(d.id);
+                  if (pos == -1){
+                      selectedNodes.push(d.id);
+                      d3.select(this.parentNode).select("text").style('fill', 'red');
+                  } else {
+                      selectedNodes.slice(pos, 1);
+                      d3.select(this.parentNode).select("text").style('fill', 'black');
+                  }
 
-            updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels);
+            } else {
 
-            // reposition drag line
-            drag_line
-                .classed('hidden', false)
-                .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
+                // select node
+                mousedown_node = d;
+                if (mousedown_node === selected_node) selected_node = null;
+                else selected_node = mousedown_node;
+                selected_link = null;
 
-              restart();
+                d3.selectAll("text").style('fill', 'black');
+                d3.select(this.parentNode).select("text").style('fill', 'red');
+
+                updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels);
+
+                // reposition drag line
+                drag_line
+                    .classed('hidden', false)
+                    .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
+
+                restart();
+            }
           })
            .on('mouseup', function (d) {
                // nb. no mousedown event registered, so no need to check for drag-to-self
@@ -585,9 +668,10 @@ function network_editor () {
     function clearEverything() {
       nodes = [];
       links = [];
+      groups = [];
       lastNodeId = 0;
        d3.select("#info").select("form").remove();
-      force.nodes(nodes).links(links);
+      force.nodes(nodes).links(links).groups(groups);
       restart();
     }
 
@@ -656,7 +740,21 @@ function network_editor () {
             link_list.push({source_id: link.source.id, target_id: link.target.id, data: link.data});
         }
 
-        var protocol_string = JSON.stringify({nodes: node_list, links: link_list});
+        var group_list = [];
+        for (i=0; i<groups.length; i++){
+
+            var group = groups[i];
+            var leaves = [];
+
+            for (var j=0; j < groups[i].leaves.length; j++){
+                leaves.push({data: groups[i].leaves[j].data, id: groups[i].leaves[j].id, bounds: groups[i].leaves[j].bounds })
+            }
+
+            group_list.push({leaves: leaves});
+        }
+
+
+        var protocol_string = JSON.stringify({nodes: node_list, links: link_list, groups: group_list});
         $.ajax({
         type: "POST",
         contentType: "application/json; charset=utf-8",
@@ -670,6 +768,36 @@ function network_editor () {
         success: function () { console.log("SUCCESS")},
         error: function (result, textStatus) { console.log(result); console.log(textStatus); }
         })
+    }
+
+    function startRepeat(){
+        selectingGroup = true;
+        selectedNodes = [];
+
+        d3.select("#repeatButton")
+            .text("Done")
+            .on("click", endRepeat);
+
+        // Unselect all nodes
+        d3.selectAll("text").style("fill", "black");
+        selected_node = false;
+        selected_link = false;
+    }
+
+    function endRepeat(){
+        selectingGroup = false;
+        d3.select("#repeatButton")
+            .on("click", startRepeat)
+            .text("Select nodes for repeat");
+
+        if (selectedNodes){
+            groups.push({"leaves": selectedNodes})
+        }
+
+        force.nodes(nodes).links(links);
+        force.groups(groups);
+        restart();
+        force.start();
     }
 
 
@@ -697,5 +825,11 @@ function network_editor () {
 
     restart();
 
-    return {addWellNode: addWellNode, addVolumeNode: addVolumeNode, clearEverything: clearEverything, save: save};
+    d3.select("#repeatButton")
+        .on("click", startRepeat)
+        .text("Select nodes for repeat");
+
+
+    return {addWellNode: addWellNode, addVolumeNode: addVolumeNode, clearEverything: clearEverything, save: save,
+        startRepeat: startRepeat};
 }
