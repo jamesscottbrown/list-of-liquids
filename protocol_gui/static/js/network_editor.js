@@ -46,17 +46,8 @@ function network_editor () {
         }
 
     } else {
-        nodes = [
-          {id: 0, type: "well", label: "Sample", data: {num_wells: 2}},
-          {id: 1, type: "volume", label: "10 ml", data: {}},
-          {id: 2, type: "cross", label: "cross", data: {}},
-          {id: 3, type: "aliquot", label: "Aliquot", data: {"container_name": ""}}];
-
-        links = [
-          {source: nodes[0], target: nodes[2]},
-          {source: nodes[1], target: nodes[2]},
-          {source: nodes[2], target: nodes[3]}
-        ];
+        nodes = [];
+        links = [];
     }
     lastNodeId = nodes.length - 1;
 
