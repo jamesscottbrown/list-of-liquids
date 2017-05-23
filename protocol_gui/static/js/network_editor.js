@@ -102,6 +102,7 @@ function network_editor () {
   // mouse event vars
     var selected_node = null,
         selected_link = null,
+        selected_group = null,
         mousedown_link = null,
         mousedown_node = null,
         mouseup_node = null;
@@ -232,7 +233,7 @@ function network_editor () {
             else selected_link = mousedown_link;
             selected_node = null;
               d3.selectAll("text").style('fill', 'black');
-              updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels);
+              updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels);
             restart();
           });
 
@@ -328,7 +329,7 @@ function network_editor () {
             d3.selectAll("text").style('fill', 'black');
             d3.select(this.parentNode).select("text").style('fill', 'red');
 
-            updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels);
+            updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels);
 
             // reposition drag line
             drag_line
@@ -397,7 +398,15 @@ function network_editor () {
         group.enter().append("rect")
             .attr("rx", 8).attr("ry", 8)
             .attr("class", "group")
-            .style("fill", function (d, i) { return color(i); });
+            .style("fill", function (d, i) { return color(i); })
+            .on("click", function(d) {
+                selected_node = false;
+                selected_link = false;
+                selected_group = d;
+
+                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels);
+
+            });
 
         // remove old groups
         group.exit().remove();
@@ -526,7 +535,7 @@ function network_editor () {
                 d3.selectAll("text").style('fill', 'black');
                 d3.select(this.parentNode).select("text").style('fill', 'red');
 
-                updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels);
+                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels);
 
                 // reposition drag line
                 drag_line
@@ -743,7 +752,6 @@ function network_editor () {
         var group_list = [];
         for (i=0; i<groups.length; i++){
 
-            var group = groups[i];
             var leaves = [];
 
             for (var j=0; j < groups[i].leaves.length; j++){
@@ -791,7 +799,7 @@ function network_editor () {
             .text("Select nodes for repeat");
 
         if (selectedNodes){
-            groups.push({"leaves": selectedNodes})
+            groups.push({"leaves": selectedNodes, data: {repeats: 2}})
         }
 
         force.nodes(nodes).links(links);

@@ -1,10 +1,10 @@
-function updateDescriptionPanel(selected_node, selected_link, links,  restart, redrawLinkLabels) {
+function updateDescriptionPanel(selected_node, selected_link, selected_group, links,  restart, redrawLinkLabels) {
 
     // TODO: rather than calling restart(), redraw single label
     var info = d3.select("#info");
     info.select("form").remove();
 
-    if (!selected_node && !selected_link) {
+    if (!selected_node && !selected_link && !selected_group) {
         return;
     }
 
@@ -21,6 +21,8 @@ function updateDescriptionPanel(selected_node, selected_link, links,  restart, r
         drawProcessPanel(selected_node, restart, form);
     } else if (selected_node){
         drawOperationPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form);
+    } else if (selected_group){
+        drawRepeatPanel(selected_group, form)
     }
 }
 
@@ -112,6 +114,8 @@ function drawWellPanel(selected_node, restart, form) {
 
 
 function drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form){
+
+    form.selectAll().remove();
 
     var title;
     if (selected_link.source.type == "well"){
@@ -226,7 +230,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
     label.append("i").classed("fa", true).classed("fa-minus", true)
         .on("click", function (d, i) {
             volumes.splice(i, 1);
-            updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels);
+            drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form)
             redrawLinkLabels();
         });
     label.append("b").text(function (d, i) {
@@ -263,7 +267,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         .append("i").classed("fa", true).classed("fa-plus", true)
         .on("click", function () {
             volumes.push(0);
-            updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels);
+            drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form);
             redrawLinkLabels();
         });
 }
@@ -345,5 +349,27 @@ function drawOperationPanel(selected_node, selected_link, links,  restart, redra
 
     // TODO: options menu to change type (alternative to context menu)
     // TODO: display of resulting aliquots
+
+}
+
+function drawRepeatPanel(selected_group, form){
+    form.append("h2").style().text("Repeat");
+
+    var div1 = form.append("div").classed("form-group", true);
+    div1.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-2", true)
+        .attr("for", "repeats")
+        .text("Repeats:");
+
+    var repeatInput = div1.append("div")
+        .classed("col-sm-2", true)
+        .append("input")
+        .attr("type", "text")
+        .attr("name", "repeats")
+        .attr("value", selected_group.data.repeats)
+        .on("change", function () {
+            selected_node.selected_group.repeats = this.value;
+        });
 
 }
