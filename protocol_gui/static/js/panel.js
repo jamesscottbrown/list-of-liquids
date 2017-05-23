@@ -126,6 +126,30 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
 
     form.append("h2").style().text(title);
 
+    // Form to set number of duplicates
+    var duplicatesDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    duplicatesDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-2", true)
+        .attr("for", "duplicates")
+        .text("Number of duplicates");
+
+    var duplicatesInput = duplicatesDiv.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-2", true)
+        .attr("name", "duplicates")
+        .attr("id", "duplicates")
+        .on("change", function(){
+            selected_link.data.num_duplicates = selected_link.data.num_duplicates;
+        });
+
+    duplicatesInput.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
+    duplicatesInput.node().value = selected_link.data.num_duplicates;
+
+
+
     // Form to set whether we are adding to this
     var containerDiv = form.append("div").append("div")
         .classed("form-group", true);
@@ -152,7 +176,11 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
             selected_link.target.data.container_name = selected_link.source.data.container_name;
 
             selected_link.data.addToThis = (this.value == "Yes");
+
+            // toggle disabled-ness of volume and number of duplicates controls
             volumeDivs.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
+            duplicatesDiv.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
+
             restart();
         });
 

@@ -639,7 +639,7 @@ function network_editor () {
 
         // handle arrow draw from well/aliquot to process (e.g. thermocycle)
         if (mouseup_node.type == "process" && (mousedown_node.type != "volume")){
-            links.push({source: mousedown_node, target: mouseup_node, data: {volumes: [1], addToThis: true, changeTips: false, mix: false} });
+            links.push({source: mousedown_node, target: mouseup_node, data: {volumes: [1], addToThis: true, changeTips: false, mix: false, num_duplicates: 1} });
             selected_node = mouseup_node;
             return;
         }
@@ -650,8 +650,8 @@ function network_editor () {
                             parents: [mousedown_node, mouseup_node], data: {container_name: ''} });
         i--;
 
-        links.push({source: mousedown_node, target: nodes[i], data: {volumes: [1], addToThis: false, changeTips: false, mix: false } });
-        links.push({source: mouseup_node, target: nodes[i], data: {volumes: [1], addToThis: true, changeTips: false, mix: false} });
+        links.push({source: mousedown_node, target: nodes[i], data: {volumes: [1], addToThis: false, changeTips: false, mix: false, num_duplicates: 1 } });
+        links.push({source: mouseup_node, target: nodes[i], data: {volumes: [1], addToThis: true, changeTips: false, mix: false, num_duplicates: 1} });
 
         selected_link = null;
         selected_node = nodes[i];
@@ -692,7 +692,7 @@ function network_editor () {
 
     function addProcessNodeToNode(sourceNode){
         i = addProcessNode();
-        links.push({source: sourceNode, target: nodes[i], data: {volumes: [1], addToThis: null, changeTips: null, mix: null} });
+        links.push({source: sourceNode, target: nodes[i], data: {volumes: [1], addToThis: null, changeTips: null, mix: null, num_duplicates: 1} });
         restart();
     }
 
