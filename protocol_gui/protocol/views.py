@@ -80,10 +80,10 @@ def new_protocol():
     """Add new protocol."""
     form = ProtocolForm(request.form)
     if form.validate_on_submit():
-        Protocol.create(name=form.name.data, description=form.description.data,
+        new_protocol = Protocol.create(name=form.name.data, description=form.description.data,
                         user_id=current_user.id, public=form.public.data, protocol="")
         flash('New protocol created.', 'success')
-        return redirect(url_for('protocol.list_protocols'))
+        return redirect(url_for('protocol.protocol', protocol_id=new_protocol.id))
     else:
         flash_errors(form)
     return render_template('protocols/new_protocol.html', form=form)
