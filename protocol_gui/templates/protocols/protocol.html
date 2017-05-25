@@ -20,15 +20,19 @@
 
     <h2>Protocol</h2>
 
-    <div id="network"></div>
-
-    <div id="info"></div>
-    <div id="controls">
-      <button onclick="networkEditor.addWellNode();">Add Well</button>
-      <button onclick="networkEditor.clearEverything();">Clear</button>
-      <button onclick="networkEditor.save();">Save</button>
-      <button id="repeatButton">repeat</button>
+    <div class="row">
+        <div id="network" class="col-md-8">
+            <div id="controls">
+              <button onclick="networkEditor.addWellNode();">Add Well</button>
+              <button onclick="networkEditor.clearEverything();">Clear</button>
+              <button onclick="networkEditor.save();">Save</button>
+              <button id="repeatButton">repeat</button>
+            </div>
+        </div>
+        <div id="info" class="col-md-4">
+        </div>
     </div>
+
 {% endblock %}
 
 
