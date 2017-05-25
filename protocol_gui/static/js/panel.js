@@ -37,12 +37,12 @@ function drawWellPanel(selected_node, restart, form) {
     var div1 = form.append("div").classed("form-group", true);
     div1.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "name")
         .text("Name:");
 
     div1.append("div")
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .append("input")
         .attr("type", "text")
         .attr("name", "name")
@@ -58,12 +58,12 @@ function drawWellPanel(selected_node, restart, form) {
     var div2 = form.append("div").classed("form-group", true);
     div2.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "num-wells")
         .text("Number of wells:");
 
     div2.append("div")
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
 
         .append("input")
         .attr("type", "text")
@@ -79,12 +79,12 @@ function drawWellPanel(selected_node, restart, form) {
     var div3 = form.append("div").classed("form-group", true);
     div3.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "container-name")
         .text("Container name:");
 
     div3.append("div")
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .append("input")
         .attr("type", "text")
         .attr("id", "container-name")
@@ -99,12 +99,12 @@ function drawWellPanel(selected_node, restart, form) {
     var div4 = form.append("div").classed("form-group", true);
     div4.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "wells")
         .text("Well locations:");
 
     div4.append("div")
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .append("input")
         .attr("type", "text")
         .attr("id", "wells")
@@ -137,13 +137,13 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
 
     duplicatesDiv.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "duplicates")
         .text("Number of duplicates");
 
     var duplicatesInput = duplicatesDiv.append("input")
         .classed("control-input", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("name", "duplicates")
         .attr("id", "duplicates")
         .on("change", function(){
@@ -161,13 +161,13 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
 
     containerDiv.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "container")
         .text("Add to this container");
 
     var containerSelect = containerDiv.append("select")
         .classed("control-input", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("name", "container")
         .attr("id", "container")
         .on("change", function(){
@@ -200,13 +200,13 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
 
     changeTipDiv.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "change-tips")
         .text("Change Tips");
 
     var changeTipSelect = changeTipDiv.append("select")
         .classed("control-input", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("name", "change-tips")
         .attr("id", "change-tips")
         .on("change", function(){
@@ -225,13 +225,13 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
 
     mixDiv.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "change-tips")
         .text("Mix");
 
     var mixSelect = mixDiv.append("select")
         .classed("control-input", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("name", "change-tips")
         .attr("id", "change-tips")
         .on("change", function(){
@@ -257,7 +257,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
 
     var label = volumeDivs.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "volume");
 
     label.append("i").classed("fa", true).classed("fa-minus", true)
@@ -272,7 +272,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
 
     volumeDivs.append("input")
         .classed("control-input", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("name", "value")
         .attr("value", function (d) {
             return d;
@@ -296,7 +296,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         .classed("form-group", true)
         .append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .append("i").classed("fa", true).classed("fa-plus", true)
         .on("click", function () {
             volumes.push(0);
@@ -311,12 +311,12 @@ function drawProcessPanel(selected_node, restart, form){
     var div1 = form.append("div").classed("form-group", true);
     div1.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "name")
         .text("Name:");
 
     div1.append("div")
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
 
         .append("input")
         .attr("type", "text")
@@ -330,7 +330,7 @@ function drawProcessPanel(selected_node, restart, form){
     var div2 = form.append("div").classed("form-group", true);
     div2.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "options")
         .text("Options:");
 
@@ -354,12 +354,12 @@ function drawPoolPanel(selected_node, restart, form){
     var div1 = form.append("div").classed("form-group", true);
     div1.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "container")
         .text("Container:");
 
     var containerInput = div1.append("div")
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .append("input")
         .attr("type", "text")
         .attr("name", "container")
@@ -380,12 +380,12 @@ function drawSelectPanel(selected_node, restart, form){
     var div1 = form.append("div").classed("form-group", true);
     div1.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "container")
         .text("Container:");
 
     var containerInput = div1.append("div")
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .append("input")
         .attr("type", "text")
         .attr("name", "container")
@@ -409,7 +409,7 @@ function drawSelectPanel(selected_node, restart, form){
 
     var label = selectionDivs.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "Well");
 
     label.append("i").classed("fa", true).classed("fa-minus", true)
@@ -423,7 +423,7 @@ function drawSelectPanel(selected_node, restart, form){
 
     selectionDivs.append("input")
         .classed("control-input", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("name", "value")
         .attr("value", function (d) {
             return d;
@@ -443,7 +443,7 @@ function drawSelectPanel(selected_node, restart, form){
         .classed("form-group", true)
         .append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .append("i").classed("fa", true).classed("fa-plus", true)
         .on("click", function () {
             selection.push(0);
@@ -458,12 +458,12 @@ function drawOperationPanel(selected_node, selected_link, links,  restart, redra
     var div1 = form.append("div").classed("form-group", true);
     div1.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "container")
         .text("Container:");
 
     var containerInput = div1.append("div")
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .append("input")
         .attr("type", "text")
         .attr("name", "container")
@@ -496,12 +496,12 @@ function drawRepeatPanel(selected_group, form){
     var div1 = form.append("div").classed("form-group", true);
     div1.append("label")
         .classed("control-label", true)
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .attr("for", "repeats")
         .text("Repeats:");
 
     var repeatInput = div1.append("div")
-        .classed("col-sm-2", true)
+        .classed("col-sm-5", true)
         .append("input")
         .attr("type", "text")
         .attr("name", "repeats")
