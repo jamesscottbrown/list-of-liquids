@@ -15,14 +15,18 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
 
     if (selected_node && selected_node.type == "well") {
         drawWellPanel(selected_node, restart, form);
-    } else if (selected_link) {
-        drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form);
     } else if (selected_node && selected_node.type == "process") {
         drawProcessPanel(selected_node, restart, form);
+    } else if (selected_node && selected_node.type == "pool") {
+        drawPoolPanel(selected_node, restart, form);
+    } else if (selected_node && selected_node.type == "select") {
+        drawSelectPanel(selected_node, restart, form);
     } else if (selected_node){
         drawOperationPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form);
     } else if (selected_group){
         drawRepeatPanel(selected_group, form)
+    } else if (selected_link) {
+        drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form);
     }
 }
 
@@ -115,7 +119,8 @@ function drawWellPanel(selected_node, restart, form) {
 
 function drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form){
 
-    form.selectAll().remove();
+    form.selectAll("div").remove();
+    form.selectAll("h2").remove();
 
     var title;
     if (selected_link.source.type == "well"){
@@ -340,6 +345,111 @@ function drawProcessPanel(selected_node, restart, form){
             selected_node.data = this.value;
             restart();
         });
+}
+
+function drawPoolPanel(selected_node, restart, form){
+    form.append("h2").style().text("Pool samples together");
+
+    // Set container
+    var div1 = form.append("div").classed("form-group", true);
+    div1.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-2", true)
+        .attr("for", "container")
+        .text("Container:");
+
+    var containerInput = div1.append("div")
+        .classed("col-sm-2", true)
+        .append("input")
+        .attr("type", "text")
+        .attr("name", "container")
+        .attr("value", selected_node.data.container_name)
+        .on("change", function () {
+            selected_node.data.container_name = this.value;
+            restart();
+        });
+}
+
+function drawSelectPanel(selected_node, restart, form){
+    form.selectAll("div").remove();
+    form.selectAll("h2").remove();
+
+    form.append("h2").style().text("Select");
+
+    // Set container
+    var div1 = form.append("div").classed("form-group", true);
+    div1.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-2", true)
+        .attr("for", "container")
+        .text("Container:");
+
+    var containerInput = div1.append("div")
+        .classed("col-sm-2", true)
+        .append("input")
+        .attr("type", "text")
+        .attr("name", "container")
+        .attr("value", selected_node.data.container_name)
+        .on("change", function () {
+            selected_node.data.container_name = this.value;
+            restart();
+        });
+
+
+  // Form to select samples
+    var selection = selected_node.data.selection;
+
+    var div2 = form.append("div");
+
+    var selectionDivs = div2.selectAll("div")
+        .data(selection)
+        .enter()
+        .append("div")
+        .classed("form-group", true);
+
+    var label = selectionDivs.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-2", true)
+        .attr("for", "Well");
+
+    label.append("i").classed("fa", true).classed("fa-minus", true)
+        .on("click", function (d, i) {
+            selection.splice(i, 1);
+            drawSelectPanel(selected_node, restart, form);
+        });
+    label.append("b").text(function (d, i) {
+        return "Selection " + (i + 1) + ":";
+    });
+
+    selectionDivs.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-2", true)
+        .attr("name", "value")
+        .attr("value", function (d) {
+            return d;
+        })
+        .on("change", function () {
+            var new_selection = [];
+            var selectionInputs = selectionDivs.selectAll("input");
+            for (var i = 0; i < selectionInputs.length; i++) {
+                new_selection.push(parseFloat(selectionInputs[i][0].value))
+            }
+            selected_node.data.selection = new_selection;
+        });
+
+
+    // adding an extra volume
+    div2.append("div")
+        .classed("form-group", true)
+        .append("label")
+        .classed("control-label", true)
+        .classed("col-sm-2", true)
+        .append("i").classed("fa", true).classed("fa-plus", true)
+        .on("click", function () {
+            selection.push(0);
+            drawSelectPanel(selected_node, restart, form);
+        });
+
 }
 
 function drawOperationPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form){

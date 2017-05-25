@@ -361,13 +361,25 @@ function network_editor () {
             restart();
           })
        .on('contextmenu', d3.contextMenu([{
-                    title: 'Delete',
-                    action: function(elm, d) { deleteNode(d); }
-                },{
                     title: 'Process',
                     action: function(elm, d) {
                         var node = nodes.filter(function(n){ return n.id == d.id})[0];
-                        addProcessNodeToNode(node); }
+                        addProcessNodeToNode(node, 'process'); }
+                },{
+                    title: 'Pool',
+                    action: function(elm, d) {
+                        var node = nodes.filter(function(n){ return n.id == d.id})[0];
+                        addProcessNodeToNode(node, 'pool'); }
+                },{
+                    title: 'Select',
+                    action: function(elm, d) {
+                        var node = nodes.filter(function(n){ return n.id == d.id})[0];
+                        addProcessNodeToNode(node, 'select'); }
+                },{
+				    divider: true
+			    },{
+                    title: 'Delete',
+                    action: function(elm, d) { deleteNode(d); }
                 }])
         );
 
@@ -618,20 +630,36 @@ function network_editor () {
 			});
         }
 
+        menu.push({
+                    title: 'Process',
+                    action: function(elm, d) {
+                        var node = nodes.filter(function (n) {
+                            return n.id == d.id
+                        })[0];
+                        addProcessNodeToNode(node, 'process');
+                    }
+                    });
+        menu.push({
+                        title: 'Pool',
+                        action: function(elm, d) {
+                            var node = nodes.filter(function(n){ return n.id == d.id})[0];
+                            addProcessNodeToNode(node, 'pool'); }
+                    });
+        menu.push({
+                    title: 'Select',
+                    action: function(elm, d) {
+                        var node = nodes.filter(function(n){ return n.id == d.id})[0];
+                        addProcessNodeToNode(node, 'select'); }
+                    });
+
+        menu.push({
+				divider: true
+			});
 
         menu.push({
                     title: 'Delete',
                     action: function(elm, d) { deleteNode(d); }
                 });
-
-        menu.push({
-                    title: 'Process',
-                    action: function(elm, d) {
-                        var node = nodes.filter(function(n){ return n.id == d.id})[0];
-                        addProcessNodeToNode(node);
-                    }
-                });
-
         return menu;
     }
 
@@ -690,15 +718,27 @@ function network_editor () {
       restart();
     }
 
-    function addProcessNodeToNode(sourceNode){
-        i = addProcessNode();
-        links.push({source: sourceNode, target: nodes[i], data: {volumes: [1], addToThis: null, changeTips: null, mix: null, num_duplicates: 1} });
+    function addProcessNodeToNode(sourceNode, kind){
+        i = addProcessNode(kind);
+        links.push({source: sourceNode, target: nodes[i],
+            data: {volumes: [1], addToThis: null, changeTips: null, mix: null, num_duplicates: 1} });
         restart();
     }
 
-    function addProcessNode(){
-        var operation = prompt('Operation:');
-        var i = nodes.push({id: ++lastNodeId, type: 'process', x: width * Math.random(), y: height / 2, label: operation, data: operation});
+    function addProcessNode(kind){
+
+        var operation, type;
+        if (kind) {
+            operation = kind;
+            type = kind;
+
+        } else {
+            operation = prompt('Operation:');
+            type = 'process';
+        }
+
+        var i = nodes.push({id: ++lastNodeId, type: type, x: width * Math.random(), y: height / 2, label: operation,
+            data: {operation: operation, selection: []}});
         i--;
         selected_node = nodes[i];
         restart();
