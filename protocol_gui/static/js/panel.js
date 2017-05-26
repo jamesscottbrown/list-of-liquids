@@ -1,4 +1,4 @@
-function updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode) {
+function updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram) {
 
     // TODO: rather than calling restart(), redraw single label
     var info = d3.select("#info");
@@ -14,7 +14,7 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
         .attr("onsubmit", "return false;");
 
     if (selected_node && selected_node.type == "well") {
-        drawWellPanel(selected_node, restart, form, deleteNode);
+        drawWellPanel(selected_node, restart, form, deleteNode, serialiseDiagram);
     } else if (selected_node && selected_node.type == "process") {
         drawProcessPanel(selected_node, restart, form, deleteNode);
     } else if (selected_node && selected_node.type == "pool") {
@@ -22,13 +22,38 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
     } else if (selected_node && selected_node.type == "select") {
         drawSelectPanel(selected_node, restart, form, deleteNode);
     } else if (selected_node) {
-        drawOperationPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form, deleteNode);
+        drawOperationPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form, deleteNode, serialiseDiagram);
     } else if (selected_group) {
         drawRepeatPanel(selected_group, form)
     } else if (selected_link) {
         drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form);
     }
 }
+
+    function getContents(serialiseDiagram, selected_node) {
+        var protocol_string = serialiseDiagram();
+
+        $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            url: window.location.href + "/contents",
+            dataType: 'html',
+            async: true,
+            data: {protocol_string: protocol_string, selected_node: selected_node.id },
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrf_token);
+            },
+            success: function (res) {
+                result = res;
+                console.log(result)
+            },
+            error: function (result, textStatus) {
+                console.log(result);
+                console.log(textStatus);
+            }
+        });
+    }
+
 
 function addDeleteButton(form, selected_node, deleteNode) {
     form.append("div")
@@ -43,7 +68,10 @@ function addDeleteButton(form, selected_node, deleteNode) {
         .text("Delete ").append("i").classed("fa", true).classed("fa-trash-o", true);
 }
 
-function drawWellPanel(selected_node, restart, form, deleteNode) {
+
+// Functions to draw specific types of panel:
+
+function drawWellPanel(selected_node, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Initially present resource");
 
     var div1 = form.append("div").classed("form-group", true);
@@ -148,6 +176,7 @@ function drawWellPanel(selected_node, restart, form, deleteNode) {
             selected_node.data.well_addresses = this.value;
         });
 
+    getContents(serialiseDiagram, selected_node);
     addDeleteButton(form, selected_node, deleteNode);
 }
 
@@ -495,7 +524,7 @@ function drawSelectPanel(selected_node, restart, form, deleteNode) {
     addDeleteButton(form, selected_node, deleteNode);
 }
 
-function drawOperationPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form, deleteNode) {
+function drawOperationPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Operation");
 
     var div1 = form.append("div").classed("form-group", true);
@@ -531,6 +560,8 @@ function drawOperationPanel(selected_node, selected_link, links, restart, redraw
     addDeleteButton(form, selected_node, deleteNode);
     // TODO: options menu to change type (alternative to context menu)
     // TODO: display of resulting aliquots
+
+    getContents(serialiseDiagram, selected_node);
 
 }
 

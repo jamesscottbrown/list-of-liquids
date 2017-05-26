@@ -1,3 +1,4 @@
+from protocol_gui.protocol.liquid_handling import *
 from protocol_gui.protocol.models import Protocol
 from protocol_gui.protocol.forms import ProtocolForm
 
@@ -108,3 +109,88 @@ def save_protocol(protocol_id):
     current_protocol.save()
 
     return "SUCCESS"
+
+@blueprint.route('/<int:protocol_id>/contents', methods=['GET'])
+@login_required
+def get_contents(protocol_id):
+    """Determine what a given node on a protocol diagram represents."""
+
+    current_protocol = Protocol.query.filter_by(id=protocol_id).first()
+    if not current_protocol:
+        flash('No such specification!', 'danger')
+        return redirect('.')
+
+    if current_protocol.user != current_user:
+        flash('Not your project!', 'danger')
+        return redirect('.')
+
+    node_id = int(request.args.get("selected_node"))
+    protocol_obj = json.loads(request.args.get("protocol_string"))
+
+    result = process_node(protocol_obj, node_id)
+    return json.dumps( map(lambda x: map(lambda y: str(y.volume) + " of " + y.resource, x), result) )
+
+
+def process_node(protocol_obj, node_id):
+    nodes = protocol_obj["nodes"]
+    links = protocol_obj["links"]
+
+    incident_links = list(filter(lambda l: l["target_id"] == node_id, links))
+    node = list(filter(lambda n: n["id"] == node_id, nodes))[0]
+    node_data = node["data"]
+
+    # print incident_links, node
+
+    if node["type"] == "well":
+        # return one aliquot per distinct component, with a volume that is the available volume in well
+        component_names = [node["label"] + "_" + str(i) for i in range(0, int(node_data["num_wells"]))]
+        return map(lambda x: [Aliquot(x, node_data["volume"], container=node_data["container_name"])], component_names)
+
+    elif node["type"] == "zip":
+
+        components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
+        components2 = get_constituent_aliquots(protocol_obj, incident_links[1])
+        return map(lambda(x,y): x+y, zip(components1, components2))
+
+    elif node["type"] == "cross":
+
+        components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
+        components2 = get_constituent_aliquots(protocol_obj, incident_links[1])
+        return cross(components1, components2)
+
+    elif node["type"] == "process":
+        pass
+
+    elif node["type"] == "pool":
+        pass
+
+    elif node["type"] == "select":
+        pass
+
+
+def get_constituent_aliquots(protocol_obj, link):
+    # Return a list, each element of which is the list of Aliquots corresponding to one incident link
+    all_aliquots = []
+
+    inputs = process_node(protocol_obj, link["source_id"])
+
+    volumes = link["data"]["volumes"]
+    if len(volumes) == 1:
+        volumes *= len(inputs)
+    elif len(volumes) != len(inputs):
+        print "Error: number of volumes (%s) and aliquots (%s) do not match" % (len(volumes), len(inputs))
+
+    # each input corresponds to a link on the diagram
+    for (input, transfered_volume) in zip(inputs, volumes):
+        total_volume = sum(map(lambda x: float(x.volume), input))  # total volume of mixture of aliquots we are drawing from
+
+        # Loop over all individual resources included on this link
+        aliquot_list = []
+        for i in range(0, len(input)):
+            a = input[i]
+            aliquot_list.append(Aliquot(a.resource, (transfered_volume * float(a.volume)/total_volume)))
+
+        all_aliquots.append(aliquot_list)
+
+    return all_aliquots
+

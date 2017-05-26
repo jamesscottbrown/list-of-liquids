@@ -253,7 +253,7 @@ function network_editor() {
                 else selected_link = mousedown_link;
                 selected_node = null;
                 d3.selectAll("text").style('fill', 'black');
-                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
+                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
                 restart();
             });
 
@@ -353,7 +353,7 @@ function network_editor() {
                     d3.selectAll("text").style('fill', 'black');
                     d3.select(this.parentNode).select("text").style('fill', 'red');
 
-                    updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
+                    updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
 
                     // reposition drag line
                     drag_line
@@ -453,7 +453,7 @@ function network_editor() {
                 selected_link = false;
                 selected_group = d;
 
-                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
+                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
 
             });
 
@@ -594,7 +594,7 @@ function network_editor() {
                     d3.selectAll("text").style('fill', 'black');
                     d3.select(this.parentNode).select("text").style('fill', 'red');
 
-                    updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
+                    updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
 
                     // reposition drag line
                     drag_line
@@ -822,8 +822,6 @@ function network_editor() {
         return i;
     }
 
-    function save() {
-
     function serialiseDiagram() {
         // note that we cannot serialise {nodes: nodes, links: links} because of cyclic references
         var node_list = [];
@@ -867,7 +865,11 @@ function network_editor() {
         }
 
 
-        var protocol_string = JSON.stringify({nodes: node_list, links: link_list, groups: group_list});
+        return JSON.stringify({nodes: node_list, links: link_list, groups: group_list});
+    }
+
+    function save() {
+        var protocol_string = serialiseDiagram();
         $.ajax({
             type: "POST",
             contentType: "application/json; charset=utf-8",
