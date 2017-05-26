@@ -822,36 +822,9 @@ function network_editor() {
         return i;
     }
 
-    function addVolumeNode() {
-        var volumeList = prompt('Volumes:').split(',');
-        var label;
-
-        // Label node with volume (if all volumes are equal) or 'Volume' (otherwise)
-        if (volumeList.length >= 1) {
-            label = volumeList[0];
-            for (var i = 0; i < volumeList.length; i++) {
-                if (volumeList[i] != label) {
-                    label = "Volume";
-                }
-            }
-        }
-        if (label != "Volume") {
-            label = label + " μL";
-        }
-
-        nodes.push({
-            id: ++lastNodeId,
-            type: 'volume',
-            x: width * Math.random(),
-            y: height / 2,
-            label: label,
-            data: volumeList
-        });
-        restart();
-    }
-
     function save() {
 
+    function serialiseDiagram() {
         // note that we cannot serialise {nodes: nodes, links: links} because of cyclic references
         var node_list = [];
         for (i = 0; i < nodes.length; i++) {
@@ -976,7 +949,7 @@ function network_editor() {
 
 
     return {
-        addWellNode: addWellNode, addVolumeNode: addVolumeNode, clearEverything: clearEverything, save: save,
+        addWellNode: addWellNode, clearEverything: clearEverything, save: save,
         startRepeat: startRepeat
     };
 }
