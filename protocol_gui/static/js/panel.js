@@ -88,6 +88,27 @@ function drawWellPanel(selected_node, restart, form, deleteNode) {
         });
 
 
+    var div2a = form.append("div").classed("form-group", true);
+    div2a.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "volume")
+        .text("Volume per well:");
+
+    div2a.append("div")
+        .classed("col-sm-5", true)
+
+        .append("input")
+        .attr("type", "text")
+        .attr("id", "volume")
+        .attr("name", "volume")
+        .classed("form-control", true)
+        .attr("value", selected_node.data.volume)
+        .on("change", function () {
+            selected_node.data.volume = this.value;
+        });
+
+
     var div3 = form.append("div").classed("form-group", true);
     div3.append("label")
         .classed("control-label", true)
