@@ -1,5 +1,5 @@
-function network_editor () {
-  // set up SVG for D3
+function network_editor() {
+    // set up SVG for D3
     var width = 960,
         height = 900;
 
@@ -14,11 +14,11 @@ function network_editor () {
     var selectingGroup = false;
     var selectedNodes = [];
 
-  // set up initial nodes and links
+    // set up initial nodes and links
     var nodes, lastNodeId, links, groups;
     var color = d3.scale.category20();
 
-    if (protocol_string){
+    if (protocol_string) {
 
         console.log(protocol_string);
         var obj = JSON.parse(protocol_string);
@@ -26,27 +26,31 @@ function network_editor () {
         nodes = obj.nodes;
 
         var nodePosition = [];
-        for (var i = 0; i < nodes.length; i++){
-            nodePosition[ nodes[i].id ] = i;
+        for (var i = 0; i < nodes.length; i++) {
+            nodePosition[nodes[i].id] = i;
         }
 
-        for (i = 0; i < nodes.length; i++){
-            if (nodes[i].hasOwnProperty('parentIds')){
+        for (i = 0; i < nodes.length; i++) {
+            if (nodes[i].hasOwnProperty('parentIds')) {
                 var ind1 = nodePosition[nodes[i].parentIds[0]];
-                var ind2 =  nodePosition[nodes[i].parentIds[1]];
+                var ind2 = nodePosition[nodes[i].parentIds[1]];
                 nodes[i].parents = [nodes[ind1], nodes[ind2]];
             }
 
             var nodeType = nodes[i].type;
-            if (['zip', 'add', 'cross'].indexOf(nodeType) != -1){
+            if (['zip', 'add', 'cross'].indexOf(nodeType) != -1) {
                 nodes[i].label = operationLabels[nodeType];
             }
         }
 
         links = [];
-        for (i=0; i<obj.links.length; i++){
+        for (i = 0; i < obj.links.length; i++) {
             var link = obj.links[i];
-            links.push({source: nodes[nodePosition[link.source_id]], target: nodes[nodePosition[link.target_id]], data: link.data});
+            links.push({
+                source: nodes[nodePosition[link.source_id]],
+                target: nodes[nodePosition[link.target_id]],
+                data: link.data
+            });
         }
 
         groups = obj.groups;
@@ -66,7 +70,7 @@ function network_editor () {
         .groups(groups)
         .on('tick', tick);
 
-  // define arrow markers for graph links
+    // define arrow markers for graph links
     svg.append('svg:defs').append('svg:marker')
         .attr('id', 'end-arrow')
         .attr('viewBox', '0 -5 10 10')
@@ -78,12 +82,12 @@ function network_editor () {
         .attr('d', 'M0,-5L10,0L0,5')
         .attr('fill', '#000');
 
-  // line displayed when dragging new nodes
+    // line displayed when dragging new nodes
     var drag_line = svg.append('svg:path')
         .attr('class', 'link dragline hidden')
         .attr('d', 'M0,0L0,0');
 
-  // handles to link and node element groups
+    // handles to link and node element groups
     var group_group = svg.append('svg:g');
     var group = group_group.selectAll(".group");
 
@@ -99,7 +103,7 @@ function network_editor () {
     var path_labels_group = svg.append('svg:g');
     var path_labels = path_labels_group.selectAll('g');
 
-  // mouse event vars
+    // mouse event vars
     var selected_node = null,
         selected_link = null,
         selected_group = null,
@@ -108,59 +112,67 @@ function network_editor () {
         mouseup_node = null;
 
     function resetMouseVars() {
-      mousedown_node = null;
-      mouseup_node = null;
-      mousedown_link = null;
+        mousedown_node = null;
+        mouseup_node = null;
+        mousedown_link = null;
     }
 
-  // update force layout (called automatically each iteration)
+    // update force layout (called automatically each iteration)
     function tick() {
-      // draw directed edges with proper padding from node centers
-      path.attr('d', function (d) {
-        var deltaX = d.target.x - d.source.x,
-            deltaY = d.target.y - d.source.y,
-            dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY),
-            normX = deltaX / dist,
-            normY = deltaY / dist,
-            sourcePadding = 12,
-            targetPadding = 17,
-            sourceX = d.source.x + (sourcePadding * normX),
-            sourceY = d.source.y + (sourcePadding * normY),
-            targetX = d.target.x - (targetPadding * normX),
-            targetY = d.target.y - (targetPadding * normY);
-        return 'M' + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
-      });
+        // draw directed edges with proper padding from node centers
+        path.attr('d', function (d) {
+            var deltaX = d.target.x - d.source.x,
+                deltaY = d.target.y - d.source.y,
+                dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY),
+                normX = deltaX / dist,
+                normY = deltaY / dist,
+                sourcePadding = 12,
+                targetPadding = 17,
+                sourceX = d.source.x + (sourcePadding * normX),
+                sourceY = d.source.y + (sourcePadding * normY),
+                targetX = d.target.x - (targetPadding * normX),
+                targetY = d.target.y - (targetPadding * normY);
+            return 'M' + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
+        });
 
-      path_labels.attr("x", function(d){
-         return 8 + (d.source.x  + d.target.x) / 2;
-      })
-        .attr("y", function(d){
-         return (d.source.y  + d.target.y) / 2;
-      });
+        path_labels.attr("x", function (d) {
+                return 8 + (d.source.x + d.target.x) / 2;
+            })
+            .attr("y", function (d) {
+                return (d.source.y + d.target.y) / 2;
+            });
 
-      circle.attr('transform', function (d) {
-        return 'translate(' + d.x + ',' + d.y + ')';
-      });
+        circle.attr('transform', function (d) {
+            return 'translate(' + d.x + ',' + d.y + ')';
+        });
 
         rect.attr('transform', function (d) {
-        return 'translate(' + (d.x -12) + ',' + (d.y-12) + ')';
-      });
+            return 'translate(' + (d.x - 12) + ',' + (d.y - 12) + ')';
+        });
 
 
         svg.selectAll(".group")
-            .attr("x", function (d) { return getBounds(d).x; })
-            .attr("y", function (d) { return getBounds(d).y; })
-            .attr("width", function (d) { return getBounds(d).width; })
-            .attr("height", function (d) { return getBounds(d).height; });
+            .attr("x", function (d) {
+                return getBounds(d).x;
+            })
+            .attr("y", function (d) {
+                return getBounds(d).y;
+            })
+            .attr("width", function (d) {
+                return getBounds(d).width;
+            })
+            .attr("height", function (d) {
+                return getBounds(d).height;
+            });
     }
 
-    function getBounds(group){
+    function getBounds(group) {
         // For some reason, Cola doe snot automatically calculate .bounds for each group,
         // just each individual leaf of the group
 
         var bounds = {x: Infinity, X: 0, y: Infinity, Y: 0};
 
-        for (var i=0; i < group.leaves.length; i++){
+        for (var i = 0; i < group.leaves.length; i++) {
             bounds.x = Math.min(bounds.x, group.leaves[i].bounds.x);
             bounds.y = Math.min(bounds.y, group.leaves[i].bounds.y);
 
@@ -169,8 +181,10 @@ function network_editor () {
         }
 
         var padding = 10;
-        bounds.x -= padding; bounds.X += padding;
-        bounds.y -= padding; bounds.Y += padding;
+        bounds.x -= padding;
+        bounds.X += padding;
+        bounds.y -= padding;
+        bounds.Y += padding;
 
         bounds.width = bounds.X - bounds.x;
         bounds.height = bounds.Y - bounds.y;
@@ -178,74 +192,82 @@ function network_editor () {
         return bounds;
     }
 
-  // update graph (called when needed)
+    // update graph (called when needed)
     function restart() {
         // create an array mapping from node id to index in the nodes array
         var nodePosition = [];
-        for (var i = 0; i < nodes.length; i++){
-            nodePosition[ nodes[i].id ] = i;
+        for (var i = 0; i < nodes.length; i++) {
+            nodePosition[nodes[i].id] = i;
         }
 
-      var constraints = [];
-      for (i = 0; i < links.length; i++) {
-        var link = links[i];
-        constraints.push({"axis": "y", "left": nodePosition[link.source.id],
-                          "right": nodePosition[link.target.id], "gap": 50})
-      }
-      force.constraints(constraints);
+        var constraints = [];
+        for (i = 0; i < links.length; i++) {
+            var link = links[i];
+            constraints.push({
+                "axis": "y", "left": nodePosition[link.source.id],
+                "right": nodePosition[link.target.id], "gap": 50
+            })
+        }
+        force.constraints(constraints);
 
         redrawGroups(); // draw groups ebfore nodes so that they are in the background
         redrawLinks();
         redrawLinkLabels();
 
-      // circle (node) group
-        var circular_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) == -1 });
-        var process_nodes = nodes.filter(function(d){ return process_node_types.indexOf(d.type) != -1 });
+        // circle (node) group
+        var circular_nodes = nodes.filter(function (d) {
+            return process_node_types.indexOf(d.type) == -1
+        });
+        var process_nodes = nodes.filter(function (d) {
+            return process_node_types.indexOf(d.type) != -1
+        });
 
         redrawCircularNodes(circular_nodes);
         redrawRectangularNodes(process_nodes);
-      force.start();
+        force.start();
     }
 
-    function redrawLinks(){
-              // path (link) group
-      path = path.data(links);
+    function redrawLinks() {
+        // path (link) group
+        path = path.data(links);
 
-      // update existing links
-      path.classed('selected', function (d) {
-            return d === selected_link;
-          })
-          .style('marker-start', '')
-          .style('marker-end', 'url(#end-arrow)');
+        // update existing links
+        path.classed('selected', function (d) {
+                return d === selected_link;
+            })
+            .style('marker-start', '')
+            .style('marker-end', 'url(#end-arrow)');
 
-      // add new links
-      path.enter().append('svg:path')
-          .attr('class', 'link')
-          .classed('selected', function (d) {
-            return d === selected_link;
-          })
-          .style('marker-start', '')
-          .style('marker-end', 'url(#end-arrow)')
-          .on('mousedown', function (d) {
-            // select link
-            mousedown_link = d;
-            if (mousedown_link === selected_link) selected_link = null;
-            else selected_link = mousedown_link;
-            selected_node = null;
-              d3.selectAll("text").style('fill', 'black');
-              updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
-            restart();
-          });
+        // add new links
+        path.enter().append('svg:path')
+            .attr('class', 'link')
+            .classed('selected', function (d) {
+                return d === selected_link;
+            })
+            .style('marker-start', '')
+            .style('marker-end', 'url(#end-arrow)')
+            .on('mousedown', function (d) {
+                // select link
+                mousedown_link = d;
+                if (mousedown_link === selected_link) selected_link = null;
+                else selected_link = mousedown_link;
+                selected_node = null;
+                d3.selectAll("text").style('fill', 'black');
+                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
+                restart();
+            });
 
-      // remove old links
-      path.exit().remove();
+        // remove old links
+        path.exit().remove();
 
         path_group.selectAll('.link')
-                  .classed('addToThis', function(d){ return d.data.addToThis; });
+            .classed('addToThis', function (d) {
+                return d.data.addToThis;
+            });
 
     }
 
-    function redrawLinkLabels(){
+    function redrawLinkLabels() {
         // volume labels
         path_labels = path_labels.data(links);
 
@@ -253,165 +275,180 @@ function network_editor () {
 
         path_labels_group
             .selectAll('text')
-            .text(function (d){
-              return (d.data.volumes.length == 1) ? d.data.volumes[0] : "";
+            .text(function (d) {
+                return (d.data.volumes.length == 1) ? d.data.volumes[0] : "";
             })
-            .style("visibility", function(d){ return d.data.addToThis ? 'hidden' : 'visible' });
+            .style("visibility", function (d) {
+                return d.data.addToThis ? 'hidden' : 'visible'
+            });
 
         path_labels.exit().remove();
 
     }
 
-    function redrawCircularNodes(circular_nodes){
+    function redrawCircularNodes(circular_nodes) {
 
-      // NB: the function arg is crucial here! nodes are known by id, not by index!
-      circle = circle.data(circular_nodes, function (d) {
-        return d.id;
-      });
+        // NB: the function arg is crucial here! nodes are known by id, not by index!
+        circle = circle.data(circular_nodes, function (d) {
+            return d.id;
+        });
 
-      // update existing nodes (selected visual state)
-      circle.selectAll('circle')
-          .style('opacity', function (d) {
-            return (d === selected_node) ? '1' : '0.5';
-          });
+        // update existing nodes (selected visual state)
+        circle.selectAll('circle')
+            .style('opacity', function (d) {
+                return (d === selected_node) ? '1' : '0.5';
+            });
 
-      // add new nodes
-      var g = circle.enter().append('svg:g').attr("id", "group-circle-node");
+        // add new nodes
+        var g = circle.enter().append('svg:g').attr("id", "group-circle-node");
 
-      g.append('svg:circle')
-          .attr('class', 'node')
-          .classed('well', function (d) {
-            return d.type == "well"
-          })
-          .classed('volume', function (d) {
-            return d.type == "volume"
-          })
-          .classed('aliquot', function (d) {
-            return d.type == "aliquot"
-          })
-          .attr('r', 12)
-          .style('opacity', function (d) {
-            return (d === selected_node) ? '1' : '0.5';
-          })
-          .on('mouseover', function (d) {
-            if (!mousedown_node || d === mousedown_node) return;
-            d3.select(this).attr('transform', 'scale(1.1)'); // enlarge target node
-          })
-          .on('mouseout', function (d) {
-            if (!mousedown_node || d === mousedown_node) return;
-            d3.select(this).attr('transform', ''); // unenlarge target node
-          })
-          .on('mousedown', function (d) {
+        g.append('svg:circle')
+            .attr('class', 'node')
+            .classed('well', function (d) {
+                return d.type == "well"
+            })
+            .classed('volume', function (d) {
+                return d.type == "volume"
+            })
+            .classed('aliquot', function (d) {
+                return d.type == "aliquot"
+            })
+            .attr('r', 12)
+            .style('opacity', function (d) {
+                return (d === selected_node) ? '1' : '0.5';
+            })
+            .on('mouseover', function (d) {
+                if (!mousedown_node || d === mousedown_node) return;
+                d3.select(this).attr('transform', 'scale(1.1)'); // enlarge target node
+            })
+            .on('mouseout', function (d) {
+                if (!mousedown_node || d === mousedown_node) return;
+                d3.select(this).attr('transform', ''); // unenlarge target node
+            })
+            .on('mousedown', function (d) {
 
-              // ignore right click
-              if ((this.hasOwnProperty("which") && this.which == 3) // Firefox, WebKit
-                  || (this.hasOwnProperty("button") && this.button == 2))  // IE
-                   return;
+                // ignore right click
+                if ((this.hasOwnProperty("which") && this.which == 3) // Firefox, WebKit
+                    || (this.hasOwnProperty("button") && this.button == 2))  // IE
+                    return;
 
-          if (selectingGroup){
+                if (selectingGroup) {
 
-              var pos = selectedNodes.indexOf(d.id);
-              if (pos == -1){
-                  selectedNodes.push(d.id);
-                  d3.select(this.parentNode).select("text").style('fill', 'red');
-              } else {
-                  selectedNodes.slice(pos, 1);
-                  d3.select(this.parentNode).select("text").style('fill', 'black');
-              }
+                    var pos = selectedNodes.indexOf(d.id);
+                    if (pos == -1) {
+                        selectedNodes.push(d.id);
+                        d3.select(this.parentNode).select("text").style('fill', 'red');
+                    } else {
+                        selectedNodes.slice(pos, 1);
+                        d3.select(this.parentNode).select("text").style('fill', 'black');
+                    }
 
-          } else {
-            // select node
-            mousedown_node = d;
-            if (mousedown_node === selected_node) selected_node = null;
-            else selected_node = mousedown_node;
-            selected_link = null;
+                } else {
+                    // select node
+                    mousedown_node = d;
+                    if (mousedown_node === selected_node) selected_node = null;
+                    else selected_node = mousedown_node;
+                    selected_link = null;
 
-            d3.selectAll("text").style('fill', 'black');
-            d3.select(this.parentNode).select("text").style('fill', 'red');
+                    d3.selectAll("text").style('fill', 'black');
+                    d3.select(this.parentNode).select("text").style('fill', 'red');
 
-            updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
+                    updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
 
-            // reposition drag line
-            drag_line
-                .classed('hidden', false)
-                .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
+                    // reposition drag line
+                    drag_line
+                        .classed('hidden', false)
+                        .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
 
-            restart();
+                    restart();
 
-          }
+                }
 
-          })
-          .on('mouseup', function (d) {
-            if (!mousedown_node) return;
+            })
+            .on('mouseup', function (d) {
+                if (!mousedown_node) return;
 
-            // needed by FF
-            drag_line
-                .classed('hidden', true)
-                .style('marker-end', '');
+                // needed by FF
+                drag_line
+                    .classed('hidden', true)
+                    .style('marker-end', '');
 
-            // check for drag-to-self
-            mouseup_node = d;
-            if (mouseup_node === mousedown_node) {
-              resetMouseVars();
-              return;
-            }
+                // check for drag-to-self
+                mouseup_node = d;
+                if (mouseup_node === mousedown_node) {
+                    resetMouseVars();
+                    return;
+                }
 
-            // add link to graph (update if exists)
-            addEdge();
-            restart();
-          })
-       .on('contextmenu', d3.contextMenu([{
+                // add link to graph (update if exists)
+                addEdge();
+                restart();
+            })
+            .on('contextmenu', d3.contextMenu([{
                     title: 'Process',
-                    action: function(elm, d) {
-                        var node = nodes.filter(function(n){ return n.id == d.id})[0];
-                        addProcessNodeToNode(node, 'process'); }
-                },{
+                    action: function (elm, d) {
+                        var node = nodes.filter(function (n) {
+                            return n.id == d.id
+                        })[0];
+                        addProcessNodeToNode(node, 'process');
+                    }
+                }, {
                     title: 'Pool',
-                    action: function(elm, d) {
-                        var node = nodes.filter(function(n){ return n.id == d.id})[0];
-                        addProcessNodeToNode(node, 'pool'); }
-                },{
+                    action: function (elm, d) {
+                        var node = nodes.filter(function (n) {
+                            return n.id == d.id
+                        })[0];
+                        addProcessNodeToNode(node, 'pool');
+                    }
+                }, {
                     title: 'Select',
-                    action: function(elm, d) {
-                        var node = nodes.filter(function(n){ return n.id == d.id})[0];
-                        addProcessNodeToNode(node, 'select'); }
-                },{
-				    divider: true
-			    },{
+                    action: function (elm, d) {
+                        var node = nodes.filter(function (n) {
+                            return n.id == d.id
+                        })[0];
+                        addProcessNodeToNode(node, 'select');
+                    }
+                }, {
+                    divider: true
+                }, {
                     title: 'Delete',
-                    action: function(elm, d) { deleteNode(d); }
+                    action: function (elm, d) {
+                        deleteNode(d);
+                    }
                 }])
-        );
+            );
 
         // remove old nodes
-      circle.exit().remove();
+        circle.exit().remove();
 
         // update text of existing labels
         circle.selectAll('text')
-           .text(function (d) {
-            return d.label;
-          });
+            .text(function (d) {
+                return d.label;
+            });
 
 
-      // show node IDs
-      g.append('svg:text')
-          .attr('x', 0)
-          .attr('y', 4)
-          .attr('class', 'id')
-          .text(function (d) {
-            return d.label;
-          });
+        // show node IDs
+        g.append('svg:text')
+            .attr('x', 0)
+            .attr('y', 4)
+            .attr('class', 'id')
+            .text(function (d) {
+                return d.label;
+            });
 
     }
 
-    function redrawGroups(){
+    function redrawGroups() {
         group = group.data(groups);
 
         group.enter().append("rect")
             .attr("rx", 8).attr("ry", 8)
             .attr("class", "group")
-            .style("fill", function (d, i) { return color(i); })
-            .on("click", function(d) {
+            .style("fill", function (d, i) {
+                return color(i);
+            })
+            .on("click", function (d) {
                 selected_node = false;
                 selected_link = false;
                 selected_group = d;
@@ -424,14 +461,16 @@ function network_editor () {
         group.exit().remove();
     }
 
-    function deleteNode(d){
+    function deleteNode(d) {
 
-         if (process_node_types.indexOf(d.type) == "well") {
-             deleteDownFromNode(d);
-         }  else {
+        if (process_node_types.indexOf(d.type) == "well") {
+            deleteDownFromNode(d);
+        } else {
             // delete arrows to this process node
-            var inLinks = links.filter( function(l){return l.target.id == d.id; });
-            for (var i=0; i<inLinks.length; i++){
+            var inLinks = links.filter(function (l) {
+                return l.target.id == d.id;
+            });
+            for (var i = 0; i < inLinks.length; i++) {
                 links.splice(links.indexOf(inLinks[i]), 1);
             }
 
@@ -441,163 +480,173 @@ function network_editor () {
     }
 
 
-    function deleteDownFromNode(d){
+    function deleteDownFromNode(d) {
 
         var i;
 
         // delete this node
-        var index = nodes.indexOf( nodes.filter(function(n){ return n.id == d.id})[0] );
+        var index = nodes.indexOf(nodes.filter(function (n) {
+            return n.id == d.id
+        })[0]);
         nodes.splice(index, 1);
 
         // delete incoming links
-        var inLinks = links.filter( function(l){return l.target.id == d.id; });
-        for (i = 0; i < inLinks.length; i++){
+        var inLinks = links.filter(function (l) {
+            return l.target.id == d.id;
+        });
+        for (i = 0; i < inLinks.length; i++) {
             links.splice(links.indexOf(inLinks[i]), 1);
         }
 
         // delete outgoing links
         var children = [];
 
-        var outLinks = links.filter( function(l){return l.source.id == d.id; });
-        for (i = 0; i < outLinks.length; i++){
+        var outLinks = links.filter(function (l) {
+            return l.source.id == d.id;
+        });
+        for (i = 0; i < outLinks.length; i++) {
             children.push(outLinks[i].target);
             links.splice(links.indexOf(outLinks[i]), 1);
         }
 
         // delete the nodes that outgoing links target
-        for (i = 0; i < children.length; i++){
-            if (nodes.indexOf(children[i] != -1)){
+        for (i = 0; i < children.length; i++) {
+            if (nodes.indexOf(children[i] != -1)) {
                 deleteDownFromNode(children[i]);
             }
         }
     }
 
 
-    function redrawRectangularNodes(process_nodes){
+    function redrawRectangularNodes(process_nodes) {
 
         // update existing node labels
         rect.selectAll("text")
-            .text(function(d){return d.label; });
+            .text(function (d) {
+                return d.label;
+            });
 
         // Add new 'process' nodes
         // different shape; no ability to drag line from node; context menu
 
-      rect = rect.data(process_nodes, function (d) {
-        return d.id;
-      });
+        rect = rect.data(process_nodes, function (d) {
+            return d.id;
+        });
 
-      // add new nodes
-      var g2 = rect.enter().append('svg:g');
+        // add new nodes
+        var g2 = rect.enter().append('svg:g');
 
-      g2.append('svg:rect')
-          .attr('class', 'node')
-          .classed('well', function (d) {
-            return d.type == "well"
-          })
-          .classed('volume', function (d) {
-            return d.type == "volume"
-          })
-          .classed('cross', function (d) {
-            return d.type == "cross"
-          })
-          .classed('zip', function (d) {
-            return d.type == "zip"
-          })
-          .classed('aliquot', function (d) {
-            return d.type == "aliquot"
-          })
+        g2.append('svg:rect')
+            .attr('class', 'node')
+            .classed('well', function (d) {
+                return d.type == "well"
+            })
+            .classed('volume', function (d) {
+                return d.type == "volume"
+            })
+            .classed('cross', function (d) {
+                return d.type == "cross"
+            })
+            .classed('zip', function (d) {
+                return d.type == "zip"
+            })
+            .classed('aliquot', function (d) {
+                return d.type == "aliquot"
+            })
 
-          .attr('width', 24)
-          .attr('height', 24)
+            .attr('width', 24)
+            .attr('height', 24)
 
-          .style('opacity', '0.5')
-          .on('mouseover', function (d) {
-            if (!mousedown_node || d === mousedown_node) return;
-            d3.select(this).attr('transform', 'scale(1.1)'); // enlarge target node
-          })
-          .on('mouseout', function (d) {
-            if (!mousedown_node || d === mousedown_node) return;
-            d3.select(this).attr('transform', ''); // unenlarge target node
-          })
-          .on('mousedown', function (d) {
-              // ignore right click
-              if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
-                  || ("button" in d3.event && d3.event.button == 2))  // IE
-                   return;
+            .style('opacity', '0.5')
+            .on('mouseover', function (d) {
+                if (!mousedown_node || d === mousedown_node) return;
+                d3.select(this).attr('transform', 'scale(1.1)'); // enlarge target node
+            })
+            .on('mouseout', function (d) {
+                if (!mousedown_node || d === mousedown_node) return;
+                d3.select(this).attr('transform', ''); // unenlarge target node
+            })
+            .on('mousedown', function (d) {
+                // ignore right click
+                if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
+                    || ("button" in d3.event && d3.event.button == 2))  // IE
+                    return;
 
-              if (selectingGroup){
+                if (selectingGroup) {
 
-                  var pos = selectedNodes.indexOf(d.id);
-                  if (pos == -1){
-                      selectedNodes.push(d.id);
-                      d3.select(this.parentNode).select("text").style('fill', 'red');
-                  } else {
-                      selectedNodes.slice(pos, 1);
-                      d3.select(this.parentNode).select("text").style('fill', 'black');
-                  }
+                    var pos = selectedNodes.indexOf(d.id);
+                    if (pos == -1) {
+                        selectedNodes.push(d.id);
+                        d3.select(this.parentNode).select("text").style('fill', 'red');
+                    } else {
+                        selectedNodes.slice(pos, 1);
+                        d3.select(this.parentNode).select("text").style('fill', 'black');
+                    }
 
-            } else {
+                } else {
 
-                // select node
-                mousedown_node = d;
-                if (mousedown_node === selected_node) selected_node = null;
-                else selected_node = mousedown_node;
-                selected_link = null;
+                    // select node
+                    mousedown_node = d;
+                    if (mousedown_node === selected_node) selected_node = null;
+                    else selected_node = mousedown_node;
+                    selected_link = null;
 
-                d3.selectAll("text").style('fill', 'black');
-                d3.select(this.parentNode).select("text").style('fill', 'red');
+                    d3.selectAll("text").style('fill', 'black');
+                    d3.select(this.parentNode).select("text").style('fill', 'red');
 
-                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
+                    updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
 
-                // reposition drag line
-                drag_line
-                    .classed('hidden', false)
-                    .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
+                    // reposition drag line
+                    drag_line
+                        .classed('hidden', false)
+                        .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
 
-                restart();
-            }
-          })
-           .on('mouseup', function (d) {
-               // nb. no mousedown event registered, so no need to check for drag-to-self
-            if (!mousedown_node){ return; }
+                    restart();
+                }
+            })
+            .on('mouseup', function (d) {
+                // nb. no mousedown event registered, so no need to check for drag-to-self
+                if (!mousedown_node) {
+                    return;
+                }
 
-               // needed by FF
+                // needed by FF
                 drag_line
                     .classed('hidden', true)
                     .style('marker-end', '');
 
-            // check for drag-to-self
-            mouseup_node = d;
-            if (mouseup_node === mousedown_node) {
-              resetMouseVars();
-              return;
-            }
+                // check for drag-to-self
+                mouseup_node = d;
+                if (mouseup_node === mousedown_node) {
+                    resetMouseVars();
+                    return;
+                }
 
-            // un-enlarge target node
-            d3.select(this).attr('transform', '');
+                // un-enlarge target node
+                d3.select(this).attr('transform', '');
 
-            // add link to graph (update if exists)
-            addEdge();
-            restart();
-          })
+                // add link to graph (update if exists)
+                addEdge();
+                restart();
+            })
 
-          .on('contextmenu', d3.contextMenu(createOptionsMenu));
+            .on('contextmenu', d3.contextMenu(createOptionsMenu));
 
-      // show node IDs
-      g2.append('svg:text')
-          .attr('x', 12)
-          .attr('y', 4+12)
-          .attr('class', 'id')
-          .text(function (d) {
-            return d.label;
-          });
+        // show node IDs
+        g2.append('svg:text')
+            .attr('x', 12)
+            .attr('y', 4 + 12)
+            .attr('class', 'id')
+            .text(function (d) {
+                return d.label;
+            });
 
-      // remove old nodes
-      rect.exit().remove();
+        // remove old nodes
+        rect.exit().remove();
     }
 
 
-    function createOptionsMenu(d){
+    function createOptionsMenu(d) {
         var menu = [];
 
         var operations = ['zip', 'cross', 'add'];
@@ -618,68 +667,90 @@ function network_editor () {
             for (var i = 0; i < operations.length; i++) {
                 var operation = operations[i];
 
-                    menu.push({
-                        title: operation,
-                        disabled: (operation == d.type),
-                        action: changeOperation(operation)
-                    })
+                menu.push({
+                    title: operation,
+                    disabled: (operation == d.type),
+                    action: changeOperation(operation)
+                })
             }
 
             menu.push({
-				divider: true
-			});
+                divider: true
+            });
         }
 
         menu.push({
-                    title: 'Process',
-                    action: function(elm, d) {
-                        var node = nodes.filter(function (n) {
-                            return n.id == d.id
-                        })[0];
-                        addProcessNodeToNode(node, 'process');
-                    }
-                    });
+            title: 'Process',
+            action: function (elm, d) {
+                var node = nodes.filter(function (n) {
+                    return n.id == d.id
+                })[0];
+                addProcessNodeToNode(node, 'process');
+            }
+        });
         menu.push({
-                        title: 'Pool',
-                        action: function(elm, d) {
-                            var node = nodes.filter(function(n){ return n.id == d.id})[0];
-                            addProcessNodeToNode(node, 'pool'); }
-                    });
+            title: 'Pool',
+            action: function (elm, d) {
+                var node = nodes.filter(function (n) {
+                    return n.id == d.id
+                })[0];
+                addProcessNodeToNode(node, 'pool');
+            }
+        });
         menu.push({
-                    title: 'Select',
-                    action: function(elm, d) {
-                        var node = nodes.filter(function(n){ return n.id == d.id})[0];
-                        addProcessNodeToNode(node, 'select'); }
-                    });
+            title: 'Select',
+            action: function (elm, d) {
+                var node = nodes.filter(function (n) {
+                    return n.id == d.id
+                })[0];
+                addProcessNodeToNode(node, 'select');
+            }
+        });
 
         menu.push({
-				divider: true
-			});
+            divider: true
+        });
 
         menu.push({
-                    title: 'Delete',
-                    action: function(elm, d) { deleteNode(d); }
-                });
+            title: 'Delete',
+            action: function (elm, d) {
+                deleteNode(d);
+            }
+        });
         return menu;
     }
 
-    function addEdge(){
+    function addEdge() {
 
         // handle arrow draw from well/aliquot to process (e.g. thermocycle)
-        if (mouseup_node.type == "process" && (mousedown_node.type != "volume")){
-            links.push({source: mousedown_node, target: mouseup_node, data: {volumes: [1], addToThis: true, changeTips: false, mix: false, num_duplicates: 1} });
+        if (mouseup_node.type == "process" && (mousedown_node.type != "volume")) {
+            links.push({
+                source: mousedown_node,
+                target: mouseup_node,
+                data: {volumes: [1], addToThis: true, changeTips: false, mix: false, num_duplicates: 1}
+            });
             selected_node = mouseup_node;
             return;
         }
 
         var operator = "cross";
 
-        var i = nodes.push({id: ++lastNodeId, type: operator, x: width * Math.random(), y: height/2, label: "×",
-                            parents: [mousedown_node, mouseup_node], data: {container_name: ''} });
+        var i = nodes.push({
+            id: ++lastNodeId, type: operator, x: width * Math.random(), y: height / 2, label: "×",
+            parents: [mousedown_node, mouseup_node], data: {container_name: ''}
+        });
         i--;
 
-        links.push({source: mousedown_node, target: nodes[i], data: {volumes: [1], addToThis: false, changeTips: false, mix: false, num_duplicates: 1 } });
-        links.push({source: mouseup_node, target: nodes[i], data: {volumes: [1], addToThis: true, changeTips: false, mix: false, num_duplicates: 1} });
+        links.push({
+            source: mousedown_node,
+            target: nodes[i],
+            data: {volumes: [1], addToThis: false, changeTips: false, mix: false, num_duplicates: 1}
+        });
+        links.push({
+            source: mouseup_node,
+            target: nodes[i],
+            data: {volumes: [1], addToThis: true, changeTips: false, mix: false, num_duplicates: 1}
+        });
 
         selected_link = null;
         selected_node = nodes[i];
@@ -687,45 +758,49 @@ function network_editor () {
 
 
     function mousemove() {
-      if (!mousedown_node) return;
-      drag_line.attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + d3.mouse(this)[0] + ',' + d3.mouse(this)[1]);
-      restart();
-    }
-
-    function mouseup() {
-      if (mousedown_node) {
-        drag_line
-            .classed('hidden', true)
-            .style('marker-end', '');
-      }
-      svg.classed('active', false);
-      resetMouseVars();
-    }
-
-    function clearEverything() {
-      nodes = [];
-      links = [];
-      groups = [];
-      lastNodeId = 0;
-       d3.select("#info").select("form").remove();
-      force.nodes(nodes).links(links).groups(groups);
-      restart();
-    }
-
-    function addWellNode() {
-      nodes.push({id: ++lastNodeId, type: 'well', x: width / 2, y: height / 2, label: prompt('Name:'),
-          data: {num_wells: 1, container_name: '', well_addresses: ''}});
-      restart();
-    }
-
-    function addProcessNodeToNode(sourceNode, kind){
-        i = addProcessNode(kind);
-        links.push({source: sourceNode, target: nodes[i],
-            data: {volumes: [1], addToThis: null, changeTips: null, mix: null, num_duplicates: 1} });
+        if (!mousedown_node) return;
+        drag_line.attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + d3.mouse(this)[0] + ',' + d3.mouse(this)[1]);
         restart();
     }
 
-    function addProcessNode(kind){
+    function mouseup() {
+        if (mousedown_node) {
+            drag_line
+                .classed('hidden', true)
+                .style('marker-end', '');
+        }
+        svg.classed('active', false);
+        resetMouseVars();
+    }
+
+    function clearEverything() {
+        nodes = [];
+        links = [];
+        groups = [];
+        lastNodeId = 0;
+        d3.select("#info").select("form").remove();
+        force.nodes(nodes).links(links).groups(groups);
+        restart();
+    }
+
+    function addWellNode() {
+        nodes.push({
+            id: ++lastNodeId, type: 'well', x: width / 2, y: height / 2, label: prompt('Name:'),
+            data: {num_wells: 1, container_name: '', well_addresses: ''}
+        });
+        restart();
+    }
+
+    function addProcessNodeToNode(sourceNode, kind) {
+        i = addProcessNode(kind);
+        links.push({
+            source: sourceNode, target: nodes[i],
+            data: {volumes: [1], addToThis: null, changeTips: null, mix: null, num_duplicates: 1}
+        });
+        restart();
+    }
+
+    function addProcessNode(kind) {
 
         var operation, type;
         if (kind) {
@@ -737,8 +812,10 @@ function network_editor () {
             type = 'process';
         }
 
-        var i = nodes.push({id: ++lastNodeId, type: type, x: width * Math.random(), y: height / 2, label: operation,
-            data: {operation: operation, selection: []}});
+        var i = nodes.push({
+            id: ++lastNodeId, type: type, x: width * Math.random(), y: height / 2, label: operation,
+            data: {operation: operation, selection: []}
+        });
         i--;
         selected_node = nodes[i];
         restart();
@@ -746,56 +823,71 @@ function network_editor () {
     }
 
     function addVolumeNode() {
-      var volumeList = prompt('Volumes:').split(',');
+        var volumeList = prompt('Volumes:').split(',');
         var label;
 
         // Label node with volume (if all volumes are equal) or 'Volume' (otherwise)
-        if (volumeList.length >= 1){
+        if (volumeList.length >= 1) {
             label = volumeList[0];
-            for (var i=0; i<volumeList.length; i++){
-                if (volumeList[i] != label){ label = "Volume"; }
+            for (var i = 0; i < volumeList.length; i++) {
+                if (volumeList[i] != label) {
+                    label = "Volume";
+                }
             }
         }
-        if (label != "Volume"){label = label + " μL"; }
+        if (label != "Volume") {
+            label = label + " μL";
+        }
 
-      nodes.push({
-        id: ++lastNodeId,
-        type: 'volume',
-        x: width * Math.random(),
-        y: height / 2,
-        label: label,
-        data: volumeList
-      });
-      restart();
+        nodes.push({
+            id: ++lastNodeId,
+            type: 'volume',
+            x: width * Math.random(),
+            y: height / 2,
+            label: label,
+            data: volumeList
+        });
+        restart();
     }
 
-    function save(){
+    function save() {
 
         // note that we cannot serialise {nodes: nodes, links: links} because of cyclic references
         var node_list = [];
-        for (i=0; i<nodes.length; i++){
+        for (i = 0; i < nodes.length; i++) {
             var node = nodes[i];
-            var converted_node = {id: node.id, type: node.type, x: node.x, y: node.y, label: node.label, data:node.data};
+            var converted_node = {
+                id: node.id,
+                type: node.type,
+                x: node.x,
+                y: node.y,
+                label: node.label,
+                data: node.data
+            };
 
-            if (node.hasOwnProperty("parents")){
+            if (node.hasOwnProperty("parents")) {
                 converted_node.parentIds = [node.parents[0].id, node.parents[1].id];
             }
             node_list.push(converted_node);
         }
 
         var link_list = [];
-        for (i=0; i<links.length; i++){
+        for (i = 0; i < links.length; i++) {
             var link = links[i];
             link_list.push({source_id: link.source.id, target_id: link.target.id, data: link.data});
         }
 
         var group_list = [];
-        for (i=0; i<groups.length; i++){
+        for (i = 0; i < groups.length; i++) {
 
             var leaves = [];
 
-            for (var j=0; j < groups[i].leaves.length; j++){
-                leaves.push({data: groups[i].leaves[j].data, id: groups[i].leaves[j].id, bounds: groups[i].leaves[j].bounds })
+            for (var j = 0; j < groups[i].leaves.length; j++) {
+                leaves.push({
+                    data: groups[i].leaves[j].data,
+                    id: groups[i].leaves[j].id,
+                    bounds: groups[i].leaves[j].bounds
+                })
             }
 
             group_list.push({leaves: leaves});
@@ -804,21 +896,26 @@ function network_editor () {
 
         var protocol_string = JSON.stringify({nodes: node_list, links: link_list, groups: group_list});
         $.ajax({
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        url: window.location.href + "/save",
-        dataType: 'html',
-        async: true,
-        data: protocol_string,
-        beforeSend: function(xhr) {
-            xhr.setRequestHeader("X-CSRFToken", csrf_token);
-         },
-        success: function () { console.log("SUCCESS")},
-        error: function (result, textStatus) { console.log(result); console.log(textStatus); }
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: window.location.href + "/save",
+            dataType: 'html',
+            async: true,
+            data: protocol_string,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrf_token);
+            },
+            success: function () {
+                console.log("SUCCESS")
+            },
+            error: function (result, textStatus) {
+                console.log(result);
+                console.log(textStatus);
+            }
         })
     }
 
-    function startRepeat(){
+    function startRepeat() {
         selectingGroup = true;
         selectedNodes = [];
 
@@ -832,13 +929,13 @@ function network_editor () {
         selected_link = false;
     }
 
-    function endRepeat(){
+    function endRepeat() {
         selectingGroup = false;
         d3.select("#repeatButton")
             .on("click", startRepeat)
             .text("Select nodes for repeat");
 
-        if (selectedNodes){
+        if (selectedNodes) {
             groups.push({"leaves": selectedNodes, data: {repeats: 2}})
         }
 
@@ -849,27 +946,27 @@ function network_editor () {
     }
 
 
-  // app starts here
+    // app starts here
     svg.on('mousemove', mousemove)
         .on('mouseup', mouseup)
-       .on('contextmenu', d3.contextMenu([{
+        .on('contextmenu', d3.contextMenu([{
                 title: 'Add Well',
                 action: addWellNode
-            },{
+            }, {
                 title: 'Add Process',
                 action: addProcessNode
-            },{
-				divider: true
-			},{
+            }, {
+                divider: true
+            }, {
                 title: 'Clear',
                 action: clearEverything
-            },{
+            }, {
                 title: 'Save',
                 action: save
             }
 
-       ])
-    );
+            ])
+        );
 
     restart();
 
@@ -878,6 +975,8 @@ function network_editor () {
         .text("Select nodes for repeat");
 
 
-    return {addWellNode: addWellNode, addVolumeNode: addVolumeNode, clearEverything: clearEverything, save: save,
-        startRepeat: startRepeat};
+    return {
+        addWellNode: addWellNode, addVolumeNode: addVolumeNode, clearEverything: clearEverything, save: save,
+        startRepeat: startRepeat
+    };
 }

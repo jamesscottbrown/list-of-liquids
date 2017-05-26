@@ -1,4 +1,4 @@
-function updateDescriptionPanel(selected_node, selected_link, selected_group, links,  restart, redrawLinkLabels, deleteNode) {
+function updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode) {
 
     // TODO: rather than calling restart(), redraw single label
     var info = d3.select("#info");
@@ -21,23 +21,25 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
         drawPoolPanel(selected_node, restart, form, deleteNode);
     } else if (selected_node && selected_node.type == "select") {
         drawSelectPanel(selected_node, restart, form, deleteNode);
-    } else if (selected_node){
-        drawOperationPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form, deleteNode);
-    } else if (selected_group){
+    } else if (selected_node) {
+        drawOperationPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form, deleteNode);
+    } else if (selected_group) {
         drawRepeatPanel(selected_group, form)
     } else if (selected_link) {
-        drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form);
+        drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form);
     }
 }
 
-function addDeleteButton(form, selected_node, deleteNode){
-        form.append("div")
+function addDeleteButton(form, selected_node, deleteNode) {
+    form.append("div")
         .classed("form-group", true)
         .append("div")
         .classed("col-sm-5", true)
 
         .append("button")
-        .on("click", function(){ deleteNode(selected_node)})
+        .on("click", function () {
+            deleteNode(selected_node)
+        })
         .text("Delete ").append("i").classed("fa", true).classed("fa-trash-o", true);
 }
 
@@ -129,13 +131,13 @@ function drawWellPanel(selected_node, restart, form, deleteNode) {
 }
 
 
-function drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form){
+function drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form) {
 
     form.selectAll("div").remove();
     form.selectAll("h2").remove();
 
     var title;
-    if (selected_link.source.type == "well"){
+    if (selected_link.source.type == "well") {
         title = "Transfer of " + selected_link.source.label;
     } else {
         title = "Transfer"
@@ -158,13 +160,12 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         .classed("col-sm-5", true)
         .attr("name", "duplicates")
         .attr("id", "duplicates")
-        .on("change", function(){
+        .on("change", function () {
             selected_link.data.num_duplicates = selected_link.data.num_duplicates;
         });
 
     duplicatesInput.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
     duplicatesInput.node().value = selected_link.data.num_duplicates;
-
 
 
     // Form to set whether we are adding to this
@@ -182,12 +183,16 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         .classed("col-sm-5", true)
         .attr("name", "container")
         .attr("id", "container")
-        .on("change", function(){
+        .on("change", function () {
 
             // ensure that no more than one link incident to the same node has addToThis true
-            if (this.value == "Yes"){
-                links.filter(function(x){ return x.target.id == selected_link.target.id })
-                      .map(function(x){x.data.addToThis = false});
+            if (this.value == "Yes") {
+                links.filter(function (x) {
+                        return x.target.id == selected_link.target.id
+                    })
+                    .map(function (x) {
+                        x.data.addToThis = false
+                    });
             }
 
             selected_link.target.data.container_name = selected_link.source.data.container_name;
@@ -221,7 +226,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         .classed("col-sm-5", true)
         .attr("name", "change-tips")
         .attr("id", "change-tips")
-        .on("change", function(){
+        .on("change", function () {
             selected_link.data.changeTips = (this.value == "Yes");
             restart();
         });
@@ -246,7 +251,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         .classed("col-sm-5", true)
         .attr("name", "change-tips")
         .attr("id", "change-tips")
-        .on("change", function(){
+        .on("change", function () {
             selected_link.data.mix = (this.value == "Yes");
             restart();
         });
@@ -275,7 +280,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
     label.append("i").classed("fa", true).classed("fa-minus", true)
         .on("click", function (d, i) {
             volumes.splice(i, 1);
-            drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form);
+            drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form);
             redrawLinkLabels();
         });
     label.append("b").text(function (d, i) {
@@ -299,7 +304,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
             redrawLinkLabels();
         });
 
-    if (selected_link.data.addToThis){
+    if (selected_link.data.addToThis) {
         volumeDivs.selectAll('input').attr('disabled', true);
     }
 
@@ -312,12 +317,12 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         .append("i").classed("fa", true).classed("fa-plus", true)
         .on("click", function () {
             volumes.push(0);
-            drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form);
+            drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form);
             redrawLinkLabels();
         });
 }
 
-function drawProcessPanel(selected_node, restart, form, deleteNode){
+function drawProcessPanel(selected_node, restart, form, deleteNode) {
     form.append("h2").style().text("Processing step");
 
     var div1 = form.append("div").classed("form-group", true);
@@ -361,7 +366,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode){
     addDeleteButton(form, selected_node, deleteNode);
 }
 
-function drawPoolPanel(selected_node, restart, form, deleteNode){
+function drawPoolPanel(selected_node, restart, form, deleteNode) {
     form.append("h2").style().text("Pool samples together");
 
     // Set container
@@ -386,7 +391,7 @@ function drawPoolPanel(selected_node, restart, form, deleteNode){
     addDeleteButton(form, selected_node, deleteNode);
 }
 
-function drawSelectPanel(selected_node, restart, form, deleteNode){
+function drawSelectPanel(selected_node, restart, form, deleteNode) {
     form.selectAll("div").remove();
     form.selectAll("h2").remove();
 
@@ -412,7 +417,7 @@ function drawSelectPanel(selected_node, restart, form, deleteNode){
         });
 
 
-  // Form to select samples
+    // Form to select samples
     var selection = selected_node.data.selection;
 
     var div2 = form.append("div");
@@ -469,7 +474,7 @@ function drawSelectPanel(selected_node, restart, form, deleteNode){
     addDeleteButton(form, selected_node, deleteNode);
 }
 
-function drawOperationPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form, deleteNode){
+function drawOperationPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form, deleteNode) {
     form.append("h2").style().text("Operation");
 
     var div1 = form.append("div").classed("form-group", true);
@@ -493,8 +498,8 @@ function drawOperationPanel(selected_node, selected_link, links,  restart, redra
     // If incident edge has 'addToThis' true, ensure container_name for this is consistent with this
     // and disable field to prevent it being changed
     var container = false;
-    for (var i = 0; i < links.length; i++ ){
-        if (links[i].target.id == selected_node.id && links[i].data.addToThis){
+    for (var i = 0; i < links.length; i++) {
+        if (links[i].target.id == selected_node.id && links[i].data.addToThis) {
             selected_node.data.container_name = links[i].source.data.container_name;
             containerInput.node().value = selected_node.data.container_name;
             containerInput.attr("disabled", "");
@@ -508,7 +513,7 @@ function drawOperationPanel(selected_node, selected_link, links,  restart, redra
 
 }
 
-function drawRepeatPanel(selected_group, form){
+function drawRepeatPanel(selected_group, form) {
     form.append("h2").style().text("Repeat");
 
     var div1 = form.append("div").classed("form-group", true);
