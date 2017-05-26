@@ -1,4 +1,4 @@
-function updateDescriptionPanel(selected_node, selected_link, selected_group, links,  restart, redrawLinkLabels) {
+function updateDescriptionPanel(selected_node, selected_link, selected_group, links,  restart, redrawLinkLabels, deleteNode) {
 
     // TODO: rather than calling restart(), redraw single label
     var info = d3.select("#info");
@@ -14,15 +14,15 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
         .attr("onsubmit", "return false;");
 
     if (selected_node && selected_node.type == "well") {
-        drawWellPanel(selected_node, restart, form);
+        drawWellPanel(selected_node, restart, form, deleteNode);
     } else if (selected_node && selected_node.type == "process") {
-        drawProcessPanel(selected_node, restart, form);
+        drawProcessPanel(selected_node, restart, form, deleteNode);
     } else if (selected_node && selected_node.type == "pool") {
-        drawPoolPanel(selected_node, restart, form);
+        drawPoolPanel(selected_node, restart, form, deleteNode);
     } else if (selected_node && selected_node.type == "select") {
-        drawSelectPanel(selected_node, restart, form);
+        drawSelectPanel(selected_node, restart, form, deleteNode);
     } else if (selected_node){
-        drawOperationPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form);
+        drawOperationPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form, deleteNode);
     } else if (selected_group){
         drawRepeatPanel(selected_group, form)
     } else if (selected_link) {
@@ -30,8 +30,18 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
     }
 }
 
+function addDeleteButton(form, selected_node, deleteNode){
+        form.append("div")
+        .classed("form-group", true)
+        .append("div")
+        .classed("col-sm-5", true)
 
-function drawWellPanel(selected_node, restart, form) {
+        .append("button")
+        .on("click", function(){ deleteNode(selected_node)})
+        .text("Delete ").append("i").classed("fa", true).classed("fa-trash-o", true);
+}
+
+function drawWellPanel(selected_node, restart, form, deleteNode) {
     form.append("h2").style().text("Initially present resource");
 
     var div1 = form.append("div").classed("form-group", true);
@@ -114,6 +124,8 @@ function drawWellPanel(selected_node, restart, form) {
         .on("change", function () {
             selected_node.data.well_addresses = this.value;
         });
+
+    addDeleteButton(form, selected_node, deleteNode);
 }
 
 
@@ -263,7 +275,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
     label.append("i").classed("fa", true).classed("fa-minus", true)
         .on("click", function (d, i) {
             volumes.splice(i, 1);
-            drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form)
+            drawTransferPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form);
             redrawLinkLabels();
         });
     label.append("b").text(function (d, i) {
@@ -305,7 +317,7 @@ function drawTransferPanel(selected_node, selected_link, links,  restart, redraw
         });
 }
 
-function drawProcessPanel(selected_node, restart, form){
+function drawProcessPanel(selected_node, restart, form, deleteNode){
     form.append("h2").style().text("Processing step");
 
     var div1 = form.append("div").classed("form-group", true);
@@ -345,9 +357,11 @@ function drawProcessPanel(selected_node, restart, form){
             selected_node.data = this.value;
             restart();
         });
+
+    addDeleteButton(form, selected_node, deleteNode);
 }
 
-function drawPoolPanel(selected_node, restart, form){
+function drawPoolPanel(selected_node, restart, form, deleteNode){
     form.append("h2").style().text("Pool samples together");
 
     // Set container
@@ -368,9 +382,11 @@ function drawPoolPanel(selected_node, restart, form){
             selected_node.data.container_name = this.value;
             restart();
         });
+
+    addDeleteButton(form, selected_node, deleteNode);
 }
 
-function drawSelectPanel(selected_node, restart, form){
+function drawSelectPanel(selected_node, restart, form, deleteNode){
     form.selectAll("div").remove();
     form.selectAll("h2").remove();
 
@@ -415,7 +431,7 @@ function drawSelectPanel(selected_node, restart, form){
     label.append("i").classed("fa", true).classed("fa-minus", true)
         .on("click", function (d, i) {
             selection.splice(i, 1);
-            drawSelectPanel(selected_node, restart, form);
+            drawSelectPanel(selected_node, restart, form, deleteNode);
         });
     label.append("b").text(function (d, i) {
         return "Selection " + (i + 1) + ":";
@@ -447,12 +463,13 @@ function drawSelectPanel(selected_node, restart, form){
         .append("i").classed("fa", true).classed("fa-plus", true)
         .on("click", function () {
             selection.push(0);
-            drawSelectPanel(selected_node, restart, form);
+            drawSelectPanel(selected_node, restart, form, deleteNode);
         });
 
+    addDeleteButton(form, selected_node, deleteNode);
 }
 
-function drawOperationPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form){
+function drawOperationPanel(selected_node, selected_link, links,  restart, redrawLinkLabels, form, deleteNode){
     form.append("h2").style().text("Operation");
 
     var div1 = form.append("div").classed("form-group", true);
@@ -485,6 +502,7 @@ function drawOperationPanel(selected_node, selected_link, links,  restart, redra
         }
     }
 
+    addDeleteButton(form, selected_node, deleteNode);
     // TODO: options menu to change type (alternative to context menu)
     // TODO: display of resulting aliquots
 

@@ -233,7 +233,7 @@ function network_editor () {
             else selected_link = mousedown_link;
             selected_node = null;
               d3.selectAll("text").style('fill', 'black');
-              updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels);
+              updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
             restart();
           });
 
@@ -329,7 +329,7 @@ function network_editor () {
             d3.selectAll("text").style('fill', 'black');
             d3.select(this.parentNode).select("text").style('fill', 'red');
 
-            updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels);
+            updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
 
             // reposition drag line
             drag_line
@@ -416,7 +416,7 @@ function network_editor () {
                 selected_link = false;
                 selected_group = d;
 
-                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels);
+                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
 
             });
 
@@ -547,7 +547,7 @@ function network_editor () {
                 d3.selectAll("text").style('fill', 'black');
                 d3.select(this.parentNode).select("text").style('fill', 'red');
 
-                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels);
+                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode);
 
                 // reposition drag line
                 drag_line
