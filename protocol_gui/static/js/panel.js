@@ -30,29 +30,29 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
     }
 }
 
-    function getContents(serialiseDiagram, selected_node) {
-        var protocol_string = serialiseDiagram();
+function getContents(serialiseDiagram, selected_node) {
+    var protocol_string = serialiseDiagram();
 
-        $.ajax({
-            type: "GET",
-            contentType: "application/json; charset=utf-8",
-            url: window.location.href + "/contents",
-            dataType: 'html',
-            async: true,
-            data: {protocol_string: protocol_string, selected_node: selected_node.id },
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("X-CSRFToken", csrf_token);
-            },
-            success: function (res) {
-                result = res;
-                console.log(result)
-            },
-            error: function (result, textStatus) {
-                console.log(result);
-                console.log(textStatus);
-            }
-        });
-    }
+    $.ajax({
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        url: window.location.href + "/contents",
+        dataType: 'html',
+        async: true,
+        data: {protocol_string: protocol_string, selected_node: selected_node.id},
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRFToken", csrf_token);
+        },
+        success: function (res) {
+            result = res;
+            console.log(result)
+        },
+        error: function (result, textStatus) {
+            console.log(result);
+            console.log(textStatus);
+        }
+    });
+}
 
 
 function addDeleteButton(form, selected_node, deleteNode) {
