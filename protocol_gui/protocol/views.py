@@ -34,8 +34,19 @@ def protocol(protocol_id):
     else:
         protocol_obj = None
 
+    # These are the container types recognised by OpenTrons
+    container_types = ['tube-rack-15_50ml', 'tube-rack-2ml-9x9', '96-flat', 'point', 'tiprack-1000ul-chem',
+                       '96-deep-well', 'trough-12row-short', '24-vial-rack', 'T75-flask', 'tube-rack-80well',
+                       '96-well-plate-20mm', 'trough-12row', 'small_vial_rack_16x45', '5ml-3x4', '96-PCR-tall',
+                       'tube-rack-5ml-96', 'trash-box', 'tiprack-1000ul', 'tiprack-10ul', 'tiprack-10ul-H',
+                       '12-well-plate', 'e-gelgol', 'tube-rack-2ml', 'tube-rack-.75ml', 'MALDI-plate', 'T25-flask',
+                       '48-vial-plate', 'tiprack-1000ul-H', '6-well-plate', 'rigaku-compact-crystallization-plate',
+                       '384-plate', 'trough-1row-25ml', '96-PCR-flat', '24-well-plate', '48-well-plate',
+                       'alum-block-pcr-strips', 'wheaton_vial_rack', 'tiprack-200ul', 'PCR-strip-tall',
+                       'hampton-1ml-deep-block']
+
     return render_template('protocols/protocol.html', protocol=current_protocol,
-                           protocol_obj=protocol_obj)
+                           protocol_obj=protocol_obj, container_types=container_types)
 
 @blueprint.route('/<int:protocol_id>/edit', methods=['GET', 'POST'])
 @login_required

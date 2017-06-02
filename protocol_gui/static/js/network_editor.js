@@ -54,11 +54,16 @@ function network_editor() {
         }
 
         groups = obj.groups;
+        containers = obj.containers;
+        pipettes = obj.pipettes;
 
     } else {
         nodes = [];
         links = [];
         groups = [];
+
+        containers = [];
+        pipettes = [];
     }
     lastNodeId = nodes.length - 1;
 
@@ -225,6 +230,9 @@ function network_editor() {
         redrawCircularNodes(circular_nodes);
         redrawRectangularNodes(process_nodes);
         force.start();
+
+        update_container_list();
+        update_pipette_list();
     }
 
     function redrawLinks() {
@@ -777,6 +785,10 @@ function network_editor() {
         nodes = [];
         links = [];
         groups = [];
+
+        containers = [];
+        pipettes = [];
+
         lastNodeId = 0;
         d3.select("#info").select("form").remove();
         force.nodes(nodes).links(links).groups(groups);
@@ -865,7 +877,10 @@ function network_editor() {
         }
 
 
-        return JSON.stringify({nodes: node_list, links: link_list, groups: group_list});
+        return JSON.stringify({
+            nodes: node_list, links: link_list, groups: group_list,
+            containers: containers, pipettes: pipettes
+        });
     }
 
     function save() {

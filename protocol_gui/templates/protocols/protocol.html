@@ -1,11 +1,10 @@
-
 {% extends "layout.html" %}
 
 
 {% block css %}
     {% assets "css_network_editor" %}
-    <link rel="stylesheet" href="{{ ASSET_URL }}">
-  {% endassets %}
+        <link rel="stylesheet" href="{{ ASSET_URL }}">
+    {% endassets %}
 {% endblock %}
 
 {% block body_other %} onload="networkEditor = network_editor();"{% endblock %}
@@ -13,20 +12,111 @@
 
 {% block content %}
 
-    <h1>{{protocol.name}} <small>(<a href="/protocols/{{protocol.id}}/edit"><i class="fa fa-pencil"></i>Edit</a> or
-    <a href="/protocols/{{protocol.id}}/delete"><i class="fa fa-trash-o"></i>Delete</a>)</small></h1>
+    <div class="modal fade" id="containerModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">New Container</h4>
+                </div>
+                <div class="modal-body">
 
-    <blockquote>{{protocol.description}}</blockquote>
+
+                    <div class="form-group">
+                        <label for="containerName">Name</label>
+                        <input class="form-control" id="containerName" placeholder="Container 1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="containerType">Type</label>
+                        <select class="form-control" id="containerType">
+                            {% for container_type in container_types %}
+                                <option id="{{ container_type }}">{{ container_type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="AddContainerButton">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="pipetteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">New Pipette</h4>
+                </div>
+                <div class="modal-body">
+
+
+                    <div class="form-group">
+                        <label for="pipetteName">Name</label>
+                        <input class="form-control" id="pipetteName" placeholder="Pipette 1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pipetteVolume">Volume</label>
+                        <input class="form-control" id="pipetteVolume" value="100">
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="AddPipetteButton">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <h1>{{ protocol.name }}
+        <small>(<a href="/protocols/{{ protocol.id }}/edit"><i class="fa fa-pencil"></i>Edit</a> or
+            <a href="/protocols/{{ protocol.id }}/delete"><i class="fa fa-trash-o"></i>Delete</a>)
+        </small>
+    </h1>
+
+    <blockquote>{{ protocol.description }}</blockquote>
+
+
+    <h2>Containers</h2>
+    <div class="row">
+        <div id="containers" class="col-md-8">
+            <ul></ul>
+            <p><a href="#" onclick="return false;" id="add-container"><i class="fa fa-plus" aria-hidden="true"></i>Add a
+                container</a></p>
+        </div>
+    </div>
+
+
+    <h2>Pipettes</h2>
+    <div class="row">
+        <div id="pipettes" class="col-md-8">
+            <ul></ul>
+            <p><a href="#" onclick="return false;" id="add-pipette"><i class="fa fa-plus" aria-hidden="true"></i>Add a
+                pipette</a></p>
+        </div>
+    </div>
 
     <h2>Protocol</h2>
 
     <div class="row">
         <div id="network" class="col-md-8">
             <div id="controls">
-              <button onclick="networkEditor.addWellNode();">Add Well</button>
-              <button onclick="networkEditor.clearEverything();">Clear</button>
-              <button onclick="networkEditor.save();">Save</button>
-              <button id="repeatButton">repeat</button>
+                <button onclick="networkEditor.addWellNode();">Add Well</button>
+                <button onclick="networkEditor.clearEverything();">Clear</button>
+                <button onclick="networkEditor.save();">Save</button>
+                <button id="repeatButton">repeat</button>
             </div>
         </div>
         <div id="info" class="col-md-4">
@@ -40,9 +130,10 @@
     <script type="text/javascript">
         var csrf_token = "{{ csrf_token() }}";
         var protocol_string = {{ protocol.protocol | tojson}};
+        var container_type = {{ container_types | tojson }};
     </script>
 
-  {% assets "js_network_editor" %}
-      <script type="text/javascript" src="{{ ASSET_URL }}"></script>
-  {% endassets %}
+    {% assets "js_network_editor" %}
+        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
 {% endblock %}
