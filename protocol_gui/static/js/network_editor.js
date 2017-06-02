@@ -19,6 +19,7 @@ function network_editor() {
     var selectingGroup = false;
     var selectedNodes = [];
 
+    var rectLabels, circleLabels;
 
     if (protocol_string) {
 
@@ -69,7 +70,7 @@ function network_editor() {
     }
     lastNodeId = nodes.length - 1;
 
-    function getDefaultLinkData(addToThis){
+    function getDefaultLinkData(addToThis) {
         var default_link_data = {
             volumes: [1],
             addToThis: true,
@@ -249,6 +250,9 @@ function network_editor() {
 
         update_container_list();
         update_pipette_list();
+
+        recolorLabels();
+
     }
 
     function redrawLinks() {
@@ -276,7 +280,6 @@ function network_editor() {
                 if (mousedown_link === selected_link) selected_link = null;
                 else selected_link = mousedown_link;
                 selected_node = null;
-                d3.selectAll("text").style('fill', 'black');
                 updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
                 restart();
             });
@@ -288,6 +291,24 @@ function network_editor() {
             .classed('addToThis', function (d) {
                 return d.data.addToThis;
             });
+
+
+        // Color all links according to pipette used
+        path_group.selectAll('.link').style('stroke', function (d) {
+            var pipette_index = pipettes.map(function (x) {
+                return x.name;
+            }).indexOf(d.data.pipette_name);
+
+            return (pipette_index == -1) ? "#000" : color(pipette_index);
+        });
+
+        // Color selected link red
+        if (selected_link) {
+            path_group.selectAll('.link').filter(function (d) {
+                return d == selected_link
+            }).style('stroke', 'red');
+        }
+
 
     }
 
@@ -361,11 +382,10 @@ function network_editor() {
                     var pos = selectedNodes.indexOf(d.id);
                     if (pos == -1) {
                         selectedNodes.push(d.id);
-                        d3.select(this.parentNode).select("text").style('fill', 'red');
                     } else {
-                        selectedNodes.slice(pos, 1);
-                        d3.select(this.parentNode).select("text").style('fill', 'black');
+                        selectedNodes.splice(pos, 1);
                     }
+                    recolorLabels();
 
                 } else {
                     // select node
@@ -373,9 +393,6 @@ function network_editor() {
                     if (mousedown_node === selected_node) selected_node = null;
                     else selected_node = mousedown_node;
                     selected_link = null;
-
-                    d3.selectAll("text").style('fill', 'black');
-                    d3.select(this.parentNode).select("text").style('fill', 'red');
 
                     updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
 
@@ -385,7 +402,6 @@ function network_editor() {
                         .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
 
                     restart();
-
                 }
 
             })
@@ -451,6 +467,7 @@ function network_editor() {
                 return d.label;
             });
 
+        circleLabels = circle.selectAll('text');
 
         // show node IDs
         g.append('svg:text')
@@ -601,11 +618,10 @@ function network_editor() {
                     var pos = selectedNodes.indexOf(d.id);
                     if (pos == -1) {
                         selectedNodes.push(d.id);
-                        d3.select(this.parentNode).select("text").style('fill', 'red');
                     } else {
-                        selectedNodes.slice(pos, 1);
-                        d3.select(this.parentNode).select("text").style('fill', 'black');
+                        selectedNodes.splice(pos, 1);
                     }
+                    recolorLabels();
 
                 } else {
 
@@ -614,9 +630,6 @@ function network_editor() {
                     if (mousedown_node === selected_node) selected_node = null;
                     else selected_node = mousedown_node;
                     selected_link = null;
-
-                    d3.selectAll("text").style('fill', 'black');
-                    d3.select(this.parentNode).select("text").style('fill', 'red');
 
                     updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
 
@@ -665,10 +678,48 @@ function network_editor() {
                 return d.label;
             });
 
+        rectLabels = rect.selectAll('text');
+
         // remove old nodes
         rect.exit().remove();
     }
 
+    function recolorLabels() {
+        // update text color based on container
+        circleLabels
+            .style('fill', function (d) {
+                var container_index = containers.map(function (x) {
+                    return x.name;
+                }).indexOf(d.data.container_name);
+
+                return (container_index == -1) ? "#000" : color(container_index);
+            });
+
+
+        rectLabels.style('fill', function (d) {
+            var container_index = containers.map(function (x) {
+                return x.name;
+            }).indexOf(d.data.container_name);
+
+            return (container_index == -1) ? "#000" : color(container_index);
+        });
+
+
+        // color single selected node red
+        if (selected_node) {
+            d3.selectAll('text').filter(function (d) {
+                return d == selected_node
+            }).style('fill', 'red');
+        }
+
+        //color set of selected nodes red
+        if (selectingGroup && selectedNodes) {
+            d3.selectAll('text').filter(function (d) {
+                return selectedNodes.indexOf(d.id) != -1
+            }).style('fill', 'red');
+        }
+
+    }
 
     function createOptionsMenu(d) {
         var menu = [];
@@ -768,12 +819,12 @@ function network_editor() {
         links.push({
             source: mousedown_node,
             target: nodes[i],
-            data:  getDefaultLinkData(true)
+            data: getDefaultLinkData(true)
         });
         links.push({
             source: mouseup_node,
             target: nodes[i],
-            data:  getDefaultLinkData(false)
+            data: getDefaultLinkData(false)
         });
 
         selected_link = null;
@@ -823,7 +874,7 @@ function network_editor() {
         i = addProcessNode(kind);
         links.push({
             source: sourceNode, target: nodes[i],
-            data:  getDefaultLinkData(true)
+            data: getDefaultLinkData(true)
         });
         restart();
     }
@@ -929,10 +980,11 @@ function network_editor() {
             .text("Done")
             .on("click", endRepeat);
 
-        // Unselect all nodes
-        d3.selectAll("text").style("fill", "black");
+        // Un-select all nodes
         selected_node = false;
         selected_link = false;
+        recolorLabels();
+
     }
 
     function endRepeat() {
