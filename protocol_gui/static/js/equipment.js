@@ -51,6 +51,7 @@ function update_container_list() {
                 };
                 $('#containerModal').modal('toggle');
                 update_container_list();
+                updateDescriptionPanel();
             });
         });
 }
@@ -91,12 +92,25 @@ function update_pipette_list() {
             d3.select("#pipetteVolume").property('value', d.volume);
 
             d3.select("#AddPipetteButton").on("click", function () {
+
+                var oldName = d.name;
+                var newName = d3.select("#pipetteName").node().value;
+
+                // adjust any links to match the new pipette name
+                for (var j = 0; j < links.length; j++) {
+                    if (links[j].data.pipette_name == oldName) {
+                        links[j].data.pipette_name = newName;
+                    }
+                }
+
                 pipettes[i] = {
-                    name: d3.select("#pipetteName").node().value,
+                    name: newName,
                     volume: d3.select("#pipetteVolume").node().value
                 };
                 $('#pipetteModal').modal('toggle');
                 update_pipette_list();
+                updateDescriptionPanel();
+
             });
         });
 

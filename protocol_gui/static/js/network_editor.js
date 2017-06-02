@@ -69,6 +69,15 @@ function network_editor() {
     }
     lastNodeId = nodes.length - 1;
 
+    var default_link_data = {
+        volumes: [1],
+        addToThis: true,
+        changeTips: false,
+        mix: false,
+        num_duplicates: 1,
+        pipette_name: ''
+    };
+
     var force = cola.d3adaptor()
         .linkDistance(50)
         .size([width, height])
@@ -737,7 +746,7 @@ function network_editor() {
             links.push({
                 source: mousedown_node,
                 target: mouseup_node,
-                data: {volumes: [1], addToThis: true, changeTips: false, mix: false, num_duplicates: 1}
+                data: default_link_data
             });
             selected_node = mouseup_node;
             return;
@@ -754,12 +763,12 @@ function network_editor() {
         links.push({
             source: mousedown_node,
             target: nodes[i],
-            data: {volumes: [1], addToThis: false, changeTips: false, mix: false, num_duplicates: 1}
+            data: default_link_data
         });
         links.push({
             source: mouseup_node,
             target: nodes[i],
-            data: {volumes: [1], addToThis: true, changeTips: false, mix: false, num_duplicates: 1}
+            data: default_link_data
         });
 
         selected_link = null;
@@ -809,7 +818,7 @@ function network_editor() {
         i = addProcessNode(kind);
         links.push({
             source: sourceNode, target: nodes[i],
-            data: {volumes: [1], addToThis: null, changeTips: null, mix: null, num_duplicates: 1}
+            data: default_link_data
         });
         restart();
     }

@@ -274,6 +274,41 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     containerSelect.node().value = (selected_link.data.addToThis ? "Yes" : "No");
 
 
+    // Form to specify which pipette to use
+    var pipetteDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    pipetteDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "pipette")
+        .text("Pipette: ");
+
+    var pipetteInput = pipetteDiv
+        .append("select")
+        .classed("col-sm-5", true)
+        .classed("control-input", true)
+        .attr("name", "pipette")
+        .attr("value", selected_link.data.pipette_name)
+        .on("change", function () {
+            selected_link.data.pipette_name = this.value;
+            restart();
+        });
+
+    pipetteInput.selectAll("option").data(pipettes)
+        .enter()
+        .append("option")
+        .attr("id", function (d) {
+            return d.name;
+        })
+        .text(function (d) {
+            return d.name;
+        });
+
+    // N.B. need to add the options to the select before the value can be set
+    pipetteInput.property("value", selected_link.data.pipette_name);
+
+
     // Form to set whether we are changing tips
     var changeTipDiv = form.append("div").append("div")
         .classed("form-group", true);
