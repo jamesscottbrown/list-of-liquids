@@ -130,7 +130,7 @@
     <script type="text/javascript">
         var csrf_token = "{{ csrf_token() }}";
         var protocol_string = {{ protocol.protocol | tojson}};
-        var container_type = {{ container_types | tojson }};
+        var container_types = {{ container_types | tojson }};
     </script>
 
     {% assets "js_network_editor" %}

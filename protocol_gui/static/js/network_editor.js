@@ -1,3 +1,8 @@
+// set up initial nodes and links
+var nodes, lastNodeId, links, groups;
+var color = d3.scale.category20();
+
+
 function network_editor() {
     // set up SVG for D3
     var width = 960,
@@ -14,9 +19,6 @@ function network_editor() {
     var selectingGroup = false;
     var selectedNodes = [];
 
-    // set up initial nodes and links
-    var nodes, lastNodeId, links, groups;
-    var color = d3.scale.category20();
 
     if (protocol_string) {
 

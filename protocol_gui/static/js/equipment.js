@@ -34,8 +34,19 @@ function update_container_list() {
             d3.select("#containerType").property('value', d.type);
 
             d3.select("#AddContainerButton").on("click", function () {
+
+                var oldName = d.name;
+                var newName = d3.select("#containerName").node().value;
+
+                // adjust any nodes to match the new container name
+                for (var j = 0; j < nodes.length; j++) {
+                    if (nodes[j].data.container_name == oldName) {
+                        nodes[j].data.container_name = newName;
+                    }
+                }
+
                 containers[i] = {
-                    name: d3.select("#containerName").node().value,
+                    name: newName,
                     type: d3.select("#containerType").node().value
                 };
                 $('#containerModal').modal('toggle');

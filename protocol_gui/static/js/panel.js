@@ -142,19 +142,32 @@ function drawWellPanel(selected_node, restart, form, deleteNode, serialiseDiagra
         .classed("control-label", true)
         .classed("col-sm-5", true)
         .attr("for", "container-name")
-        .text("Container name:");
+        .text("Container:");
 
-    div3.append("div")
+    var containerInput = div3.append("div")
         .classed("col-sm-5", true)
-        .append("input")
+        .append("select")
         .attr("type", "text")
         .attr("id", "container-name")
         .attr("name", "container-name")
         .classed("form-control", true)
-        .attr("value", selected_node.data.container_name)
+        .property("value", selected_node.data.container_name)
         .on("change", function () {
             selected_node.data.container_name = this.value;
         });
+
+    containerInput.selectAll("option").data(containers)
+        .enter()
+        .append("option")
+        .attr("id", function (d) {
+            return d.name;
+        })
+        .text(function (d) {
+            return d.name;
+        });
+
+    // N.B. need to add the options to the select before the value can be set
+    containerInput.property("value", selected_node.data.container_name);
 
 
     var div4 = form.append("div").classed("form-group", true);
@@ -429,14 +442,27 @@ function drawPoolPanel(selected_node, restart, form, deleteNode) {
 
     var containerInput = div1.append("div")
         .classed("col-sm-5", true)
-        .append("input")
-        .attr("type", "text")
+        .append("select")
         .attr("name", "container")
         .attr("value", selected_node.data.container_name)
         .on("change", function () {
             selected_node.data.container_name = this.value;
             restart();
         });
+
+    containerInput.selectAll("option").data(containers)
+        .enter()
+        .append("option")
+        .attr("id", function (d) {
+            return d.name;
+        })
+        .text(function (d) {
+            return d.name;
+        });
+
+    // N.B. need to add the options to the select before the value can be set
+    containerInput.property("value", selected_node.data.container_name);
+
 
     addDeleteButton(form, selected_node, deleteNode);
 }
@@ -457,14 +483,27 @@ function drawSelectPanel(selected_node, restart, form, deleteNode) {
 
     var containerInput = div1.append("div")
         .classed("col-sm-5", true)
-        .append("input")
-        .attr("type", "text")
+        .append("select")
         .attr("name", "container")
         .attr("value", selected_node.data.container_name)
         .on("change", function () {
             selected_node.data.container_name = this.value;
             restart();
         });
+
+
+    containerInput.selectAll("option").data(containers)
+        .enter()
+        .append("option")
+        .attr("id", function (d) {
+            return d.name;
+        })
+        .text(function (d) {
+            return d.name;
+        });
+
+    // N.B. need to add the options to the select before the value can be set
+    containerInput.property("value", selected_node.data.container_name);
 
 
     // Form to select samples
@@ -536,14 +575,27 @@ function drawOperationPanel(selected_node, selected_link, links, restart, redraw
 
     var containerInput = div1.append("div")
         .classed("col-sm-5", true)
-        .append("input")
-        .attr("type", "text")
+        .append("select")
         .attr("name", "container")
         .attr("value", selected_node.data.container_name)
         .on("change", function () {
             selected_node.data.container_name = this.value;
             restart();
         });
+
+    containerInput.selectAll("option").data(containers)
+        .enter()
+        .append("option")
+        .attr("id", function (d) {
+            return d.name;
+        })
+        .text(function (d) {
+            return d.name;
+        });
+
+    // N.B. need to add the options to the select before the value can be set
+    containerInput.property("value", selected_node.data.container_name);
+
 
     // If incident edge has 'addToThis' true, ensure container_name for this is consistent with this
     // and disable field to prevent it being changed
