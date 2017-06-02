@@ -1,6 +1,6 @@
 // set up initial nodes and links
 var nodes, lastNodeId, links, groups;
-var color = d3.scale.category20();
+var color = d3.scale.category10();
 
 
 function network_editor() {

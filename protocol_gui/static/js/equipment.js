@@ -1,15 +1,20 @@
 var containers, pipettes;
 
 function update_container_list() {
+    d3.select("#containers").selectAll("li").remove();
+
     var c = d3.select("#containers").select("ul").selectAll("li")
         .data(containers);
 
     c.enter().append("li");
     c.exit().remove();
 
-    var container_node = d3.select("#containers").select("ul").selectAll("li").text(function (d) {
-        return d.name + " (" + d.type + ") "
-    });
+    var container_node = d3.select("#containers").select("ul").selectAll("li");
+
+    container_node.append("b")
+        .text(function (d) {
+            return d.name + " (" + d.type + ") "
+        });
 
     // Add delete buttons
     container_node.append("button")
@@ -54,16 +59,26 @@ function update_container_list() {
                 updateDescriptionPanel();
             });
         });
+
+    container_node.selectAll("b").style('color', function (d) {
+        return color(containers.indexOf(d));
+    })
+
 }
 
 function update_pipette_list() {
+   d3.select("#pipettes").selectAll("li").remove();
+
     var p = d3.select("#pipettes").select("ul").selectAll("li")
         .data(pipettes);
 
     p.enter().append("li");
     p.exit().remove();
 
-    var pippette_nodes = d3.select("#pipettes").select("ul").selectAll("li")
+    var pippette_nodes = d3.select("#pipettes").select("ul").selectAll("li");
+
+    pippette_nodes
+        .append("b")
         .text(function (d) {
             return d.name + " (" + d.volume + " µl) "
         });
@@ -113,6 +128,11 @@ function update_pipette_list() {
 
             });
         });
+
+    pippette_nodes.selectAll("b").style('color', function (d) {
+        console.log(d)
+        return color(pipettes.indexOf(d));
+    });
 
 }
 
