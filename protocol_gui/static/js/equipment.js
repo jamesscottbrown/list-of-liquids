@@ -67,7 +67,7 @@ function update_container_list() {
 }
 
 function update_pipette_list() {
-   d3.select("#pipettes").selectAll("li").remove();
+    d3.select("#pipettes").selectAll("li").remove();
 
     var p = d3.select("#pipettes").select("ul").selectAll("li")
         .data(pipettes);
@@ -136,8 +136,7 @@ function update_pipette_list() {
 
 }
 
-
-d3.select("#add-pipette").on("click", function () {
+function addPipette(updateDescriptionPanelCallback) {
     $('#pipetteModal').modal('toggle');
     d3.select("#pipetteModal").select(".modal-title").text("Add pipette");
 
@@ -148,11 +147,14 @@ d3.select("#add-pipette").on("click", function () {
         });
         $('#pipetteModal').modal('toggle');
         update_pipette_list();
+
+        if (updateDescriptionPanelCallback){
+            updateDescriptionPanelCallback();
+        }
     });
-});
+}
 
-
-d3.select("#add-container").on("click", function () {
+function addContainer(updateDescriptionPanelCallback) {
     $('#containerModal').modal('toggle');
     d3.select("#containerModal").select(".modal-title").text("Add container");
 
@@ -164,7 +166,14 @@ d3.select("#add-container").on("click", function () {
         });
         $('#containerModal').modal('toggle');
         update_container_list();
+
+        if (updateDescriptionPanelCallback){
+            updateDescriptionPanelCallback();
+        }
     });
-});
+}
+
+d3.select("#add-pipette").on("click", addPipette);
+d3.select("#add-container").on("click", addContainer);
 
 

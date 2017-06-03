@@ -14,17 +14,17 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
         .attr("onsubmit", "return false;");
 
     if (selected_node && selected_node.type == "well") {
-        drawWellPanel(selected_node, restart, form, deleteNode, serialiseDiagram);
+        drawWellPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
     } else if (selected_node && selected_node.type == "aliquot") {
-        drawAliquotPanel(selected_node, restart, form, deleteNode, serialiseDiagram)
+        drawAliquotPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram)
     } else if (selected_node && selected_node.type == "process") {
         drawProcessPanel(selected_node, restart, form, deleteNode);
     } else if (selected_node && selected_node.type == "pool") {
-        drawPoolPanel(selected_node, restart, form, deleteNode);
+        drawPoolPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
     } else if (selected_node && selected_node.type == "select") {
-        drawSelectPanel(selected_node, restart, form, deleteNode);
+        drawSelectPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
     } else if (selected_node) {
-        drawOperationPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form, deleteNode, serialiseDiagram);
+        drawOperationPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
     } else if (selected_group) {
         drawRepeatPanel(selected_group, form)
     } else if (selected_link) {
@@ -96,10 +96,57 @@ function addDeleteButton(form, selected_node, deleteNode) {
         .text("Delete ").append("i").classed("fa", true).classed("fa-trash-o", true);
 }
 
+function addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
+    var div3 = form.append("div").classed("form-group", true);
+    div3.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "container-name")
+        .text("Container:");
+
+
+    var containerInput = div3.append("div")
+        .classed("col-sm-5", true)
+        .append("select")
+        .attr("type", "text")
+        .attr("id", "container-name")
+        .attr("name", "container-name")
+        .classed("form-control", true)
+        .property("value", selected_node.data.container_name)
+        .on("change", function () {
+            selected_node.data.container_name = this.value;
+        });
+
+    containerInput.selectAll("option").data(containers)
+        .enter()
+        .append("option")
+        .attr("id", function (d) {
+            return d.name;
+        })
+        .text(function (d) {
+            return d.name;
+        });
+
+    // N.B. need to add the options to the select before the value can be set
+    containerInput.property("value", selected_node.data.container_name);
+
+    
+    var updateDescriptionPanelCallback = function () {
+        updateDescriptionPanel(selected_node, null, null, links, restart, null, deleteNode, serialiseDiagram);
+    };
+
+    div3.append("b").classed("fa", true).classed("fa-plus", true)
+        .style("color", "#337ab7")
+        .on("click", function () {
+            addContainer(updateDescriptionPanelCallback)
+        });
+
+    return containerInput;
+}
 
 // Functions to draw specific types of panel:
 
-function drawWellPanel(selected_node, restart, form, deleteNode, serialiseDiagram) {
+function drawWellPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Initially present resource");
 
     var div1 = form.append("div").classed("form-group", true);
@@ -165,38 +212,7 @@ function drawWellPanel(selected_node, restart, form, deleteNode, serialiseDiagra
         });
 
 
-    var div3 = form.append("div").classed("form-group", true);
-    div3.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "container-name")
-        .text("Container:");
-
-    var containerInput = div3.append("div")
-        .classed("col-sm-5", true)
-        .append("select")
-        .attr("type", "text")
-        .attr("id", "container-name")
-        .attr("name", "container-name")
-        .classed("form-control", true)
-        .property("value", selected_node.data.container_name)
-        .on("change", function () {
-            selected_node.data.container_name = this.value;
-        });
-
-    containerInput.selectAll("option").data(containers)
-        .enter()
-        .append("option")
-        .attr("id", function (d) {
-            return d.name;
-        })
-        .text(function (d) {
-            return d.name;
-        });
-
-    // N.B. need to add the options to the select before the value can be set
-    containerInput.property("value", selected_node.data.container_name);
-
+    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
 
     var div4 = form.append("div").classed("form-group", true);
     div4.append("label")
@@ -223,7 +239,7 @@ function drawWellPanel(selected_node, restart, form, deleteNode, serialiseDiagra
 }
 
 
-function drawAliquotPanel(selected_node, restart, form, deleteNode, serialiseDiagram) {
+function drawAliquotPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Aliquot");
 
     var div1 = form.append("div").classed("form-group", true);
@@ -247,34 +263,7 @@ function drawAliquotPanel(selected_node, restart, form, deleteNode, serialiseDia
         });
 
 
-    var div3 = form.append("div").classed("form-group", true);
-    div3.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "container-name")
-        .text("Container:");
-
-    var containerInput = div3.append("div")
-        .classed("col-sm-5", true)
-        .append("select")
-        .attr("type", "text")
-        .attr("id", "container-name")
-        .attr("name", "container-name")
-        .classed("form-control", true)
-        .property("value", selected_node.data.container_name)
-        .on("change", function () {
-            selected_node.data.container_name = this.value;
-        });
-
-    containerInput.selectAll("option").data(containers)
-        .enter()
-        .append("option")
-        .attr("id", function (d) {
-            return d.name;
-        })
-        .text(function (d) {
-            return d.name;
-        });
+    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram);
 
     var contentsDiv = form.append("div");
     getContents(serialiseDiagram, selected_node, contentsDiv);
@@ -339,8 +328,8 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
             // ensure that no more than one link incident to the same node has addToThis true
             if (this.value == "Yes") {
                 links.filter(function (x) {
-                    return x.target.id == selected_link.target.id
-                })
+                        return x.target.id == selected_link.target.id
+                    })
                     .map(function (x) {
                         x.data.addToThis = false
                     });
@@ -395,6 +384,17 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
     // N.B. need to add the options to the select before the value can be set
     pipetteInput.property("value", selected_link.data.pipette_name);
+
+    // Create new pipette if plus sign is clicked
+    var updateDescriptionPanelCallback = function () {
+        updateDescriptionPanel(selected_node, selected_link, null, links, restart, redrawLinkLabels, null, null)
+    };
+    pipetteDiv.append("b")
+        .classed("fa", true).classed("fa-plus", true)
+        .style("color", "#337ab7")
+        .on("click", function () {
+            addPipette(updateDescriptionPanelCallback);
+        });
 
 
     // Form to set whether we are changing tips
@@ -552,82 +552,20 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
     addDeleteButton(form, selected_node, deleteNode);
 }
 
-function drawPoolPanel(selected_node, restart, form, deleteNode) {
+function drawPoolPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Pool samples together");
-
-    // Set container
-    var div1 = form.append("div").classed("form-group", true);
-    div1.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "container")
-        .text("Container:");
-
-    var containerInput = div1.append("div")
-        .classed("col-sm-5", true)
-        .append("select")
-        .attr("name", "container")
-        .attr("value", selected_node.data.container_name)
-        .on("change", function () {
-            selected_node.data.container_name = this.value;
-            restart();
-        });
-
-    containerInput.selectAll("option").data(containers)
-        .enter()
-        .append("option")
-        .attr("id", function (d) {
-            return d.name;
-        })
-        .text(function (d) {
-            return d.name;
-        });
-
-    // N.B. need to add the options to the select before the value can be set
-    containerInput.property("value", selected_node.data.container_name);
-
-
+    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
     addDeleteButton(form, selected_node, deleteNode);
 }
 
-function drawSelectPanel(selected_node, restart, form, deleteNode) {
+function drawSelectPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.selectAll("div").remove();
     form.selectAll("h2").remove();
 
     form.append("h2").style().text("Select");
 
     // Set container
-    var div1 = form.append("div").classed("form-group", true);
-    div1.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "container")
-        .text("Container:");
-
-    var containerInput = div1.append("div")
-        .classed("col-sm-5", true)
-        .append("select")
-        .attr("name", "container")
-        .attr("value", selected_node.data.container_name)
-        .on("change", function () {
-            selected_node.data.container_name = this.value;
-            restart();
-        });
-
-
-    containerInput.selectAll("option").data(containers)
-        .enter()
-        .append("option")
-        .attr("id", function (d) {
-            return d.name;
-        })
-        .text(function (d) {
-            return d.name;
-        });
-
-    // N.B. need to add the options to the select before the value can be set
-    containerInput.property("value", selected_node.data.container_name);
-
+    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
 
     // Form to select samples
     var selection = selected_node.data.selection;
@@ -648,7 +586,7 @@ function drawSelectPanel(selected_node, restart, form, deleteNode) {
     label.append("i").classed("fa", true).classed("fa-minus", true)
         .on("click", function (d, i) {
             selection.splice(i, 1);
-            drawSelectPanel(selected_node, restart, form, deleteNode);
+            drawSelectPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
         });
     label.append("b").text(function (d, i) {
         return "Selection " + (i + 1) + ":";
@@ -680,13 +618,13 @@ function drawSelectPanel(selected_node, restart, form, deleteNode) {
         .append("i").classed("fa", true).classed("fa-plus", true)
         .on("click", function () {
             selection.push(0);
-            drawSelectPanel(selected_node, restart, form, deleteNode);
+            drawSelectPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
         });
 
     addDeleteButton(form, selected_node, deleteNode);
 }
 
-function drawOperationPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form, deleteNode, serialiseDiagram) {
+function drawOperationPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Operation");
 
     var div1 = form.append("div").classed("form-group", true);
@@ -696,28 +634,7 @@ function drawOperationPanel(selected_node, selected_link, links, restart, redraw
         .attr("for", "container")
         .text("Container:");
 
-    var containerInput = div1.append("div")
-        .classed("col-sm-5", true)
-        .append("select")
-        .attr("name", "container")
-        .attr("value", selected_node.data.container_name)
-        .on("change", function () {
-            selected_node.data.container_name = this.value;
-            restart();
-        });
-
-    containerInput.selectAll("option").data(containers)
-        .enter()
-        .append("option")
-        .attr("id", function (d) {
-            return d.name;
-        })
-        .text(function (d) {
-            return d.name;
-        });
-
-    // N.B. need to add the options to the select before the value can be set
-    containerInput.property("value", selected_node.data.container_name);
+    var containerInput = addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
 
 
     // If incident edge has 'addToThis' true, ensure container_name for this is consistent with this
