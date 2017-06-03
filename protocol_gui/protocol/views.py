@@ -169,6 +169,12 @@ def process_node(protocol_obj, node_id):
         components2 = get_constituent_aliquots(protocol_obj, incident_links[1])
         return cross(components1, components2)
 
+    elif node["type"] == "aliquot":
+
+        # aliquot has only one input
+        components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
+        return components1 * int(incident_links[0]["data"]["num_duplicates"])
+
     elif node["type"] == "process":
         pass
 
