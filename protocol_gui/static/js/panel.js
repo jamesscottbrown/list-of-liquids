@@ -32,14 +32,14 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
     }
 }
 
-function getContents(serialiseDiagram, selected_node) {
+function getContents(serialiseDiagram, selected_node, div) {
     var protocol_string = serialiseDiagram();
 
     $.ajax({
         type: "GET",
         contentType: "application/json; charset=utf-8",
         url: window.location.href + "/contents",
-        dataType: 'html',
+        dataType: 'json',
         async: true,
         data: {protocol_string: protocol_string, selected_node: selected_node.id},
         beforeSend: function (xhr) {
@@ -47,13 +47,39 @@ function getContents(serialiseDiagram, selected_node) {
         },
         success: function (res) {
             result = res;
-            console.log(result)
+            console.log(result);
+            listContents(result, div);
         },
         error: function (result, textStatus) {
             console.log(result);
             console.log(textStatus);
         }
     });
+
+}
+
+function listContents(result, div) {
+
+    div.append("h3").text("Contents");
+
+    var outer_list_items = div
+        .append("ol")
+        .selectAll("li")
+        .data(result)
+        .enter()
+        .append("li").style("margin-top", "10px")
+        .append("ul");
+
+
+    var items = outer_list_items.selectAll("li")
+        .data(function (d) {
+            return d
+        })
+        .enter()
+        .append("li")
+        .text(function (d) {
+            return d;
+        });
 }
 
 
@@ -191,7 +217,8 @@ function drawWellPanel(selected_node, restart, form, deleteNode, serialiseDiagra
             selected_node.data.well_addresses = this.value;
         });
 
-    getContents(serialiseDiagram, selected_node);
+    var contentsDiv = form.append("div");
+    getContents(serialiseDiagram, selected_node, contentsDiv);
     addDeleteButton(form, selected_node, deleteNode);
 }
 
@@ -249,7 +276,9 @@ function drawAliquotPanel(selected_node, restart, form, deleteNode, serialiseDia
             return d.name;
         });
 
-    getContents(serialiseDiagram, selected_node);
+    var contentsDiv = form.append("div");
+    getContents(serialiseDiagram, selected_node, contentsDiv);
+
     addDeleteButton(form, selected_node, deleteNode);
 }
 
@@ -310,8 +339,8 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
             // ensure that no more than one link incident to the same node has addToThis true
             if (this.value == "Yes") {
                 links.filter(function (x) {
-                        return x.target.id == selected_link.target.id
-                    })
+                    return x.target.id == selected_link.target.id
+                })
                     .map(function (x) {
                         x.data.addToThis = false
                     });
@@ -703,11 +732,13 @@ function drawOperationPanel(selected_node, selected_link, links, restart, redraw
         }
     }
 
+    var contentsDiv = form.append("div");
+    getContents(serialiseDiagram, selected_node, contentsDiv);
+
     addDeleteButton(form, selected_node, deleteNode);
     // TODO: options menu to change type (alternative to context menu)
     // TODO: display of resulting aliquots
 
-    getContents(serialiseDiagram, selected_node);
 
 }
 
