@@ -51,11 +51,6 @@ circle.node {
       stroke: rgb(255, 255, 255);
 }
 
-circle.node.aliquot{
-  fill: rgb(255, 127, 14);
-  stroke: rgb(178, 88, 9);
-}
-
 rect.node{
     fill: rgb(255, 255, 255);
     stroke: rgb(255, 255, 255);

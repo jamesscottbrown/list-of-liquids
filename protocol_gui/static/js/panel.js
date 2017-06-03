@@ -15,6 +15,8 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
 
     if (selected_node && selected_node.type == "well") {
         drawWellPanel(selected_node, restart, form, deleteNode, serialiseDiagram);
+    } else if (selected_node && selected_node.type == "aliquot") {
+        drawAliquotPanel(selected_node, restart, form, deleteNode, serialiseDiagram)
     } else if (selected_node && selected_node.type == "process") {
         drawProcessPanel(selected_node, restart, form, deleteNode);
     } else if (selected_node && selected_node.type == "pool") {
@@ -193,6 +195,63 @@ function drawWellPanel(selected_node, restart, form, deleteNode, serialiseDiagra
     addDeleteButton(form, selected_node, deleteNode);
 }
 
+
+function drawAliquotPanel(selected_node, restart, form, deleteNode, serialiseDiagram) {
+    form.append("h2").style().text("Aliquot");
+
+    var div1 = form.append("div").classed("form-group", true);
+    div1.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "name")
+        .text("Name:");
+
+    div1.append("div")
+        .classed("col-sm-5", true)
+        .append("input")
+        .attr("type", "text")
+        .attr("name", "name")
+        .classed("form-control", true)
+        .attr("value", selected_node.label)
+        .on("change", function () {
+            selected_node.label = this.value;
+            restart();
+            console.log(nodes)
+        });
+
+
+    var div3 = form.append("div").classed("form-group", true);
+    div3.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "container-name")
+        .text("Container:");
+
+    var containerInput = div3.append("div")
+        .classed("col-sm-5", true)
+        .append("select")
+        .attr("type", "text")
+        .attr("id", "container-name")
+        .attr("name", "container-name")
+        .classed("form-control", true)
+        .property("value", selected_node.data.container_name)
+        .on("change", function () {
+            selected_node.data.container_name = this.value;
+        });
+
+    containerInput.selectAll("option").data(containers)
+        .enter()
+        .append("option")
+        .attr("id", function (d) {
+            return d.name;
+        })
+        .text(function (d) {
+            return d.name;
+        });
+
+    getContents(serialiseDiagram, selected_node);
+    addDeleteButton(form, selected_node, deleteNode);
+}
 
 function drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form) {
 

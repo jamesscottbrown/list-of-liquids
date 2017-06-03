@@ -35,9 +35,9 @@ function network_editor() {
 
         for (i = 0; i < nodes.length; i++) {
             if (nodes[i].hasOwnProperty('parentIds')) {
-                var ind1 = nodePosition[nodes[i].parentIds[0]];
-                var ind2 = nodePosition[nodes[i].parentIds[1]];
-                nodes[i].parents = [nodes[ind1], nodes[ind2]];
+                nodes[i].parents = nodes[i].parentIds.map(function (x) {
+                    return nodes[nodePosition[x]]
+                });
             }
 
             var nodeType = nodes[i].type;
@@ -373,8 +373,8 @@ function network_editor() {
             .on('mousedown', function (d) {
 
                 // ignore right click
-                if ((this.hasOwnProperty("which") && this.which == 3) // Firefox, WebKit
-                    || (this.hasOwnProperty("button") && this.button == 2))  // IE
+                if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
+                    || ("button" in d3.event && d3.event.button == 2))  // IE
                     return;
 
                 if (selectingGroup) {
@@ -449,7 +449,13 @@ function network_editor() {
                         addProcessNodeToNode(node, 'select');
                     }
                 }, {
-                    divider: true
+                    title: 'Take aliquot',
+                    action: function (elm, d) {
+                        var node = nodes.filter(function (n) {
+                            return n.id == d.id
+                        })[0];
+                        takeAliquot(node);
+                    }
                 }, {
                     title: 'Delete',
                     action: function (elm, d) {
@@ -517,6 +523,13 @@ function network_editor() {
 
             deleteDownFromNode(d);
         }
+
+        // clear line
+        drag_line
+            .classed('hidden', true)
+            .style('marker-end', '');
+        resetMouseVars();
+
         restart();
     }
 
@@ -781,6 +794,16 @@ function network_editor() {
                 addProcessNodeToNode(node, 'select');
             }
         });
+        menu.push({
+            title: 'Take aliquot',
+            action: function (elm, d) {
+                var node = nodes.filter(function (n) {
+                    return n.id == d.id
+                })[0];
+                takeAliquot(node);
+            }
+        });
+
 
         menu.push({
             divider: true
@@ -916,7 +939,9 @@ function network_editor() {
             };
 
             if (node.hasOwnProperty("parents")) {
-                converted_node.parentIds = [node.parents[0].id, node.parents[1].id];
+                converted_node.parentIds = node.parents.map(function (x) {
+                    return x.id
+                });
             }
             node_list.push(converted_node);
         }
@@ -1004,10 +1029,37 @@ function network_editor() {
     }
 
 
+    function takeAliquot(node) {
+        var i = nodes.push({
+            id: ++lastNodeId, type: "aliquot", x: width * Math.random(), y: height / 2, label: "aliquot",
+            parents: [node], data: {container_name: ''}
+        });
+        i--;
+
+        links.push({
+            source: node,
+            target: nodes[i],
+            data: getDefaultLinkData(false)
+        });
+
+        selected_link = null;
+        selected_node = nodes[i];
+
+        // clear line
+        drag_line
+            .classed('hidden', true)
+            .style('marker-end', '');
+
+        resetMouseVars();
+
+        restart();
+    }
+
     // app starts here
     svg.on('mousemove', mousemove)
         .on('mouseup', mouseup)
-        .on('contextmenu', d3.contextMenu([{
+        .on('contextmenu',
+            d3.contextMenu([{
                 title: 'Add Well',
                 action: addWellNode
             }, {
@@ -1022,7 +1074,6 @@ function network_editor() {
                 title: 'Save',
                 action: save
             }
-
             ])
         );
 
