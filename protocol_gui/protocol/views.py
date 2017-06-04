@@ -182,7 +182,15 @@ def process_node(protocol_obj, node_id):
         pass
 
     elif node["type"] == "select":
-        pass
+        components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
+        selection = node_data["selection"]
+
+        result = []
+        for component, is_elected in zip(components1, selection):
+            if is_elected:
+                result.append(component)
+
+        return result
 
 
 def get_constituent_aliquots(protocol_obj, link):

@@ -32,8 +32,12 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
     }
 }
 
-function getContents(serialiseDiagram, selected_node, div) {
+function getContents(serialiseDiagram, queryNode, div, drawFunction) {
     var protocol_string = serialiseDiagram();
+
+    if (!drawFunction) {
+        drawFunction = listContents;
+    }
 
     $.ajax({
         type: "GET",
@@ -41,14 +45,14 @@ function getContents(serialiseDiagram, selected_node, div) {
         url: window.location.href + "/contents",
         dataType: 'json',
         async: true,
-        data: {protocol_string: protocol_string, selected_node: selected_node.id},
+        data: {protocol_string: protocol_string, selected_node: queryNode.id},
         beforeSend: function (xhr) {
             xhr.setRequestHeader("X-CSRFToken", csrf_token);
         },
         success: function (res) {
             result = res;
             console.log(result);
-            listContents(result, div);
+            drawFunction(result, div);
         },
         error: function (result, textStatus) {
             console.log(result);
@@ -80,6 +84,56 @@ function listContents(result, div) {
         .text(function (d) {
             return d;
         });
+}
+
+
+function selectContents(selected_node) {
+    return function (result, div) {
+
+        // add index to results
+        for (var i = 0; i < result.length; i++) {
+            result[i].index = i;
+        }
+
+        // if necessary, extend or truncate list of which nodes are selected
+        while (selected_node.data.selection.length < result.length) {
+            selected_node.data.selection.push(false);
+        }
+
+        while (selected_node.data.selection.length > result.length) {
+            selected_node.data.selection.pop();
+        }
+
+        div.append("h3").text("Contents");
+
+        var outer_list_divs = div
+            .append("ol")
+            .selectAll("div")
+            .data(result)
+            .enter()
+            .append("div").classed("checkbox", "true").attr("name", function (d) {
+                return "checkbox_contents_" + d.index;
+            });
+
+
+        outer_list_divs
+            .append("input").attr("type", "checkbox").attr("checked", function (d) {
+                return selected_node.data.selection[d.index] ? 'checked' : null;
+            })
+            .on("change", function (d) {
+                selected_node.data.selection[d.index] = this.checked;
+            });
+
+        var items = outer_list_divs.append("ul").selectAll("li")
+            .data(function (d) {
+                return d
+            })
+            .enter()
+            .append("li")
+            .text(function (d) {
+                return d;
+            });
+    }
 }
 
 
@@ -130,7 +184,7 @@ function addContainerSelect(selected_node, links, restart, form, deleteNode, ser
     // N.B. need to add the options to the select before the value can be set
     containerInput.property("value", selected_node.data.container_name);
 
-    
+
     var updateDescriptionPanelCallback = function () {
         updateDescriptionPanel(selected_node, null, null, links, restart, null, deleteNode, serialiseDiagram);
     };
@@ -567,59 +621,14 @@ function drawSelectPanel(selected_node, links, restart, form, deleteNode, serial
     // Set container
     addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
 
-    // Form to select samples
-    var selection = selected_node.data.selection;
 
-    var div2 = form.append("div");
-
-    var selectionDivs = div2.selectAll("div")
-        .data(selection)
-        .enter()
-        .append("div")
-        .classed("form-group", true);
-
-    var label = selectionDivs.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "Well");
-
-    label.append("i").classed("fa", true).classed("fa-minus", true)
-        .on("click", function (d, i) {
-            selection.splice(i, 1);
-            drawSelectPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
-        });
-    label.append("b").text(function (d, i) {
-        return "Selection " + (i + 1) + ":";
-    });
-
-    selectionDivs.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "value")
-        .attr("value", function (d) {
-            return d;
-        })
-        .on("change", function () {
-            var new_selection = [];
-            var selectionInputs = selectionDivs.selectAll("input");
-            for (var i = 0; i < selectionInputs.length; i++) {
-                new_selection.push(parseFloat(selectionInputs[i][0].value))
-            }
-            selected_node.data.selection = new_selection;
-        });
-
-
-    // adding an extra volume
-    div2.append("div")
-        .classed("form-group", true)
-        .append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .append("i").classed("fa", true).classed("fa-plus", true)
-        .on("click", function () {
-            selection.push(0);
-            drawSelectPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
-        });
+    // Note that the user selects from the contents of the parent node, not the contents of the selected node
+    // (which consists only of what the user has selected)
+    var contentsDiv = form.append("div");
+    var parentNode = links.filter(function (x) {
+        return x.target == selected_node
+    })[0].source;
+    getContents(serialiseDiagram, parentNode, contentsDiv, selectContents(selected_node));
 
     addDeleteButton(form, selected_node, deleteNode);
 }
