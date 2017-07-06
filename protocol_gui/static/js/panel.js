@@ -92,7 +92,7 @@ function listContents(result, div, queryNode, serialiseDiagram) {
             .on("click", function () {
                 // need to make sure populationWellAssignmentModal isn't called until modal is shown
                 // as we scale SVG to fit inside it
-                $('#locationModal').on('shown.bs.modal', function(){populationWellAssignmentModal(queryNode.data.container_name, serialiseDiagram)});
+                $('#locationModal').one('shown.bs.modal', function(){populationWellAssignmentModal(queryNode.data.container_name, serialiseDiagram)});
                 $('#locationModal').modal('toggle');
             });
 

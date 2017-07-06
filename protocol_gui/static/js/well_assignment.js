@@ -8,6 +8,15 @@ function populationWellAssignmentModal(container_name, serialiseDiagram) {
 
     d3.select("#locationModal").select(".modal-title").text("Well assignments for " + container_name);
 
+    var div = d3.select("#locationModal").select("#well-list");
+
+    div.selectAll("div").remove();
+    div.selectAll("li").remove();
+    div.selectAll("ul").remove();
+    div.selectAll("ol").remove();
+    div.selectAll("h4").remove();
+
+
     drawContainerDiagram(selected_container);
     listContentsOfContainer(container_name, serialiseDiagram);
 }
@@ -27,13 +36,7 @@ function listContentsOfContainer(container_name, serialiseDiagram) {
 }
 
 function listContainerContents(result, div, queryNode) {
-
-    div.selectAll("div").remove();
-    div.selectAll("li").remove();
-    div.selectAll("ul").remove();
-    div.selectAll("ol").remove();
-    div.selectAll("h4").remove();
-
+    
     //d3.select("#node-" + queryNode.id).remove();
     var newDiv = div.append("div").attr("id", "node-" + queryNode.id);
 

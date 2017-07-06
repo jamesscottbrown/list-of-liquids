@@ -65,7 +65,7 @@ function update_container_list() {
             .on("click", function (container) {
                 // need to make sure populationWellAssignmentModal isn't called until modal is shown
                 // as we scale SVG to fit inside it
-                $('#locationModal').on('shown.bs.modal', function(){populationWellAssignmentModal(container.name, serialiseDiagram)});
+                $('#locationModal').one('shown.bs.modal', function(){populationWellAssignmentModal(container.name, serialiseDiagram)});
                 $('#locationModal').modal('toggle');
             });
 
