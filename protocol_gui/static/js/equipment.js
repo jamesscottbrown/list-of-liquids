@@ -60,6 +60,16 @@ function update_container_list() {
             });
         });
 
+            container_node.append("a")
+            .text("Show or Set well locations")
+            .on("click", function (container) {
+                // need to make sure populationWellAssignmentModal isn't called until modal is shown
+                // as we scale SVG to fit inside it
+                $('#locationModal').on('shown.bs.modal', function(){populationWellAssignmentModal(container.name, serialiseDiagram)});
+                $('#locationModal').modal('toggle');
+            });
+
+
     container_node.selectAll("b").style('color', function (d) {
         return color(containers.indexOf(d));
     })

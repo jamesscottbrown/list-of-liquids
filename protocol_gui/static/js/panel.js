@@ -52,7 +52,7 @@ function getContents(serialiseDiagram, queryNode, div, drawFunction) {
         success: function (res) {
             result = res;
             console.log(result);
-            drawFunction(result, div);
+            drawFunction(result, div, queryNode, serialiseDiagram);
         },
         error: function (result, textStatus) {
             console.log(result);
@@ -62,7 +62,8 @@ function getContents(serialiseDiagram, queryNode, div, drawFunction) {
 
 }
 
-function listContents(result, div) {
+
+function listContents(result, div, queryNode, serialiseDiagram) {
 
     div.append("h3").text("Contents");
 
@@ -84,6 +85,20 @@ function listContents(result, div) {
         .text(function (d) {
             return d;
         });
+
+    if (queryNode.data.container_name) {
+        div.append("a")
+            .text("Show or Set well locations")
+            .on("click", function () {
+                // need to make sure populationWellAssignmentModal isn't called until modal is shown
+                // as we scale SVG to fit inside it
+                $('#locationModal').on('shown.bs.modal', function(){populationWellAssignmentModal(queryNode.data.container_name, serialiseDiagram)});
+                $('#locationModal').modal('toggle');
+            });
+
+    } else {
+        div.append("p").text("To set well locations you must first set the container")
+    }
 }
 
 

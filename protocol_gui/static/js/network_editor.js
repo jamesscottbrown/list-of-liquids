@@ -1,5 +1,5 @@
 // set up initial nodes and links
-var nodes, lastNodeId, links, groups;
+var nodes, lastNodeId, links, groups, serialiseDiagram;
 var color = d3.scale.category10();
 
 
@@ -924,7 +924,7 @@ function network_editor() {
         return i;
     }
 
-    function serialiseDiagram() {
+    serialiseDiagram = function () {
         // note that we cannot serialise {nodes: nodes, links: links} because of cyclic references
         var node_list = [];
         for (i = 0; i < nodes.length; i++) {
