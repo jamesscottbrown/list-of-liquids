@@ -21,20 +21,18 @@ function listContentsOfContainer(container_name, serialiseDiagram) {
 
     var div = d3.select("#locationModal").select("#well-list");
 
-    // TODO: fix clearing
-    div.selectAll("div").remove();
-    div.selectAll("li").remove();
-    div.selectAll("ul").remove();
-    div.selectAll("ol").remove();
-    div.selectAll("h4").remove();
-
-
     for (var i = 0; i < located_nodes.length; i++) {
         getContents(serialiseDiagram, located_nodes[i], div, listContainerContents);
     }
 }
 
 function listContainerContents(result, div, queryNode) {
+
+    div.selectAll("div").remove();
+    div.selectAll("li").remove();
+    div.selectAll("ul").remove();
+    div.selectAll("ol").remove();
+    div.selectAll("h4").remove();
 
     //d3.select("#node-" + queryNode.id).remove();
     var newDiv = div.append("div").attr("id", "node-" + queryNode.id);
