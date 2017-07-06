@@ -1,4 +1,4 @@
-var selected_container;
+var selected_container, color;
 
 function populationWellAssignmentModal(container_name, serialiseDiagram) {
 
@@ -29,6 +29,7 @@ function listContentsOfContainer(container_name, serialiseDiagram) {
 
 
     var div = d3.select("#locationModal").select("#well-list");
+    var color = d3.scale.category10().domain(located_nodes.length);
 
     for (var i = 0; i < located_nodes.length; i++) {
         getContents(serialiseDiagram, located_nodes[i], div, listContainerContents);
@@ -36,7 +37,7 @@ function listContentsOfContainer(container_name, serialiseDiagram) {
 }
 
 function listContainerContents(result, div, queryNode) {
-    
+
     //d3.select("#node-" + queryNode.id).remove();
     var newDiv = div.append("div").attr("id", "node-" + queryNode.id);
 
@@ -302,7 +303,8 @@ function resetAppearances() {
 
     d3.selectAll("circle")
         .style("fill", function (d) {
-            return selected_container.contents[d.name] ? "black" : "white";
+            var contents = selected_container.contents[d.name];
+            return contents ? color(contents.operation_index) : "white";
         });
 
 
