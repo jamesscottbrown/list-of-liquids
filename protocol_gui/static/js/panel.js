@@ -635,15 +635,7 @@ function drawSelectPanel(selected_node, links, restart, form, deleteNode, serial
 function drawOperationPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Operation");
 
-    var div1 = form.append("div").classed("form-group", true);
-    div1.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "container")
-        .text("Container:");
-
     var containerInput = addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
-
 
     // If incident edge has 'addToThis' true, ensure container_name for this is consistent with this
     // and disable field to prevent it being changed
