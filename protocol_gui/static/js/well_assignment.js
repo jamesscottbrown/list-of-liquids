@@ -1,4 +1,4 @@
-var selected_container, color;
+var selected_container, color, located_nodes;
 
 function populationWellAssignmentModal(container_name, serialiseDiagram) {
 
@@ -23,7 +23,7 @@ function populationWellAssignmentModal(container_name, serialiseDiagram) {
 
 
 function listContentsOfContainer(container_name, serialiseDiagram) {
-    var located_nodes = nodes.filter(function (node) {
+    located_nodes = nodes.filter(function (node) {
         return node.data.container_name == container_name;
     });
 
@@ -36,6 +36,16 @@ function listContentsOfContainer(container_name, serialiseDiagram) {
     }
 }
 
+function getColors(nodeId) {
+    var index = 0;
+    for (var i = 0; i < located_nodes.length; i++) {
+        if (located_nodes[i].id == nodeId) {
+            index = i;
+        }
+    }
+    return color(index);
+}
+
 function listContainerContents(result, div, queryNode) {
 
     //d3.select("#node-" + queryNode.id).remove();
@@ -46,14 +56,15 @@ function listContainerContents(result, div, queryNode) {
         data.push({contents: result[i], aliquot_index: i, operation_index: queryNode.id});
     }
 
-    newDiv.append("h4").text("Node " + queryNode.id);
-
     var outer_list_items = div
         .append("ol")
+        .style("margin-top", "20px")
         .selectAll("li")
         .data(data)
         .enter()
         .append("li").style("margin-top", "10px")
+        .style("border-right", "5px solid " + getColors(queryNode.id))
+
         .classed("well-contents", true)
 
         .append("ul")
@@ -304,7 +315,7 @@ function resetAppearances() {
     d3.selectAll("circle")
         .style("fill", function (d) {
             var contents = selected_container.contents[d.name];
-            return contents ? color(contents.operation_index) : "white";
+            return contents ? getColors(contents.operation_index) : "white";
         });
 
 
