@@ -370,7 +370,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
         .attr("name", "duplicates")
         .attr("id", "duplicates")
         .on("change", function () {
-            selected_link.data.num_duplicates = selected_link.data.num_duplicates;
+            selected_link.data.num_duplicates = this.value;
         });
 
     duplicatesInput.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
