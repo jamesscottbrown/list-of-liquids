@@ -281,26 +281,7 @@ function drawWellPanel(selected_node, links, restart, form, deleteNode, serialis
         });
 
 
-    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
-
-    var div4 = form.append("div").classed("form-group", true);
-    div4.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "wells")
-        .text("Well locations:");
-
-    div4.append("div")
-        .classed("col-sm-5", true)
-        .append("input")
-        .attr("type", "text")
-        .attr("id", "wells")
-        .attr("name", "wells")
-        .classed("form-control", true)
-        .attr("value", selected_node.data.well_addresses)
-        .on("change", function () {
-            selected_node.data.well_addresses = this.value;
-        });
+    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram);
 
     var contentsDiv = form.append("div");
     getContents(serialiseDiagram, selected_node, contentsDiv);
