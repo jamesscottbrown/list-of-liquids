@@ -10,12 +10,7 @@ function populationWellAssignmentModal(container_name, serialiseDiagram) {
 
     var div = d3.select("#locationModal").select("#well-list");
 
-    div.selectAll("div").remove();
-    div.selectAll("li").remove();
-    div.selectAll("ul").remove();
-    div.selectAll("ol").remove();
-    div.selectAll("h4").remove();
-
+    div.node().innerHTML = "";
 
     drawContainerDiagram(selected_container);
     listContentsOfContainer(container_name, serialiseDiagram);
