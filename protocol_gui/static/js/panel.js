@@ -65,6 +65,8 @@ function getContents(serialiseDiagram, queryNode, div, drawFunction) {
 
 function listContents(result, div, queryNode, serialiseDiagram) {
 
+    div.node().innerHTML = "";
+
     div.append("h3").text("Contents");
 
     var outer_list_items = div
@@ -257,6 +259,7 @@ function drawWellPanel(selected_node, links, restart, form, deleteNode, serialis
         .attr("value", selected_node.data.num_wells)
         .on("change", function () {
             selected_node.data.num_wells = this.value;
+            getContents(serialiseDiagram, selected_node, contentsDiv);
         });
 
 
