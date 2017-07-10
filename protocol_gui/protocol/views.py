@@ -19,8 +19,11 @@ def list_protocols():
     """List all user's protocol."""
     return render_template('protocols/list_protocols.html')
 
-
 @blueprint.route('/<int:protocol_id>')
+def protocol_no_backslash(protocol_id):
+    return redirect(url_for('protocol.protocol', protocol_id=protocol_id))
+
+@blueprint.route('/<int:protocol_id>/')
 def protocol(protocol_id):
     """List details of a protocol."""
     current_protocol = Protocol.query.filter_by(id=protocol_id).first()

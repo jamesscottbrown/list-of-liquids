@@ -980,7 +980,7 @@ function network_editor() {
         $.ajax({
             type: "POST",
             contentType: "application/json; charset=utf-8",
-            url: window.location.href + "/save",
+            url: window.location.href + "save",
             dataType: 'html',
             async: true,
             data: protocol_string,
