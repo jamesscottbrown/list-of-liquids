@@ -54,7 +54,8 @@ function update_container_list() {
                 containers[i] = {
                     name: newName,
                     type: d3.select("#containerType").node().value,
-                    location: d3.select("#containerLocation").node().value
+                    location: d3.select("#containerLocation").node().value,
+                    contents: d.contents
                 };
                 $('#containerModal').modal('toggle');
                 update_container_list();
