@@ -132,7 +132,13 @@ function update_pipette_list() {
 
                 pipettes[i] = {
                     name: newName,
-                    volume: d3.select("#pipetteVolume").node().value
+                    volume: d3.select("#pipetteVolume").node().value,
+                    min_volume: d3.select("#pipetteMinVolume").node().value,
+                    axis: d3.select("#pipetteAxis").node().value,
+                    tipracks: d3.select("#pipetteTipRacks").node().value,
+                    channels: d3.select("#pipetteChannels").node().value,
+                    aspirateSpeed: d3.select("#pipetteAspirateSpeed").node().value,
+                    dispenseSpeed: d3.select("#pipetteDispenseSpeed").node().value
                 };
                 $('#pipetteModal').modal('toggle');
                 update_pipette_list();
@@ -155,7 +161,13 @@ function addPipette(updateDescriptionPanelCallback) {
     d3.select("#AddPipetteButton").on("click", function () {
         pipettes.push({
             name: d3.select("#pipetteName").node().value,
-            volume: d3.select("#pipetteVolume").node().value
+            volume: d3.select("#pipetteVolume").node().value,
+            min_volume: d3.select("#pipetteMinVolume").node().value,
+            axis: d3.select("#pipetteAxis").node().value,
+            tipracks: d3.select("#pipetteTipRacks").node().value,
+            channels: d3.select("#pipetteChannels").node().value,
+            aspirateSpeed: d3.select("#pipetteAspirateSpeed").node().value,
+            dispenseSpeed: d3.select("#pipetteDispenseSpeed").node().value
         });
         $('#pipetteModal').modal('toggle');
         update_pipette_list();
