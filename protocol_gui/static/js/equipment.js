@@ -37,6 +37,7 @@ function update_container_list() {
             d3.select("#containerModal").select(".modal-title").text("Edit container");
             d3.select("#containerName").property('value', d.name);
             d3.select("#containerType").property('value', d.type);
+            d3.select("#containerLocation").property('value', d.location);
 
             d3.select("#AddContainerButton").on("click", function () {
 
@@ -52,7 +53,8 @@ function update_container_list() {
 
                 containers[i] = {
                     name: newName,
-                    type: d3.select("#containerType").node().value
+                    type: d3.select("#containerType").node().value,
+                    location: d3.select("#containerLocation").node().value
                 };
                 $('#containerModal').modal('toggle');
                 update_container_list();
@@ -172,7 +174,9 @@ function addContainer(updateDescriptionPanelCallback) {
     d3.select("#AddContainerButton").on("click", function () {
         containers.push({
             name: d3.select("#containerName").node().value,
-            type: d3.select("#containerType").node().value
+            type: d3.select("#containerType").node().value,
+            location: d3.select("#containerLocation").node().value,
+            contents: {}
         });
         $('#containerModal').modal('toggle');
         update_container_list();
