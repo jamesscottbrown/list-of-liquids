@@ -42,7 +42,7 @@ function getContents(serialiseDiagram, queryNode, div, drawFunction) {
     $.ajax({
         type: "GET",
         contentType: "application/json; charset=utf-8",
-        url: window.location.href + "/contents",
+        url: window.location.href + "contents",
         dataType: 'json',
         async: true,
         data: {protocol_string: protocol_string, selected_node: queryNode.id},
