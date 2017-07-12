@@ -494,14 +494,8 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
         .classed("col-sm-5", true)
         .attr("for", "volume");
 
-    label.append("i").classed("fa", true).classed("fa-minus", true)
-        .on("click", function (d, i) {
-            volumes.splice(i, 1);
-            drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form);
-            redrawLinkLabels();
-        });
     label.append("b").text(function (d, i) {
-        return "Volume " + (i + 1) + ":";
+        return "Volume:";
     });
 
     volumeDivs.append("input")
@@ -525,18 +519,6 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
         volumeDivs.selectAll('input').attr('disabled', true);
     }
 
-    // adding an extra volume
-    div2.append("div")
-        .classed("form-group", true)
-        .append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .append("i").classed("fa", true).classed("fa-plus", true)
-        .on("click", function () {
-            volumes.push(0);
-            drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form);
-            redrawLinkLabels();
-        });
 }
 
 function drawProcessPanel(selected_node, restart, form, deleteNode) {
