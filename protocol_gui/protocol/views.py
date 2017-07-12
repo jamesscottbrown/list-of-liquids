@@ -1,4 +1,6 @@
 from protocol_gui.protocol.liquid_handling import *
+from protocol_gui.protocol.opentrons import get_opentrons_protocol
+
 from protocol_gui.protocol.models import Protocol
 from protocol_gui.protocol.forms import ProtocolForm
 
@@ -123,6 +125,25 @@ def save_protocol(protocol_id):
     current_protocol.save()
 
     return "SUCCESS"
+
+
+
+@blueprint.route('/<int:protocol_id>/opentrons', methods=['GET'])
+@login_required
+def opentrons_protocol(protocol_id):
+    """Get OpenTrons representation of a protocol."""
+
+    current_protocol = Protocol.query.filter_by(id=protocol_id).first()
+    if not current_protocol:
+        flash('No such specification!', 'danger')
+        return redirect('.')
+
+    if current_protocol.user != current_user:
+        flash('Not your project!', 'danger')
+        return redirect('.')
+
+    return get_opentrons_protocol(json.loads(current_protocol.protocol))
+
 
 @blueprint.route('/<int:protocol_id>/contents', methods=['GET'])
 @login_required
