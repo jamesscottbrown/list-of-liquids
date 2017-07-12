@@ -76,7 +76,6 @@ function network_editor() {
             addToThis: true,
             changeTips: false,
             mix: false,
-            num_duplicates: 1,
             pipette_name: ''
         };
 
@@ -835,7 +834,7 @@ function network_editor() {
 
         var i = nodes.push({
             id: ++lastNodeId, type: operator, x: width * Math.random(), y: height / 2, label: "×",
-            parents: [mousedown_node, mouseup_node], data: {container_name: ''}
+            parents: [mousedown_node, mouseup_node], data: {container_name: '', num_duplicates: 1}
         });
         i--;
 
@@ -916,7 +915,7 @@ function network_editor() {
 
         var i = nodes.push({
             id: ++lastNodeId, type: type, x: width * Math.random(), y: height / 2, label: operation,
-            data: {operation: operation, selection: []}
+            data: {operation: operation, selection: [], num_duplicates: 1}
         });
         i--;
         selected_node = nodes[i];

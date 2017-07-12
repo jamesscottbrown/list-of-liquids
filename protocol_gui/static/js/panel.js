@@ -338,28 +338,6 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
     form.append("h2").style().text(title);
 
-    // Form to set number of duplicates
-    var duplicatesDiv = form.append("div").append("div")
-        .classed("form-group", true);
-
-    duplicatesDiv.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "duplicates")
-        .text("Number of duplicates");
-
-    var duplicatesInput = duplicatesDiv.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "duplicates")
-        .attr("id", "duplicates")
-        .on("change", function () {
-            selected_link.data.num_duplicates = this.value;
-        });
-
-    duplicatesInput.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
-    duplicatesInput.node().value = selected_link.data.num_duplicates;
-
 
     // Form to set whether we are adding to this
     var containerDiv = form.append("div").append("div")
@@ -648,6 +626,29 @@ function drawOperationPanel(selected_node, links, restart, form, deleteNode, ser
             break;
         }
     }
+
+    // Form to set number of duplicates
+    var duplicatesDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    duplicatesDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "duplicates")
+        .text("Number of duplicates");
+
+    var duplicatesInput = duplicatesDiv.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "duplicates")
+        .attr("id", "duplicates")
+        .on("change", function () {
+            selected_node.data.num_duplicates = this.value;
+            getContents(serialiseDiagram, selected_node, contentsDiv);
+        });
+
+    duplicatesInput.node().value = selected_node.data.num_duplicates;
+
 
     var contentsDiv = form.append("div");
     getContents(serialiseDiagram, selected_node, contentsDiv);
