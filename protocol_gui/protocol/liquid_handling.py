@@ -108,13 +108,13 @@ def process_node(protocol_obj, node_id):
 
         components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
         components2 = get_constituent_aliquots(protocol_obj, incident_links[1])
-        return map(lambda(x,y): x+y, zip(components1, components2))
+        return map(lambda(x,y): x+y, zip(components1, components2)) * int(node["data"]["num_duplicates"])
 
     elif node["type"] == "cross":
 
         components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
         components2 = get_constituent_aliquots(protocol_obj, incident_links[1])
-        return cross(components1, components2)
+        return cross(components1, components2) * int(node["data"]["num_duplicates"])
 
     elif node["type"] == "aliquot":
 
@@ -146,14 +146,14 @@ def get_constituent_aliquots(protocol_obj, link):
 
     inputs = process_node(protocol_obj, link["source_id"])
 
-    volumes = link["data"]["volumes"]
-    if len(volumes) == 1:
-        volumes *= len(inputs)
-    elif len(volumes) != len(inputs):
-        print "Error: number of volumes (%s) and aliquots (%s) do not match" % (len(volumes), len(inputs))
+    volume = link["data"]["volumes"][0]
+
+    input_volume_tuples = []
+    for input in inputs:
+        input_volume_tuples.append((input, volume))
 
     # each input corresponds to a link on the diagram
-    for (input, transfered_volume) in zip(inputs, volumes):
+    for (input, transfered_volume) in input_volume_tuples:
         total_volume = sum(map(lambda x: float(x.volume), input))  # total volume of mixture of aliquots we are drawing from
 
         # Loop over all individual resources included on this link
