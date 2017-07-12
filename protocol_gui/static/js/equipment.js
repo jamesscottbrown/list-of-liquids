@@ -16,16 +16,6 @@ function update_container_list() {
             return d.name + " (" + d.type + ") "
         });
 
-    // Add delete buttons
-    container_node.append("button")
-        .append("i").classed("fa", true).classed("fa-trash-o", true).text(" Delete")
-        .on("click", function (d) {
-                containers.splice(containers.indexOf(d), 1);
-                update_container_list();
-                // TODO: update protocols that refer to this . . .
-            }
-        );
-
     // Add edit buttons
     container_node
         .append("button")
@@ -61,6 +51,13 @@ function update_container_list() {
                 update_container_list();
                 updateDescriptionPanel();
             });
+
+            d3.select("#DeleteContainerButton").on("click", function(d){
+                containers.splice(containers.indexOf(d), 1);
+                update_container_list();
+                $('#containerModal').modal('toggle');
+            })
+
         });
 
             container_node.append("a")
@@ -95,17 +92,6 @@ function update_pipette_list() {
         .text(function (d) {
             return d.name + " (" + d.volume + " µl) "
         });
-
-    // Add delete buttons
-    pippette_nodes
-        .append("button")
-        .append("i").classed("fa", true).classed("fa-trash-o", true).text(" Delete")
-        .on("click", function (d) {
-                pipettes.splice(pipettes.indexOf(d), 1);
-                update_pipette_list();
-                // TODO: update protocols that refer to this . . .
-            }
-        );
 
     // Add edit buttons
     pippette_nodes
@@ -147,6 +133,12 @@ function update_pipette_list() {
 
             });
         });
+
+    d3.select("#DeletePipetteButton").on("click", function (d) {
+        pipettes.splice(pipettes.indexOf(d), 1);
+        update_pipette_list();
+        $('#pipetteModal').modal('toggle');
+    });
 
     pippette_nodes.selectAll("b").style('color', function (d) {
         console.log(d)
