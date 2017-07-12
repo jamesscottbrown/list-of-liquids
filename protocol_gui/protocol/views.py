@@ -1,12 +1,13 @@
 from protocol_gui.protocol.liquid_handling import *
 from protocol_gui.protocol.opentrons import get_opentrons_protocol
+from protocol_gui.protocol.autoprotocol import get_autoprotocol_protocol
 
 from protocol_gui.protocol.models import Protocol
 from protocol_gui.protocol.forms import ProtocolForm
 
 from protocol_gui.utils import flash_errors
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for, make_response
 from flask_login import login_required, current_user
 
 from urllib import unquote_plus
@@ -129,7 +130,6 @@ def save_protocol(protocol_id):
 
 
 @blueprint.route('/<int:protocol_id>/opentrons', methods=['GET'])
-@login_required
 def opentrons_protocol(protocol_id):
     """Get OpenTrons representation of a protocol."""
 
@@ -138,15 +138,48 @@ def opentrons_protocol(protocol_id):
         flash('No such specification!', 'danger')
         return redirect('.')
 
-    if current_protocol.user != current_user:
+    if current_protocol.user != current_user and not current_protocol.public:
         flash('Not your project!', 'danger')
         return redirect('.')
 
-    return get_opentrons_protocol(json.loads(current_protocol.protocol))
+    protocol_object = json.loads(current_protocol.protocol)
+
+    resp = make_response(get_opentrons_protocol(protocol_object))
+    resp.headers['Content-Type'] = "text"
+    resp.headers['Content-Disposition'] = "attachment; filename=" + current_protocol.name + "-opentrons.py"
+    return resp
+
+
+@blueprint.route('/<int:protocol_id>/autoprotocol', methods=['GET'])
+def autoprotocol_protocol(protocol_id):
+    """Get autoprotocol-python representation of a protocol."""
+
+    current_protocol = Protocol.query.filter_by(id=protocol_id).first()
+    if not current_protocol:
+        flash('No such specification!', 'danger')
+        return redirect('.')
+
+    print "CURRENT", current_protocol.public
+
+    if current_protocol.public:
+        print "PUBLIC"
+    else:
+        print "NOT PUBLIC"
+
+    if current_protocol.user != current_user and not current_protocol.public:
+        flash('Not your project!', 'danger')
+        return redirect('.')
+
+    protocol_object = json.loads(current_protocol.protocol)
+
+    resp = make_response(get_autoprotocol_protocol(protocol_object))
+    resp.headers['Content-Type'] = "text"
+    resp.headers['Content-Disposition'] = "attachment; filename=" + current_protocol.name + "-autoprotocol.py"
+    return resp
+
 
 
 @blueprint.route('/<int:protocol_id>/contents', methods=['GET'])
-@login_required
 def get_contents(protocol_id):
     """Determine what a given node on a protocol diagram represents."""
 
@@ -155,7 +188,7 @@ def get_contents(protocol_id):
         flash('No such specification!', 'danger')
         return redirect('.')
 
-    if current_protocol.user != current_user:
+    if current_protocol.user != current_user and not current_protocol.public:
         flash('Not your project!', 'danger')
         return redirect('.')
 
