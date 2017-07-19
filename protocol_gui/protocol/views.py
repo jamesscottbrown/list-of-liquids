@@ -1,6 +1,7 @@
 from protocol_gui.protocol.liquid_handling import *
 from protocol_gui.protocol.opentrons import get_opentrons_protocol
 from protocol_gui.protocol.autoprotocol import get_autoprotocol_protocol
+from protocol_gui.protocol.english import get_english_protocol
 
 from protocol_gui.protocol.models import Protocol
 from protocol_gui.protocol.forms import ProtocolForm
@@ -175,6 +176,34 @@ def autoprotocol_protocol(protocol_id):
     resp = make_response(get_autoprotocol_protocol(protocol_object))
     resp.headers['Content-Type'] = "text"
     resp.headers['Content-Disposition'] = "attachment; filename=" + current_protocol.name + "-autoprotocol.py"
+    return resp
+
+
+@blueprint.route('/<int:protocol_id>/english', methods=['GET'])
+def english_protocol(protocol_id):
+    """Get autoprotocol-python representation of a protocol."""
+
+    current_protocol = Protocol.query.filter_by(id=protocol_id).first()
+    if not current_protocol:
+        flash('No such specification!', 'danger')
+        return redirect('.')
+
+    print "CURRENT", current_protocol.public
+
+    if current_protocol.public:
+        print "PUBLIC"
+    else:
+        print "NOT PUBLIC"
+
+    if current_protocol.user != current_user and not current_protocol.public:
+        flash('Not your project!', 'danger')
+        return redirect('.')
+
+    protocol_object = json.loads(current_protocol.protocol)
+
+    resp = make_response(get_english_protocol(protocol_object, current_protocol.name))
+    resp.headers['Content-Type'] = "text"
+    resp.headers['Content-Disposition'] = "attachment; filename=" + current_protocol.name + "-english.md"
     return resp
 
 
