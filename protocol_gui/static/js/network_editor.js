@@ -75,7 +75,13 @@ function network_editor() {
             volumes: [1],
             addToThis: true,
             changeTips: false,
-            mix: false,
+            changeTips: "between-sources",
+            distributeSelect: false,
+            disposeTips: "trash",
+            blowout: false,
+            airgap: 0,
+            mixBefore: {repeats: 0, volume: 0},
+            mixAfter: {repeats: 0, volume: 0},
             pipette_name: ''
         };
 

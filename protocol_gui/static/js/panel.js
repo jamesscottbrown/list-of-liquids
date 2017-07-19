@@ -372,14 +372,54 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
             // toggle disabled-ness of volume and number of duplicates controls
             volumeDivs.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
-            duplicatesDiv.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
-
             restart();
         });
 
     containerSelect.append("option").text("Yes");
     containerSelect.append("option").text("No");
     containerSelect.node().value = (selected_link.data.addToThis ? "Yes" : "No");
+
+
+    // Form to adjust volumes
+    var volumes = selected_link.data.volumes;
+
+    var div2 = form.append("div");
+
+    var volumeDivs = div2.selectAll("div")
+        .data(volumes)
+        .enter()
+        .append("div")
+        .classed("form-group", true);
+
+    var label = volumeDivs.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "volume");
+
+    label.append("b").text(function (d, i) {
+        return "Volume:";
+    });
+
+    volumeDivs.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "value")
+        .attr("value", function (d) {
+            return d;
+        })
+        .on("change", function () {
+            var new_volumes = [];
+            var volumeInputs = volumeDivs.selectAll("input");
+            for (var i = 0; i < volumeInputs.length; i++) {
+                new_volumes.push(parseFloat(volumeInputs[i][0].value))
+            }
+            selected_link.data.volumes = new_volumes;
+            redrawLinkLabels();
+        });
+
+    if (selected_link.data.addToThis) {
+        volumeDivs.selectAll('input').attr('disabled', true);
+    }
 
 
     // Form to specify which pipette to use
@@ -436,7 +476,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
         .classed("control-label", true)
         .classed("col-sm-5", true)
         .attr("for", "change-tips")
-        .text("Change Tips");
+        .text("Change Tips:");
 
     var changeTipSelect = changeTipDiv.append("select")
         .classed("control-input", true)
@@ -444,80 +484,220 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
         .attr("name", "change-tips")
         .attr("id", "change-tips")
         .on("change", function () {
-            selected_link.data.changeTips = (this.value == "Yes");
+            selected_link.data.changeTips = this.value;
+
+            distributeSelect.attr("disabled", (selected_link.data.changeTips == "always") ? "true" : null);
+
             restart();
         });
 
-    changeTipSelect.append("option").text("Yes");
-    changeTipSelect.append("option").text("No");
-    changeTipSelect.node().value = (selected_link.data.changeTips ? "Yes" : "No");
+    changeTipSelect.append("option").attr("value", "always").text("Between every transfer");
+    changeTipSelect.append("option").attr("value", "between-sources").text("When changing source well");
+    changeTipSelect.append("option").attr("value", "never").text("Never");
+    changeTipSelect.node().value = selected_link.data.changeTips;
 
 
-    // Form to set whether we are changing tips
-    var mixDiv = form.append("div").append("div")
+    // Distribute
+    var distributeDiv = form.append("div").append("div")
         .classed("form-group", true);
 
-    mixDiv.append("label")
+    distributeDiv.append("label")
         .classed("control-label", true)
         .classed("col-sm-5", true)
-        .attr("for", "change-tips")
-        .text("Mix");
+        .attr("for", "distribute")
+        .text("Aspirate multiple transfers at once:");
 
-    var mixSelect = mixDiv.append("select")
+    var distributeSelect = distributeDiv.append("select")
         .classed("control-input", true)
         .classed("col-sm-5", true)
-        .attr("name", "change-tips")
-        .attr("id", "change-tips")
+        .attr("name", "distribute")
+        .attr("id", "distribute")
         .on("change", function () {
-            selected_link.data.mix = (this.value == "Yes");
+            selected_link.data.distribute = this.value;
             restart();
         });
 
-    mixSelect.append("option").text("Yes");
-    mixSelect.append("option").text("No");
-    mixSelect.node().value = (selected_link.data.mix ? "Yes" : "No");
+    distributeSelect.append("option").attr("value", true).text("Yes");
+    distributeSelect.append("option").attr("value", true).text("No");
+    distributeSelect.node().value = selected_link.data.distribute;
 
-
-    // Form to adjust volumes
-    var volumes = selected_link.data.volumes;
-
-    var div2 = form.append("div");
-
-    var volumeDivs = div2.selectAll("div")
-        .data(volumes)
-        .enter()
-        .append("div")
-        .classed("form-group", true);
-
-    var label = volumeDivs.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "volume");
-
-    label.append("b").text(function (d, i) {
-        return "Volume:";
-    });
-
-    volumeDivs.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "value")
-        .attr("value", function (d) {
-            return d;
-        })
-        .on("change", function () {
-            var new_volumes = [];
-            var volumeInputs = volumeDivs.selectAll("input");
-            for (var i = 0; i < volumeInputs.length; i++) {
-                new_volumes.push(parseFloat(volumeInputs[i][0].value))
-            }
-            selected_link.data.volumes = new_volumes;
-            redrawLinkLabels();
-        });
-
-    if (selected_link.data.addToThis) {
-        volumeDivs.selectAll('input').attr('disabled', true);
+    if (selected_link.data.changeTips == "always"){
+        distributeSelect.attr("disabled", true);
     }
+
+
+    // Tip disposal
+    var disposeTipDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    disposeTipDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "dispose-tips")
+        .text("Discarded tips:");
+
+    var disposeTipSelect = disposeTipDiv.append("select")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "dispose-tips")
+        .attr("id", "dispose-tips")
+        .on("change", function () {
+            selected_link.data.disposeTips = this.value;
+            restart();
+        });
+
+    disposeTipSelect.append("option").attr("value", "trash").text("Trash");
+    disposeTipSelect.append("option").attr("value", "rack").text("Return to rack");
+    disposeTipSelect.node().value = selected_link.data.disposeTips ? selected_link.data.disposeTips : "trash";
+
+    // Blow-out
+    var blowoutDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    blowoutDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "blowout")
+        .text("Blow-out:");
+
+    var blowoutSelect = blowoutDiv.append("select")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "blowout")
+        .attr("id", "blowout")
+        .on("change", function () {
+            selected_link.data.blowout = this.value;
+            restart();
+        });
+
+    blowoutSelect.append("option").attr("value", true).text("Yes");
+    blowoutSelect.append("option").attr("value", false).text("No");
+    blowoutSelect.node().value = selected_link.data.blowout;
+
+
+    // Air gap
+    var airgapDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    airgapDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "airgap")
+        .text("Air gap:");
+
+    var airgapInput = airgapDiv.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "airgap")
+        .attr("id", "airgap")
+        .on("change", function () {
+            selected_link.data.airgap = this.value;
+            restart();
+        });
+
+    airgapInput.node().value = selected_link.data.airgap;
+
+
+    // Mix-before
+    form.append("h4").text("Mix before");
+
+    var mixBeforeDiv_1 = form.append("div").append("div")
+        .classed("form-group", true);
+
+    mixBeforeDiv_1.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "mixBefore-repeats")
+        .text("Repeats");
+
+    mixBeforeDiv_1.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "mixBefore-repeats")
+        .attr("id", "mixBefore-repeats")
+        .on("change", function () {
+            mixBeforeDiv_2.select("input").attr('disabled', this.value == 0 ? 'true' : null);
+            selected_link.data.mixBefore.repeats = this.value;
+            restart();
+        })
+
+        .node().value = selected_link.data.mixBefore.repeats;
+
+    var mixBeforeDiv_2 = form.append("div").append("div")
+        .classed("form-group", true);
+
+    mixBeforeDiv_2.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "mixBefore-volume")
+        .text("Volume");
+
+    mixBeforeDiv_2.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "mixBefore-volume")
+        .attr("id", "mixBefore-volume")
+        .on("change", function () {
+            selected_link.data.mixBefore.volume = this.value;
+            restart();
+        })
+
+        .node().value = selected_link.data.mixBefore.volume;
+
+    if (selected_link.data.mixBefore.repeats == 0){
+        mixBeforeDiv_2.select("input").attr('disabled', true);
+    }
+
+    // Mix-after
+    form.append("h4").text("Mix after");
+
+    var mixAfterDiv_1 = form.append("div").append("div")
+        .classed("form-group", true);
+
+    mixAfterDiv_1.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "mixAfter-repeats")
+        .text("Repeats");
+
+    mixAfterDiv_1.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "mixAfter-repeats")
+        .attr("id", "mixAfter-repeats")
+        .on("change", function () {
+            mixAfterDiv_2.select("input").attr('disabled', this.value == 0 ? 'true' : null);
+            selected_link.data.mixAfter.repeats = this.value;
+            restart();
+        })
+
+        .node().value = selected_link.data.mixAfter.repeats;
+
+    var mixAfterDiv_2 = form.append("div").append("div")
+        .classed("form-group", true);
+
+    mixAfterDiv_2.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "mixAfter-volume")
+        .text("Volume");
+
+    mixAfterDiv_2.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "mixAfter-volume")
+        .attr("id", "mixAfter-volume")
+        .on("change", function () {
+            selected_link.data.mixAfter.volume = this.value;
+            restart();
+        })
+
+        .node().value = selected_link.data.mixAfter.volume;
+
+        if (selected_link.data.mixAfter.repeats == 0){
+            mixAfterDiv_2.select("input").attr('disabled', true);
+        }
+
 
 }
 
