@@ -157,8 +157,8 @@ function network_editor() {
         });
 
         path_labels.attr("x", function (d) {
-                return 8 + (d.source.x + d.target.x) / 2;
-            })
+            return 8 + (d.source.x + d.target.x) / 2;
+        })
             .attr("y", function (d) {
                 return (d.source.y + d.target.y) / 2;
             });
@@ -260,8 +260,8 @@ function network_editor() {
 
         // update existing links
         path.classed('selected', function (d) {
-                return d === selected_link;
-            })
+            return d === selected_link;
+        })
             .style('marker-start', '')
             .style('marker-end', 'url(#end-arrow)');
 
@@ -711,6 +711,7 @@ function network_editor() {
         rectLabels.style('fill', function (d) {
             var container_index = containers.map(function (x) {
                 return x.name;
+
             }).indexOf(d.data.container_name);
 
             return (container_index == -1) ? "#000" : color(container_index);
