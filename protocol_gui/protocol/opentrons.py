@@ -106,8 +106,6 @@ def process_node(node, protocol):
     # Look for rows that can be pipetted together
     for result_row in get_complete_rows(locations_result):
 
-        # TODO: if permitted, use distribute rather than stamp
-
         source_row = source_one['A' + result_row][1:]
         # check corresponding wells in first source are in a row, and columns are in consistent order with results
         isValid = True
@@ -145,17 +143,46 @@ def process_node(node, protocol):
             protocol_str += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_row, container_target, result_row, get_options(link_two_data))
             transfers_made_two.extend( map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
-    # now do remaining individual transfers
+    # now do remaining individual transfers, grouping transfers from the same well int distribute operations if permitted
     wells_to_fill = list(set(locations_result) - set(transfers_made_one))
-    for target_well in wells_to_fill:
-        source_well = source_one[target_well]
-        protocol_str += "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_well, container_target, target_well, get_options(link_one_data))
+
+    if link_one_data["distribute"]:
+        transfers = {}
+
+        for target_well in wells_to_fill:
+            source_well = source_one[target_well]
+            if source_well not in transfers.keys():
+                transfers[source_well] = []
+            transfers[source_well].append(target_well)
+
+        for source in transfers:
+            targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
+            protocol_str += "%s.distribute(%s, %s.well('%s'), %s.wells('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source, container_target, target_str, get_options(link_one_data))
+
+    else:
+        for target_well in wells_to_fill:
+            source_well = source_one[target_well]
+            protocol_str += "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_well, container_target, target_well, get_options(link_one_data))
 
     wells_to_fill = list(set(locations_result) - set(transfers_made_two))
-    for target_well in wells_to_fill:
-        source_well = source_two[target_well]
-        protocol_str += "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_well, container_target, target_well, get_options(link_two_data))
+    if link_two_data["distribute"]:
+        transfers = {}
 
+        for target_well in wells_to_fill:
+            source_well = source_two[target_well]
+            if source_well not in transfers.keys():
+                transfers[source_well] = []
+            transfers[source_well].append(target_well)
+
+        for source in transfers:
+            targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
+
+        protocol_str += "%s.distribute(%s, %s.well('%s'), %s.wells('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source, container_target, targets_str, get_options(link_two_data))
+    else:
+
+        for target_well in wells_to_fill:
+            source_well = source_two[target_well]
+            protocol_str += "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_well, container_target, target_well, get_options(link_two_data))
 
     protocol_str += "\n"
     return protocol_str
@@ -175,6 +202,7 @@ def get_complete_rows(well_addresses):
 
     return complete_rows
 
+
 def get_options(link_data):
     opts = []
 
@@ -191,10 +219,10 @@ def get_options(link_data):
     if link_data["blowout"]:
         opts.append("blow_out=True")
 
-    if link_data["mixBefore"]["repeats"] > 0: # TODO: type conversion?
+    if int(link_data["mixBefore"]["repeats"]) > 0: # TODO: type conversion?
         opts.append("mix_before=(%s, %s)" % (link_data["mixBefore"]["repeats"], link_data["mixBefore"]["volume"]))
 
-    if link_data["mixAfter"]["repeats"] > 0: # TODO: type conversion?
+    if int(link_data["mixAfter"]["repeats"]) > 0: # TODO: type conversion?
         opts.append("mix_after=(%s, %s)" % (link_data["mixAfter"]["repeats"], link_data["mixAfter"]["volume"]))
 
     if link_data["airgap"]:
@@ -204,6 +232,7 @@ def get_options(link_data):
     if opts_str:
         opts_str = ", " + opts_str
     return opts_str
+
 
 def get_locations(protocol, node):
     container = filter(lambda x: x["name"] == node["data"]["container_name"], protocol["containers"])[0]
