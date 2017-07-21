@@ -578,7 +578,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     var touchTipDiv = form.append("div").append("div")
         .classed("form-group", true);
 
-    blowoutDiv.append("label")
+    touchTipDiv.append("label")
         .classed("control-label", true)
         .classed("col-sm-5", true)
         .attr("for", "touchTip")
