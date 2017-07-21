@@ -19,7 +19,8 @@ function update_container_list() {
     // Add edit buttons
     container_node
         .append("button")
-        .append("i").classed("fa", true).classed("fa-pencil-o", true).text(" Edit")
+        .attr("class", "btn btn-default")
+        .text(" Edit ")
         .on("click", function (d, i) {
 
             $('#containerModal').modal('toggle');
@@ -58,7 +59,8 @@ function update_container_list() {
                 $('#containerModal').modal('toggle');
             })
 
-        });
+        })
+        .append("span").classed("fa", true).classed("fa-pencil", true);
 
             container_node.append("a")
             .text("Show or Set well locations")
@@ -96,7 +98,8 @@ function update_pipette_list() {
     // Add edit buttons
     pippette_nodes
         .append("button")
-        .append("i").classed("fa", true).classed("fa-pencil-o", true).text(" Edit")
+        .text(" Edit ")
+        .attr("class", "btn btn-default")
         .on("click", function (d, i) {
 
             $('#pipetteModal').modal('toggle');
@@ -132,7 +135,8 @@ function update_pipette_list() {
                 updateDescriptionPanel();
 
             });
-        });
+        })
+    .append("span").classed("fa", true).classed("fa-pencil", true);
 
     d3.select("#DeletePipetteButton").on("click", function (d) {
         pipettes.splice(pipettes.indexOf(d), 1);
