@@ -79,6 +79,7 @@ function network_editor() {
             distributeSelect: false,
             disposeTips: "trash",
             blowout: false,
+            touchTip: false,
             airgap: 0,
             mixBefore: {repeats: 0, volume: 0},
             mixAfter: {repeats: 0, volume: 0},

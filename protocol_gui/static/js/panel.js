@@ -574,6 +574,29 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     blowoutSelect.append("option").attr("value", false).text("No");
     blowoutSelect.node().value = selected_link.data.blowout;
 
+    // Touch tip
+    var touchTipDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    blowoutDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "touchTip")
+        .text("Touch tip:");
+
+    var touchTipSelect = touchTipDiv.append("select")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "touchTip")
+        .attr("id", "touchTip")
+        .on("change", function () {
+            selected_link.data.touchTip = this.value;
+            restart();
+        });
+
+    blowoutSelect.append("option").attr("value", true).text("Yes");
+    blowoutSelect.append("option").attr("value", false).text("No");
+    blowoutSelect.node().value = selected_link.data.touchTip;
 
     // Air gap
     var airgapDiv = form.append("div").append("div")
