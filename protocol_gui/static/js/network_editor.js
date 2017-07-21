@@ -898,6 +898,11 @@ function network_editor() {
             data: {num_wells: 1, container_name: '', well_addresses: '', volume: 1}
         });
         restart();
+
+        selected_link = false;
+        selected_group = false;
+        selected_node = nodes[nodes.length-1];
+        updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
     }
 
     function addProcessNodeToNode(sourceNode, kind) {
