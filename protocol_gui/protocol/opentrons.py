@@ -103,66 +103,47 @@ def process_node(node, protocol):
     transfers_made_one = []
     transfers_made_two = []
 
-    # If pipetting from a 96 well plate, look for rows that can be pipetted together
-    container = filter(lambda x: x["name"] == container_target, protocol["containers"])[0]
-    if container["type"].startswith('96'):
+    # Look for rows that can be pipetted together
+    for result_row in get_complete_rows(locations_result):
 
-        for result_row in get_complete_rows(locations_result):
+        # TODO: if permitted, use distribute rather than stamp
 
-            # TODO: exclude transgers from well to same well
-            # TODO: if permitted, use distribute rather than stamp
+        source_row = source_one['A' + result_row][1:]
+        # check corresponding wells in first source are in a row, and columns are in consistent order with results
+        isValid = True
+        for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
+            source_well = source_one[column + result_row]
 
-            # check this is also a 96 well plate, and a multichannel pipette
-            pipette = filter(lambda x: x["name"] == link_one_data["pipette_name"], protocol["pipettes"])[0]
-            container = filter(lambda x: x["name"] == container_one, protocol["containers"])[0]
+            if source_well[1:] != source_row:
+                isValid = False
+                break
 
-            print "CHANNELS? ", pipette["channels"] == 8
-            print "CONTAINER?", container["type"].startswith('96')
-            if int(pipette["channels"]) == 8 and container["type"].startswith('96'):
+            if source_well[0] != column:
+                isValid = False
+                break
 
-                source_row = source_one['A' + result_row][1:]
-                # check corresponding wells in first source are in a row, and columns are in consistent order with results
-                isValid = True
-                for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
-                    source_well = source_one[column + result_row]
-
-                    if source_well[1:] != source_row:
-                        isValid = False
-                        break
-
-                    if source_well[0] != column:
-                        isValid = False
-                        break
-
-                if isValid and not (container_target == container_one and source_row == result_row):
-                    protocol_str += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_row, container_target, result_row, get_options(link_one_data))
-                    transfers_made_one.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
+        if isValid and not (container_target == container_one and source_row == result_row):
+            protocol_str += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_row, container_target, result_row, get_options(link_one_data))
+            transfers_made_one.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
 
-            # check this is also a 96 well plate, and a multichannel pipette
-            pipette = filter(lambda x: x["name"] == link_two_data["pipette_name"], protocol["pipettes"])[0]
-            container = filter(lambda x: x["name"] == container_two, protocol["containers"])[0]
-            if int(pipette["channels"]) == 8 and container["type"].startswith('96'):
-                print "LETS  GO"
+        source_row = source_two['A' + result_row][1:]
+        # check corresponding wells in first source are in a row, and columns are in consistent order with results
+        isValid = True
+        for column in ['A', 'C', 'D', 'E', 'F', 'G', 'H']:
+            source_well = source_two[column + result_row]
 
-                source_row = source_two['A' + result_row][1:]
+            if source_well[1:] != source_row:
+                isValid = False
+                break
 
-                # check corresponding wells in first source are in a row, and columns are in consistent order with results
-                isValid = True
-                for column in ['A', 'C', 'D', 'E', 'F', 'G', 'H']:
-                    source_well = source_two[column + result_row]
+            if source_well[0] != column:
+                isValid = False
+                break
 
-                    if source_well[1:] != source_row:
-                        isValid = False
-                        break
-
-                    if source_well[0] != column:
-                        isValid = False
-                        break
-
-                if isValid and not (container_target == container_one and source_row == result_row):
-                    protocol_str += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_row, container_target, result_row, get_options(link_two_data))
-                    transfers_made_two.extend( map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
+        if isValid and not (container_target == container_one and source_row == result_row):
+            protocol_str += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_row, container_target, result_row, get_options(link_two_data))
+            transfers_made_two.extend( map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
     # now do remaining individual transfers
     wells_to_fill = list(set(locations_result) - set(transfers_made_one))
