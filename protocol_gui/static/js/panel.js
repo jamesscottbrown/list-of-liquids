@@ -594,9 +594,9 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
             restart();
         });
 
-    blowoutSelect.append("option").attr("value", true).text("Yes");
-    blowoutSelect.append("option").attr("value", false).text("No");
-    blowoutSelect.node().value = selected_link.data.touchTip;
+    touchTipSelect.append("option").attr("value", true).text("Yes");
+    touchTipSelect.append("option").attr("value", false).text("No");
+    touchTipSelect.node().value = selected_link.data.touchTip;
 
     // Air gap
     var airgapDiv = form.append("div").append("div")

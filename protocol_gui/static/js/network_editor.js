@@ -76,7 +76,7 @@ function network_editor() {
             addToThis: true,
             changeTips: false,
             changeTips: "between-sources",
-            distributeSelect: false,
+            distribute: false,
             disposeTips: "trash",
             blowout: false,
             touchTip: false,
