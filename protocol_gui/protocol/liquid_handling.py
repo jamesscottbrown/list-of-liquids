@@ -121,10 +121,25 @@ def process_node(protocol_obj, node_id):
         return components1 * int(node["data"]["num_duplicates"])
 
     elif node["type"] == "process":
-        pass
+        # process has only one input
+        return get_constituent_aliquots(protocol_obj, incident_links[0])
 
     elif node["type"] == "pool":
-        pass
+        components = get_constituent_aliquots(protocol_obj, incident_links[0])
+
+        total_volume = {}
+        for component in components:
+            for aliquot in component:
+                if aliquot.resource not in total_volume.keys():
+                    total_volume[aliquot.resource] = 0
+
+                total_volume[aliquot.resource] += aliquot.volume
+
+        res = [[]]
+        for resource in total_volume.keys():
+            res[0].append(Aliquot(resource, total_volume[resource]))
+
+        return res * int(node["data"]["num_duplicates"])
 
     elif node["type"] == "select":
         components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
