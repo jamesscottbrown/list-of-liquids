@@ -97,8 +97,6 @@ def process_node(protocol_obj, node_id):
     node = list(filter(lambda n: n["id"] == node_id, nodes))[0]
     node_data = node["data"]
 
-    # TODO: check num_repeats is considered everwhere it should be
-
     if node["type"] == "well":
         # return one aliquot per distinct component, with a volume that is the available volume in well
         component_names = [node["label"] + "_" + str(i) for i in range(0, int(node_data["num_wells"]))]
@@ -120,7 +118,7 @@ def process_node(protocol_obj, node_id):
 
         # aliquot has only one input
         components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
-        return components1 * int(incident_links[0]["data"]["num_duplicates"])
+        return components1 * int(node["data"]["num_duplicates"])
 
     elif node["type"] == "process":
         pass
@@ -137,7 +135,7 @@ def process_node(protocol_obj, node_id):
             if is_elected:
                 result.append(component)
 
-        return result
+        return result * int(node["data"]["num_duplicates"])
 
 
 def get_constituent_aliquots(protocol_obj, link):

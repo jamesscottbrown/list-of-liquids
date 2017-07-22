@@ -318,6 +318,29 @@ function drawAliquotPanel(selected_node, links, restart, form, deleteNode, seria
         });
 
 
+    // Form to set number of duplicates
+    var duplicatesDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    duplicatesDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "duplicates")
+        .text("Number of duplicates");
+
+    var duplicatesInput = duplicatesDiv.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "duplicates")
+        .attr("id", "duplicates")
+        .on("change", function () {
+            selected_node.data.num_duplicates = this.value;
+            getContents(serialiseDiagram, selected_node, contentsDiv);
+        });
+
+    duplicatesInput.node().value = selected_node.data.num_duplicates;
+
+
     addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram);
 
     var contentsDiv = form.append("div");
@@ -831,6 +854,27 @@ function drawSelectPanel(selected_node, links, restart, form, deleteNode, serial
 
     // Set container
     addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
+
+        // Form to set number of duplicates
+    var duplicatesDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    duplicatesDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "duplicates")
+        .text("Number of duplicates");
+
+    var duplicatesInput = duplicatesDiv.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "duplicates")
+        .attr("id", "duplicates")
+        .on("change", function () {
+            selected_node.data.num_duplicates = this.value;
+        });
+
+    duplicatesInput.node().value = selected_node.data.num_duplicates;
 
 
     // Note that the user selects from the contents of the parent node, not the contents of the selected node
