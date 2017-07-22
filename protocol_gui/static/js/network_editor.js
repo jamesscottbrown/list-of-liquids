@@ -13,8 +13,8 @@ function network_editor() {
         .attr('width', width)
         .attr('height', height);
 
-    var process_node_types = ['zip', 'cross', 'add', 'prod', 'process'];
-    var operationLabels = {'zip': 'zip', 'add': '+', cross: "×"};
+    var process_node_types = ['zip', 'cross', 'prod', 'process'];
+    var operationLabels = {'zip': 'zip', cross: "×"};
 
     var selectingGroup = false;
     var selectedNodes = [];
@@ -41,7 +41,7 @@ function network_editor() {
             }
 
             var nodeType = nodes[i].type;
-            if (['zip', 'add', 'cross'].indexOf(nodeType) != -1) {
+            if (['zip', 'cross'].indexOf(nodeType) != -1) {
                 nodes[i].label = operationLabels[nodeType];
             }
         }
@@ -744,7 +744,7 @@ function network_editor() {
     function createOptionsMenu(d) {
         var menu = [];
 
-        var operations = ['zip', 'cross', 'add'];
+        var operations = ['zip', 'cross'];
         if (d.type != "process") {
 
             function changeOperation(operation) {
