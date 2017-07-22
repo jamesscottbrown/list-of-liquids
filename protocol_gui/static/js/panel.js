@@ -842,7 +842,36 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
 
 function drawPoolPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Pool samples together");
-    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
+    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram);
+
+    // Form to set number of duplicates
+    var duplicatesDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    duplicatesDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "duplicates")
+        .text("Number of duplicates");
+
+    var duplicatesInput = duplicatesDiv.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "duplicates")
+        .attr("id", "duplicates")
+        .on("change", function () {
+            selected_node.data.num_duplicates = this.value;
+            getContents(serialiseDiagram, selected_node, contentsDiv);
+        });
+
+    duplicatesInput.node().value = selected_node.data.num_duplicates;
+
+
+    var contentsDiv = form.append("div");
+    getContents(serialiseDiagram, selected_node, contentsDiv);
+
+
+
     addDeleteButton(form, selected_node, deleteNode);
 }
 
