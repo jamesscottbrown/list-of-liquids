@@ -907,7 +907,7 @@ function network_editor() {
     }
 
     function addProcessNodeToNode(sourceNode, kind) {
-        i = addProcessNode(kind);
+        i = addProcessNode(sourceNode, kind);
         links.push({
             source: sourceNode, target: nodes[i],
             data: getDefaultLinkData(true)
@@ -915,7 +915,7 @@ function network_editor() {
         restart();
     }
 
-    function addProcessNode(kind) {
+    function addProcessNode(sourceNode, kind) {
 
         var operation, type;
         if (kind) {
@@ -929,7 +929,7 @@ function network_editor() {
 
         var i = nodes.push({
             id: ++lastNodeId, type: type, x: width * Math.random(), y: height / 2, label: operation,
-            data: {operation: operation, selection: [], num_duplicates: 1}
+            data: {operation: operation, selection: [], num_duplicates: 1}, parents: [sourceNode]
         });
         i--;
         selected_node = nodes[i];
@@ -1075,9 +1075,6 @@ function network_editor() {
             d3.contextMenu([{
                 title: 'Add Well',
                 action: addWellNode
-            }, {
-                title: 'Add Process',
-                action: addProcessNode
             }, {
                 divider: true
             }, {
