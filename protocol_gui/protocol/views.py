@@ -160,8 +160,6 @@ def autoprotocol_protocol(protocol_id):
         flash('No such specification!', 'danger')
         return redirect('.')
 
-    print "CURRENT", current_protocol.public
-
     if current_protocol.public:
         print "PUBLIC"
     else:
@@ -187,8 +185,6 @@ def english_protocol(protocol_id):
     if not current_protocol:
         flash('No such specification!', 'danger')
         return redirect('.')
-
-    print "CURRENT", current_protocol.public
 
     if current_protocol.public:
         print "PUBLIC"
