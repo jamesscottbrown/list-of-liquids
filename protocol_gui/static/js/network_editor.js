@@ -74,6 +74,7 @@ function network_editor() {
         var default_link_data = {
             volumes: [1],
             addToThis: true,
+            addFirst: false,
             changeTips: false,
             changeTips: "between-sources",
             distribute: false,

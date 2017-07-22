@@ -94,7 +94,9 @@ function listContents(result, div, queryNode, serialiseDiagram) {
             .on("click", function () {
                 // need to make sure populationWellAssignmentModal isn't called until modal is shown
                 // as we scale SVG to fit inside it
-                $('#locationModal').one('shown.bs.modal', function(){populationWellAssignmentModal(queryNode.data.container_name, serialiseDiagram)});
+                $('#locationModal').one('shown.bs.modal', function () {
+                    populationWellAssignmentModal(queryNode.data.container_name, serialiseDiagram)
+                });
                 $('#locationModal').modal('toggle');
             });
 
@@ -372,12 +374,59 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
             // toggle disabled-ness of volume and number of duplicates controls
             volumeDivs.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
+            // toggle disabled-ness of control ver order of combination
+            addFirstDiv.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);
+
             restart();
         });
 
     containerSelect.append("option").text("Yes");
     containerSelect.append("option").text("No");
     containerSelect.node().value = (selected_link.data.addToThis ? "Yes" : "No");
+
+
+    // Option to specify that one input should be added before the other
+    var addFirstDiv = form.append("div").append("div")
+        .classed("form-group", true);
+
+    addFirstDiv.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "container")
+        .text("Add this first");
+
+    var addFirstCheckbox = addFirstDiv.append("input")
+        .attr("type", "checkbox")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "addFirst")
+        .attr("id", "addFirst")
+        .on("change", function () {
+
+            // ensure that no more than one link incident to the same node has addFirst true
+            if (this.checked) {
+                links.filter(function (x) {
+                        return x.target.id == selected_link.target.id
+                    })
+                    .map(function (x) {
+                        x.data.addFirst = false
+                    });
+            }
+
+            selected_link.data.addFirst = this.checked;
+            restart();
+        });
+
+    addFirstCheckbox.node().checked = selected_link.data.addFirst;
+
+    // disable checkbox unless both inputs are being added to a new well
+    links.filter(function (x) {
+        return x.target.id == selected_link.target.id;
+    }).map(function (link) {
+        if (link.data.addToThis) {
+            addFirstCheckbox.attr("disabled", true)
+        }
+    });
 
 
     // Form to adjust volumes
@@ -521,7 +570,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     distributeSelect.append("option").attr("value", true).text("No");
     distributeSelect.node().value = selected_link.data.distribute;
 
-    if (selected_link.data.changeTips == "always"){
+    if (selected_link.data.changeTips == "always") {
         distributeSelect.attr("disabled", true);
     }
 
@@ -667,7 +716,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
         .node().value = selected_link.data.mixBefore.volume;
 
-    if (selected_link.data.mixBefore.repeats == 0){
+    if (selected_link.data.mixBefore.repeats == 0) {
         mixBeforeDiv_2.select("input").attr('disabled', true);
     }
 
@@ -717,9 +766,9 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
         .node().value = selected_link.data.mixAfter.volume;
 
-        if (selected_link.data.mixAfter.repeats == 0){
-            mixAfterDiv_2.select("input").attr('disabled', true);
-        }
+    if (selected_link.data.mixAfter.repeats == 0) {
+        mixAfterDiv_2.select("input").attr('disabled', true);
+    }
 
 
 }

@@ -52,7 +52,8 @@ def get_opentrons_protocol(protocol):
 
 
 def process_node(node, protocol):
-    protocol_str = ""
+    protocol_str_one = ""
+    protocol_str_two = ""
 
     num_duplicates = int(node["data"]["num_duplicates"])
     parent_nodes = filter(lambda x: x["id"] in node["parentIds"], protocol["nodes"])
@@ -121,7 +122,7 @@ def process_node(node, protocol):
                 break
 
         if isValid and not (container_target == container_one and source_row == result_row):
-            protocol_str += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_row, container_target, result_row, get_options(link_one_data))
+            protocol_str_one += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_row, container_target, result_row, get_options(link_one_data))
             transfers_made_one.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
 
@@ -140,7 +141,7 @@ def process_node(node, protocol):
                 break
 
         if isValid and not (container_target == container_one and source_row == result_row):
-            protocol_str += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_row, container_target, result_row, get_options(link_two_data))
+            protocol_str_two += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_row, container_target, result_row, get_options(link_two_data))
             transfers_made_two.extend( map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
     # now do remaining individual transfers, grouping transfers from the same well int distribute operations if permitted
@@ -157,12 +158,12 @@ def process_node(node, protocol):
 
         for source in transfers:
             targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-            protocol_str += "%s.distribute(%s, %s.well('%s'), %s.wells('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source, container_target, target_str, get_options(link_one_data))
+            protocol_str_one += "%s.distribute(%s, %s.well('%s'), %s.wells('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source, container_target, target_str, get_options(link_one_data))
 
     else:
         for target_well in wells_to_fill:
             source_well = source_one[target_well]
-            protocol_str += "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_well, container_target, target_well, get_options(link_one_data))
+            protocol_str_one += "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_well, container_target, target_well, get_options(link_one_data))
 
     wells_to_fill = list(set(locations_result) - set(transfers_made_two))
     if link_two_data["distribute"]:
@@ -177,13 +178,18 @@ def process_node(node, protocol):
         for source in transfers:
             targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
 
-        protocol_str += "%s.distribute(%s, %s.well('%s'), %s.wells('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source, container_target, targets_str, get_options(link_two_data))
+        protocol_str_two += "%s.distribute(%s, %s.well('%s'), %s.wells('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source, container_target, targets_str, get_options(link_two_data))
     else:
 
         for target_well in wells_to_fill:
             source_well = source_two[target_well]
-            protocol_str += "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_well, container_target, target_well, get_options(link_two_data))
+            protocol_str_two += "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_well, container_target, target_well, get_options(link_two_data))
 
+
+    if link_two_data["addFirst"]:
+        protocol_str =  protocol_str_two + protocol_str_one
+    else:
+       protocol_str = protocol_str_one + protocol_str_two
     protocol_str += "\n"
     return protocol_str
 
