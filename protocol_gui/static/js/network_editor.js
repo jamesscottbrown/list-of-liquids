@@ -757,6 +757,7 @@ function network_editor() {
                         return n.id == d.id
                     })[0].label = operationLabels[operation];
                     restart();
+                    updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
                 }
             }
 
