@@ -154,6 +154,8 @@ function update_pipette_list() {
 function addPipette(updateDescriptionPanelCallback) {
     $('#pipetteModal').modal('toggle');
     d3.select("#pipetteModal").select(".modal-title").text("Add pipette");
+    
+    document.getElementById("pipetteName").value = "";
 
     d3.select("#AddPipetteButton").on("click", function () {
         pipettes.push({
@@ -179,6 +181,8 @@ function addContainer(updateDescriptionPanelCallback) {
     $('#containerModal').modal('toggle');
     d3.select("#containerModal").select(".modal-title").text("Add container");
 
+    document.getElementById("containerName").value = "";
+    document.getElementById("containerLocation").value = "";
 
     d3.select("#AddContainerButton").on("click", function () {
         containers.push({
