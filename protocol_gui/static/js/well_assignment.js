@@ -1,5 +1,6 @@
 var selected_container, color, located_nodes;
 var max_col, max_row;
+var num_aliquots = [];
 
 var wellPlacementMode = "";
 setWellMode("Row");
@@ -61,6 +62,8 @@ function listContainerContents(result, div, queryNode) {
 
     //d3.select("#node-" + queryNode.id).remove();
     var newDiv = div.append("div").attr("id", "node-" + queryNode.id);
+
+    num_aliquots[queryNode.id] = result.length;
 
     var data = [];
     for (var i = 0; i < result.length; i++) {
@@ -332,6 +335,8 @@ function placeWells(d) {
     var col = location[0];
     var row = location.substr(1);
 
+    var num_wells = num_aliquots[operation_index];
+
 
     var operation = nodes.filter(function (n) {
         return n.id == operation_index;
@@ -351,12 +356,12 @@ function placeWells(d) {
 
     } else if (wellPlacementMode == "Row") {
 
-        for (aliquot_index = 0; aliquot_index < operation.data.num_wells; aliquot_index++){
+        for (aliquot_index = 0; aliquot_index < num_wells; aliquot_index++){
            clearWell(operation_index, aliquot_index);
         }
         aliquot_index = 0;
 
-        while (aliquot_index < operation.data.num_wells) {
+        while (aliquot_index < num_wells) {
 
             location = col + row;
 
@@ -382,12 +387,12 @@ function placeWells(d) {
 
     } else if (wellPlacementMode == "Col") {
 
-        for (aliquot_index = 0; aliquot_index < operation.data.num_wells; aliquot_index++){
+        for (aliquot_index = 0; aliquot_index < num_wells; aliquot_index++){
            clearWell(operation_index, aliquot_index);
         }
         aliquot_index = 0;
 
-        while (aliquot_index < operation.data.num_wells) {
+        while (aliquot_index < num_wells) {
 
             location = col + row;
 
