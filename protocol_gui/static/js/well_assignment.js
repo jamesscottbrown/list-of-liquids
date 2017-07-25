@@ -1,4 +1,20 @@
 var selected_container, color, located_nodes;
+var max_col, max_row;
+
+var wellPlacementMode = "";
+setWellMode("Row");
+
+var draggingSingleWell = false;
+
+function setWellMode(mode) {
+    d3.select("#wellRow").style("border", mode == "Row" ? "1px red solid" : "");
+    d3.select("#wellCol").style("border", mode == "Col" ? "1px red solid" : "");
+    d3.select("#wellRect1").style("border", mode == "Rect1" ? "1px red solid" : "");
+    d3.select("#wellRect2").style("border", mode == "Rect2" ? "1px red solid" : "");
+
+    wellPlacementMode = mode;
+}
+
 
 function populationWellAssignmentModal(container_name, serialiseDiagram) {
 
@@ -51,14 +67,29 @@ function listContainerContents(result, div, queryNode) {
         data.push({contents: result[i], aliquot_index: i, operation_index: queryNode.id});
     }
 
-    var outer_list_items = div
+    var outer_list = div
         .append("ol")
         .style("margin-top", "20px")
+        .style("border-left", "5px solid " + getColors(queryNode.id));
+
+    outer_list.attr("draggable", true)
+        .on("dragstart", function (d, i) {
+
+            // A drag event on the ol item corresponding set of wells will also
+            // be triggered if a single well is dragged
+            if (!draggingSingleWell) {
+                var ev = d3.event;
+                ev.dataTransfer.setData("custom-data", queryNode.id + ",");
+            }
+        })
+        .on("drop", function (a, b, c) {
+        });
+
+    var outer_list_items = outer_list
         .selectAll("li")
         .data(data)
         .enter()
         .append("li").style("margin-top", "10px")
-        .style("border-right", "5px solid " + getColors(queryNode.id))
 
         .classed("well-contents", true)
 
@@ -68,9 +99,10 @@ function listContainerContents(result, div, queryNode) {
         .on("dragstart", function (d, i) {
             var ev = d3.event;
             ev.dataTransfer.setData("custom-data", queryNode.id + "," + i);
+            draggingSingleWell = true;
         })
         .on("drop", function (a, b, c) {
-            console.log("Dropped");
+            draggingSingleWell = false;
         })
         .on("mouseover", function (d) {
 
@@ -154,6 +186,9 @@ function drawContainer(container_data, container) {
         }
     }
 
+    max_col = letter_names.sort()[letter_names.length-1];
+    max_row = digit_names.length;
+
     var xExtent = d3.extent(data.map(function (d) {
         return d.x;
     }));
@@ -213,24 +248,7 @@ function drawContainer(container_data, container) {
         })
         .on("mouseout", resetAppearances)
         .on("drop", function (d) {
-
-            if (d.container.contents[d.name]) {
-                return;
-            } // ensure well is empty
-
-            var data = d3.event.dataTransfer.getData("custom-data").split(","); // add well
-            var operation_index = data[0];
-            var aliquot_index = data[1];
-
-            // if already placed somewhere else, remove from there first
-            var oldLocation = getLocation(operation_index, aliquot_index);
-            if (oldLocation) {
-                delete selected_container.contents[oldLocation];
-            }
-
-            d.container.contents[d.name] = {operation_index: operation_index, aliquot_index: aliquot_index};
-
-            resetAppearances();
+            placeWells(d)
         })
         .on("contextmenu", d3.contextMenu(function (d) {
             return [{
@@ -302,6 +320,108 @@ function drawContainer(container_data, container) {
         .style("font-size", "5pt");
 
     resetAppearances();
+}
+
+
+function placeWells(d) {
+    var data = d3.event.dataTransfer.getData("custom-data").split(","); // add well
+    var operation_index = data[0];
+    var aliquot_index = data[1];
+
+    var location = d.name;
+    var col = location[0];
+    var row = location.substr(1);
+
+
+    var operation = nodes.filter(function (n) {
+        return n.id == operation_index;
+    })[0];
+
+    if (draggingSingleWell) {
+        if (d.container.contents[d.name]) {
+            return;
+        } // ensure well is empty
+
+        // if already placed somewhere else, remove from there first
+        clearWell(operation_index, aliquot_index);
+        d.container.contents[d.name] = {operation_index: operation_index, aliquot_index: aliquot_index};
+
+        resetAppearances();
+        draggingSingleWell = false;
+
+    } else if (wellPlacementMode == "Row") {
+
+        for (aliquot_index = 0; aliquot_index < operation.data.num_wells; aliquot_index++){
+           clearWell(operation_index, aliquot_index);
+        }
+        aliquot_index = 0;
+
+        while (aliquot_index < operation.data.num_wells) {
+
+            location = col + row;
+
+            if (!d.container.contents[location]) {
+                d.container.contents[location] = {operation_index: operation_index, aliquot_index: aliquot_index};
+                aliquot_index += 1;
+            }
+
+            // increment location along row
+            if (col == max_col && row > 1) {
+                col = "A";
+                row = row - 1;
+            } else if (col == max_col && row == 1) {
+                break;
+            }
+            else {
+                col = String.fromCharCode(col.charCodeAt(0) + 1);
+            }
+
+        }
+        resetAppearances();
+
+
+    } else if (wellPlacementMode == "Col") {
+
+        for (aliquot_index = 0; aliquot_index < operation.data.num_wells; aliquot_index++){
+           clearWell(operation_index, aliquot_index);
+        }
+        aliquot_index = 0;
+
+        while (aliquot_index < operation.data.num_wells) {
+
+            location = col + row;
+
+            if (!d.container.contents[location]) {
+                d.container.contents[location] = {operation_index: operation_index, aliquot_index: aliquot_index};
+                aliquot_index += 1;
+            }
+
+            // increment location along column
+            if (row > 1) {
+                row = row - 1;
+            } else if (col == max_col) {
+                break;
+            } else {
+                col = String.fromCharCode(col.charCodeAt(0) + 1);
+                row = max_row;
+            }
+        }
+        resetAppearances();
+
+    } else if (wellPlacementMode == "Rect1") {
+        // TOOO: enable rectangular fill
+
+    } else if (wellPlacementMode == "Rect 2") {
+        // TOOO: enable rectangular fill
+    }
+}
+
+
+function clearWell(operation_index, aliquot_index) {
+    var oldLocation = getLocation(operation_index, aliquot_index);
+    if (oldLocation) {
+        delete selected_container.contents[oldLocation];
+    }
 }
 
 function resetAppearances() {

@@ -133,6 +133,13 @@
                 </div>
                 <div class="modal-body">
 
+                    <div class="row" style="padding-bottom: 10px">
+                        <img style="margin-left: 5px" id="wellRow" onclick="setWellMode('Row')" src="/static/img/row.svg" width="50px" title="Place aliquots in a row">
+                        <img style="margin-left: 5px" id="wellCol" onclick="setWellMode('Col')" src="/static/img/column.svg" width="50px" title="Place aliquots in a column">
+                        <img style="margin-left: 5px" id="wellRect1" onclick="setWellMode('Rect1')" src="/static/img/rect1.svg" width="50px" title="Place aliquots in a rectangle">
+                        <img style="margin-left: 5px" id="wellRect2" onclick="setWellMode('Rect2')" src="/static/img/rect2.svg" width="50px" title="Place aliquots in a rectangle (other orientation)">
+                    </div>
+
                     <div class="row">
                       <div class="col-md-6" id="well-diagram"></div>
                       <div class="col-md-6" id="well-list"></div>
