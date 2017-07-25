@@ -256,7 +256,7 @@ function drawContainer(container_data, container) {
         .on("contextmenu", d3.contextMenu(function (d) {
             return [{
                 title: 'Clear',
-                disabled: !d.contents,
+                disabled: !selected_container.contents[d.name],
                 action: function (elm, d) {
                     delete selected_container.contents[d.name];
                     resetAppearances();
