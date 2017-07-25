@@ -6,6 +6,7 @@ var wellPlacementMode = "";
 setWellMode("Row");
 
 var draggingSingleWell = false;
+var single_well_highlighted = false;
 
 function setWellMode(mode) {
     d3.select("#wellRow").style("border", mode == "Row" ? "1px red solid" : "");
@@ -73,7 +74,19 @@ function listContainerContents(result, div, queryNode) {
     var outer_list = div
         .append("ol")
         .style("margin-top", "20px")
-        .style("border-left", "5px solid " + getColors(queryNode.id));
+        .style("border-left", "5px solid " + getColors(queryNode.id))
+        .on("mouseover", function () {
+            if (!single_well_highlighted) {
+                for (var i = 0; i < result.length; i++) {
+                    var d = data[i];
+                    if (getLocation(d.operation_index, d.aliquot_index)) {
+                        highlightWell(d)
+                    }
+                }
+            }
+        })
+        .on("mouseout", resetAppearances)
+        ;
 
     outer_list.attr("draggable", true)
         .on("dragstart", function (d, i) {
@@ -109,12 +122,17 @@ function listContainerContents(result, div, queryNode) {
         })
         .on("mouseover", function (d) {
 
+            single_well_highlighted = true;
+
+            resetAppearances(); // clear any highlighting of whole set of wells
             if (getLocation(d.operation_index, d.aliquot_index)) {
                 highlightWell(d)
-
             }
         })
-        .on("mouseout", resetAppearances)
+        .on("mouseout", function () {
+            single_well_highlighted = false;
+            resetAppearances();
+        })
         ;
 
     var items = outer_list_items.selectAll("li")
@@ -189,7 +207,7 @@ function drawContainer(container_data, container) {
         }
     }
 
-    max_col = letter_names.sort()[letter_names.length-1];
+    max_col = letter_names.sort()[letter_names.length - 1];
     max_row = digit_names.length;
 
     var xExtent = d3.extent(data.map(function (d) {
@@ -356,8 +374,8 @@ function placeWells(d) {
 
     } else if (wellPlacementMode == "Row") {
 
-        for (aliquot_index = 0; aliquot_index < num_wells; aliquot_index++){
-           clearWell(operation_index, aliquot_index);
+        for (aliquot_index = 0; aliquot_index < num_wells; aliquot_index++) {
+            clearWell(operation_index, aliquot_index);
         }
         aliquot_index = 0;
 
@@ -387,8 +405,8 @@ function placeWells(d) {
 
     } else if (wellPlacementMode == "Col") {
 
-        for (aliquot_index = 0; aliquot_index < num_wells; aliquot_index++){
-           clearWell(operation_index, aliquot_index);
+        for (aliquot_index = 0; aliquot_index < num_wells; aliquot_index++) {
+            clearWell(operation_index, aliquot_index);
         }
         aliquot_index = 0;
 
