@@ -111,6 +111,19 @@ function network_editor() {
         .attr('d', 'M0,-5L10,0L0,5')
         .attr('fill', '#000');
 
+    svg.append('svg:defs').append('svg:marker')
+        .attr('id', 'end-arrow-open')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 6)
+        .attr('markerWidth', 3)
+        .attr('markerHeight', 3)
+        .attr('orient', 'auto')
+        .append('svg:path')
+        .attr('d', 'M0,-5L10,0L0,5')
+        .attr('fill', '#FFF')
+        .style('stroke', 'black')
+        .style('stroke-width', '2px');
+
     // line displayed when dragging new nodes
     var drag_line = svg.append('svg:path')
         .attr('class', 'link dragline hidden')
@@ -271,7 +284,9 @@ function network_editor() {
             return d === selected_link;
         })
             .style('marker-start', '')
-            .style('marker-end', 'url(#end-arrow)');
+            .style('marker-end', function(d){
+                return (d.data.addFirst || d.data.addToThis)? 'url(#end-arrow)' : 'url(#end-arrow-open)'
+            } );
 
         // add new links
         path.enter().append('svg:path')
