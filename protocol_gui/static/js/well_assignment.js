@@ -477,7 +477,7 @@ function resetAppearances() {
             return selected_container.contents[d.name] ? "black" : "white";
         });
 
-    containerDiagram.selectAll(".well-contents").style("color", function (d) {
+    d3.selectAll(".well-contents").style("color", function (d) {
             return getLocation(d.operation_index, d.aliquot_index) ? 'grey' : 'black';
         })
         .style("border-left", "none");
