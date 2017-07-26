@@ -1,6 +1,8 @@
 var selected_container, color, located_nodes;
 var max_col, max_row;
 var num_aliquots = [];
+var container_data;
+var xScale, yScale, y_max;
 
 var wellPlacementMode = "";
 setWellMode("Row");
@@ -152,15 +154,15 @@ function drawContainerDiagram(container) {
     var containerURL = "https://raw.githubusercontent.com/OpenTrons/opentrons-api/master/api/opentrons/config/containers/default-containers.json";
 
     d3.json(containerURL, function (error, containerData) {
-        var container_data = containerData['containers'][container.type];
-        drawContainer(container_data, container);
+        container_data = containerData['containers'][container.type];
+        drawContainer(container);
     });
 
 
 }
 
 
-function drawContainer(container_data, container) {
+function drawContainer(container) {
     var padding = 50;
 
     var data = [];
@@ -169,7 +171,7 @@ function drawContainer(container_data, container) {
     var letter_names = [];
     var digits = [];
     var digit_names = [];
-    var y_max = 0;
+    y_max = 0;
 
     for (var name in container_data.locations) {
         var datum = container_data.locations[name];
@@ -229,18 +231,20 @@ function drawContainer(container_data, container) {
             d3.event.preventDefault();
         });
 
-    var xScale = d3.scale.linear().range([padding, width - padding])
+    xScale = d3.scale.linear().range([padding, width - padding])
         .domain(xExtent);
-    var yScale = d3.scale.linear().range([padding, height - padding])
+    yScale = d3.scale.linear().range([padding, height - padding])
         .domain(yExtent);
 
     if (!container_data["origin-offset"]) {
         container_data["origin-offset"] = {x: 20, y: 20};
     }
 
-    var g = svg.append("g").attr("transform", "translate(" + container_data["origin-offset"].x + ", " + container_data["origin-offset"].y + ")")
+    var g = svg.append("g")
+        .attr("transform", "translate(" + container_data["origin-offset"].x + ", " + container_data["origin-offset"].y + ")")
+        .attr("id", "container_group");
 
-    g.selectAll("circle")
+    var circles = g.selectAll("circle")
         .data(data.filter(function (d) {
             return d.diameter
         }))
@@ -258,6 +262,7 @@ function drawContainer(container_data, container) {
         .attr("title", function (d) {
             return d.name;
         })
+        .style("fill", "white")
         .style("stroke", "black")
         .style("stroke-width", "2px")
 
@@ -450,19 +455,29 @@ function clearWell(operation_index, aliquot_index) {
 function resetAppearances() {
     // adjusts appearances of wells/aliquots to show whether they are full/have been assigned positions
 
-    d3.selectAll("circle")
-        .style("fill", function (d) {
-            var contents = selected_container.contents[d.name];
-            return contents ? getColors(contents.operation_index) : "white";
-        });
+    var containerDiagram = d3.select("#container_group");
 
+    containerDiagram.selectAll("circle")
+        .style("stroke", "black").style("stroke-width", "2px");
 
-    d3.selectAll("rect")
+    // Color wells to indicate their contents
+    d3.selectAll(".pie-group").remove();
+    for (var name in container_data.locations) {
+        var datum = container_data.locations[name];
+
+        var contents = '';
+        if (selected_container.contents && selected_container.contents[name]) {
+            drawWell([selected_container.contents[name]], xScale(datum.x), yScale(y_max - datum.y))
+        }
+
+    }
+
+    containerDiagram.selectAll("rect")
         .style("fill", function (d) {
             return selected_container.contents[d.name] ? "black" : "white";
         });
 
-    d3.selectAll(".well-contents").style("color", function (d) {
+    containerDiagram.selectAll(".well-contents").style("color", function (d) {
             return getLocation(d.operation_index, d.aliquot_index) ? 'grey' : 'black';
         })
         .style("border-left", "none");
@@ -472,7 +487,6 @@ function resetAppearances() {
 function getLocation(operation_index, aliquot_index) {
 
     for (var well in selected_container.contents) {
-        var c = selected_container.contents[well];
 
         if (c.operation_index == operation_index && c.aliquot_index == aliquot_index) {
             return well;
@@ -497,8 +511,8 @@ function highlightWell(contents, highlightWholeSet) {
     d3.select("#locationModal")
         //.select(".id", "node-" + contents.operation_index) // get right set of aliauots
         .selectAll(".well-contents")
-        .style("border-left", function (d){
-            if (d.operation_index == contents.operation_index && (d.aliquot_index == contents.aliquot_index || highlightWholeSet)){
+        .style("border-left", function (d) {
+            if (d.operation_index == contents.operation_index && (d.aliquot_index == contents.aliquot_index || highlightWholeSet)) {
                 return "5px solid yellow";
             } else {
                 return "";
@@ -506,3 +520,32 @@ function highlightWell(contents, highlightWholeSet) {
         })
 }
 
+function drawWell(contents, x, y) {
+
+    var radius = 10;
+
+    var arc = d3.svg.arc()
+        .innerRadius(0)
+        .outerRadius(radius);
+
+    var g = d3.select("#container_group")
+        .append("g")
+        .attr("transform", "translate(" + x + ", " + y + ")")
+        .classed("pie-group", true);
+
+    var path = g.selectAll('.arcs')
+        .data(contents.map(function (content, i) {
+            return {
+                id: parseInt(content.operation_index),
+                startAngle: i * (2 * Math.PI / contents.length),
+                endAngle: (i + 1) * (2 * Math.PI / contents.length),
+                padding: 0
+            };
+        }))
+        .enter()
+        .append('path')
+        .attr('d', arc)
+        .attr('fill', function (d) {
+            return color(d.id);
+        });
+}
