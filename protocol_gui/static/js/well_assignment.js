@@ -372,7 +372,7 @@ function placeWells(d) {
 
         // if already placed somewhere else, remove from there first
         clearWell(operation_index, aliquot_index);
-        d.container.contents[d.name] = {operation_index: operation_index, aliquot_index: aliquot_index};
+        d.container.contents[d.name] = [{operation_index: operation_index, aliquot_index: aliquot_index}];
 
         resetAppearances();
         draggingSingleWell = false;
@@ -389,7 +389,7 @@ function placeWells(d) {
             location = col + row;
 
             if (!d.container.contents[location]) {
-                d.container.contents[location] = {operation_index: operation_index, aliquot_index: aliquot_index};
+                d.container.contents[location] = [{operation_index: operation_index, aliquot_index: aliquot_index}];
                 aliquot_index += 1;
             }
 
@@ -420,7 +420,7 @@ function placeWells(d) {
             location = col + row;
 
             if (!d.container.contents[location]) {
-                d.container.contents[location] = {operation_index: operation_index, aliquot_index: aliquot_index};
+                d.container.contents[location] = [{operation_index: operation_index, aliquot_index: aliquot_index}];
                 aliquot_index += 1;
             }
 
@@ -467,7 +467,7 @@ function resetAppearances() {
 
         var contents = '';
         if (selected_container.contents && selected_container.contents[name]) {
-            drawWell([selected_container.contents[name]], xScale(datum.x), yScale(y_max - datum.y))
+            drawWell(selected_container.contents[name], xScale(datum.x), yScale(y_max - datum.y))
         }
 
     }
@@ -487,10 +487,15 @@ function resetAppearances() {
 function getLocation(operation_index, aliquot_index) {
 
     for (var well in selected_container.contents) {
+        var contents = selected_container.contents[well];
 
-        if (c.operation_index == operation_index && c.aliquot_index == aliquot_index) {
-            return well;
+        for (var i=0; i < contents.length; i++) {
+            var c = contents[i];
+            if (c.operation_index == operation_index && c.aliquot_index == aliquot_index) {
+                return well;
+            }
         }
+
     }
     return "";
 }
