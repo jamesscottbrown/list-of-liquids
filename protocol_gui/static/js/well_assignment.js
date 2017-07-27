@@ -2,7 +2,6 @@ var selected_container, color, located_nodes;
 var max_col, max_row;
 var num_aliquots = [];
 var container_data;
-var xScale, yScale, y_max;
 
 var wellPlacementMode = "";
 setWellMode("Row");
@@ -244,6 +243,21 @@ function drawContainer(container) {
         .attr("transform", "translate(" + container_data["origin-offset"].x + ", " + container_data["origin-offset"].y + ")")
         .attr("id", "container_group");
 
+    d3.select("#container_group")
+        .selectAll(".pie-group")
+        .data(data.filter(function (d) {
+            return d.diameter
+        }))
+        .enter()
+        .append("g")
+        .attr("transform", function (d) {
+            return "translate(" + xScale(d.x) + ", " + yScale(y_max - d.y) + ")";
+        })
+        .classed("pie-group", true)
+        .attr("id", function (d) {
+            return "pie-" + d.name;
+        });
+
     var circles = g.selectAll("circle")
         .data(data.filter(function (d) {
             return d.diameter
@@ -262,7 +276,7 @@ function drawContainer(container) {
         .attr("title", function (d) {
             return d.name;
         })
-        .style("fill", "white")
+        .style("fill", "white").style("fill-opacity", 0)// N.B. if fill is "none", context menu and dropping break
         .style("stroke", "black")
         .style("stroke-width", "2px")
 
@@ -509,13 +523,14 @@ function resetAppearances() {
         .style("stroke", "black").style("stroke-width", "2px");
 
     // Color wells to indicate their contents
-    d3.selectAll(".pie-group").remove();
+    d3.selectAll(".pie-group").selectAll("path").remove();
+
     for (var name in container_data.locations) {
         var datum = container_data.locations[name];
 
         var contents = '';
         if (selected_container.contents && selected_container.contents[name]) {
-            drawWell(selected_container.contents[name], xScale(datum.x), yScale(y_max - datum.y))
+            drawWell(selected_container.contents[name], name)
         }
 
     }
@@ -573,7 +588,7 @@ function highlightWell(contents, highlightWholeSet) {
         })
 }
 
-function drawWell(contents, x, y) {
+function drawWell(contents, name) {
 
     var radius = 10;
 
@@ -581,10 +596,7 @@ function drawWell(contents, x, y) {
         .innerRadius(0)
         .outerRadius(radius);
 
-    var g = d3.select("#container_group")
-        .append("g")
-        .attr("transform", "translate(" + x + ", " + y + ")")
-        .classed("pie-group", true);
+    var g = d3.select("#pie-" + name);
 
     var path = g.selectAll('.arcs')
         .data(contents.map(function (content, i) {
