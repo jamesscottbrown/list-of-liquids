@@ -187,6 +187,7 @@ function addContainerSelect(selected_node, links, restart, form, deleteNode, ser
         .classed("form-control", true)
         .property("value", selected_node.data.container_name)
         .on("change", function () {
+            clearOperation(selected_node.id);
             selected_node.data.container_name = this.value;
         });
 
