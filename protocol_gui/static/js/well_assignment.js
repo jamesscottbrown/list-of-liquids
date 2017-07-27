@@ -372,8 +372,7 @@ function placeWells(d) {
 
         // if already placed somewhere else, remove from there first
         clearWell(operation_index, aliquot_index);
-        d.container.contents[d.name] = [{operation_index: operation_index, aliquot_index: aliquot_index}];
-
+        setWellContents(d.container, d.name, operation_index, aliquot_index);
         resetAppearances();
         draggingSingleWell = false;
 
@@ -389,7 +388,7 @@ function placeWells(d) {
             location = col + row;
 
             if (!d.container.contents[location]) {
-                d.container.contents[location] = [{operation_index: operation_index, aliquot_index: aliquot_index}];
+                setWellContents(d.container, location, operation_index, aliquot_index);
                 aliquot_index += 1;
             }
 
@@ -420,7 +419,7 @@ function placeWells(d) {
             location = col + row;
 
             if (!d.container.contents[location]) {
-                d.container.contents[location] = [{operation_index: operation_index, aliquot_index: aliquot_index}];
+                setWellContents(d.container, location, operation_index, aliquot_index);
                 aliquot_index += 1;
             }
 
@@ -449,6 +448,55 @@ function clearWell(operation_index, aliquot_index) {
     var oldLocation = getLocation(operation_index, aliquot_index);
     if (oldLocation) {
         delete selected_container.contents[oldLocation];
+    }
+}
+
+function setWellContents(container, well_name, operation_index, aliquot_index) {
+
+    var indexes = [parseInt(operation_index)];
+
+    for (var i = 0; i < links.length; i++) {
+        var link = links[i];
+        if (link.data.addToThis) {
+
+            if (link.source.id == operation_index) {
+                indexes.push(link.target.id);
+            } else if (link.target.id == operation_index) {
+                indexes.push(link.source.id);
+            }
+        }
+    }
+
+    container.contents[well_name] = indexes.map(function (operation_index) {
+        return {operation_index: operation_index, aliquot_index: aliquot_index}
+    });
+}
+
+function clearOperation(operation_index) {
+    // Clear locations of all aliquots corresponding to a particular operation
+    for (var i = 0; i < containers.length; i++) {
+        var container = containers[i];
+        for (var well in container.contents) {
+            container.contents[well] = container.contents[well].filter(function (x) {
+                return x.operation_index != operation_index;
+            });
+        }
+    }
+}
+
+function moveDescendents(source_operation_index, target_operation_index) {
+    // Set location of all aliquots produced by an operation to the locations occupied by another operation
+    for (var i = 0; i < containers.length; i++) {
+        var container = containers[i];
+        for (var well in container.contents) {
+            var contents = container.contents[well];
+
+            for (var j = 0; j < contents.length; j++) {
+                if (contents[j].operation_index == source_operation_index) {
+                    contents.push({operation_index: target_operation_index, aliquot_index: contents[j].aliquot_index})
+                }
+            }
+        }
     }
 }
 
@@ -489,7 +537,7 @@ function getLocation(operation_index, aliquot_index) {
     for (var well in selected_container.contents) {
         var contents = selected_container.contents[well];
 
-        for (var i=0; i < contents.length; i++) {
+        for (var i = 0; i < contents.length; i++) {
             var c = contents[i];
             if (c.operation_index == operation_index && c.aliquot_index == aliquot_index) {
                 return well;

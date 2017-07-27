@@ -391,6 +391,14 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
                     });
             }
 
+            // clear location of aliquots produced by this operation
+            clearOperation(selected_link.target.id);
+
+            // if addToThis is now true, set location of aliquots produced by this operation to same as parents
+            if (this.value == "Yes") {
+                moveDescendents(selected_link.source.id, selected_link.target.id);
+            }
+
             selected_link.target.data.container_name = selected_link.source.data.container_name;
 
             selected_link.data.addToThis = (this.value == "Yes");
@@ -871,7 +879,6 @@ function drawPoolPanel(selected_node, links, restart, form, deleteNode, serialis
     getContents(serialiseDiagram, selected_node, contentsDiv);
 
 
-
     addDeleteButton(form, selected_node, deleteNode);
 }
 
@@ -884,7 +891,7 @@ function drawSelectPanel(selected_node, links, restart, form, deleteNode, serial
     // Set container
     addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
 
-        // Form to set number of duplicates
+    // Form to set number of duplicates
     var duplicatesDiv = form.append("div").append("div")
         .classed("form-group", true);
 
