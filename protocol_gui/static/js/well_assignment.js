@@ -81,7 +81,7 @@ function listContainerContents(result, div, queryNode) {
                 for (var i = 0; i < result.length; i++) {
                     var d = data[i];
                     if (getLocation(d.operation_index, d.aliquot_index)) {
-                        highlightWell(d, true)
+                        highlightWell([d], true)
                     }
                 }
             }
@@ -127,7 +127,7 @@ function listContainerContents(result, div, queryNode) {
 
             resetAppearances(); // clear any highlighting of whole set of wells
             if (getLocation(d.operation_index, d.aliquot_index)) {
-                highlightWell(d)
+                highlightWell([d])
             }
         })
         .on("mouseout", function () {
@@ -564,28 +564,32 @@ function getLocation(operation_index, aliquot_index) {
 }
 
 
-function highlightWell(contents, highlightWholeSet) {
+function highlightWell(contents_list, highlightWholeSet) {
     // Highlight circle
 
-    var wellName = getLocation(contents.operation_index, contents.aliquot_index);
-
-    d3.select("#locationModal").selectAll("circle")
-        .filter(function (d) {
-            return d.name == wellName;
-        })
-        .style("stroke", "yellow").style("stroke-width", "7px");
-
-    // highlight content list
     d3.select("#locationModal")
-        //.select(".id", "node-" + contents.operation_index) // get right set of aliauots
         .selectAll(".well-contents")
-        .style("border-left", function (d) {
-            if (d.operation_index == contents.operation_index && (d.aliquot_index == contents.aliquot_index || highlightWholeSet)) {
-                return "5px solid yellow";
-            } else {
-                return "";
-            }
-        })
+        .style("border-left", "");
+
+    for (var i = 0; i < contents_list.length; i++) {
+        var contents = contents_list[i];
+
+        var wellName = getLocation(contents.operation_index, contents.aliquot_index);
+
+        d3.select("#locationModal").selectAll("circle")
+            .filter(function (d) {
+                return d.name == wellName;
+            })
+            .style("stroke", "yellow").style("stroke-width", "7px");
+
+
+        d3.select("#locationModal")
+            .selectAll(".well-contents")
+            .filter(function (d) {
+                return d.operation_index == contents.operation_index && (d.aliquot_index == contents.aliquot_index || highlightWholeSet)
+            })
+            .style("border-left", "5px solid yellow");
+    }
 }
 
 function drawWell(contents, name) {
