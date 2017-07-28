@@ -189,6 +189,7 @@ function addContainerSelect(selected_node, links, restart, form, deleteNode, ser
         .on("change", function () {
             clearOperation(selected_node.id);
             selected_node.data.container_name = this.value;
+            restart(); // really only need to call recolorLabels
         });
 
     containerInput.selectAll("option").data(containers)
