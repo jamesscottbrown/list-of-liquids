@@ -1,6 +1,6 @@
 from protocol_gui.protocol.liquid_handling import *
 from protocol_gui.protocol.opentrons import OpenTrons
-from protocol_gui.protocol.autoprotocol import get_autoprotocol_protocol
+from protocol_gui.protocol.autoprotocol import AutoProtocol
 from protocol_gui.protocol.english import English
 
 from protocol_gui.protocol.models import Protocol
@@ -174,7 +174,8 @@ def autoprotocol_protocol(protocol_id):
 
     protocol_object = json.loads(current_protocol.protocol)
 
-    resp = make_response(get_autoprotocol_protocol(protocol_object))
+    converter = AutoProtocol()
+    resp = make_response(converter.convert(protocol_object, current_protocol.name))
     resp.headers['Content-Type'] = "text"
     resp.headers['Content-Disposition'] = "attachment; filename=" + current_protocol.name + "-autoprotocol.py"
     return resp

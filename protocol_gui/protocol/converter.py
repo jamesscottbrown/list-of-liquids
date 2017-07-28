@@ -24,8 +24,12 @@ class Converter:
                     processed_nodes.append(node)
                     operation_nodes.remove(node)
 
+        protocol_str += self.get_footer(protocol_name)
         return protocol_str
 
+
+    def get_footer(self, protocol_name):
+        return ""
 
     @staticmethod
     def get_complete_rows(well_addresses):
