@@ -46,83 +46,16 @@ class English(Converter):
 
         return ", ".join(locations)
 
-    def process_node(self, node, protocol):
-
-        protocol_str = ""
-
-        num_duplicates = int(node["data"]["num_duplicates"])
-        parent_nodes = filter(lambda x: x["id"] in node["parentIds"], protocol["nodes"])
-
-        for i in range(0, len(parent_nodes)):
-
-            if parent_nodes[i]["type"] == "well":
-                resources = protocol["resources"]
-                resource = list(filter(lambda r: r["label"] == parent_nodes[i]["data"]["resource"], resources))[0]
-                parent_nodes[i] = resource
-
-        # skip operation if from somewhere to same place
-        link_one_data = filter(lambda x: x["source_id"] == node["parentIds"][0] and x["target_id"] == node["id"],
-                               protocol["links"])[0]["data"]
-        volume_one = link_one_data["volumes"][0]
-        container_one = parent_nodes[0]["data"]["container_name"]
-        locations_one = self.get_locations(protocol, parent_nodes[0])
-
-        if len(parent_nodes) > 1:
-            link_two_data = filter(lambda x: x["source_id"] == node["parentIds"][1] and x["target_id"] == node["id"],
-                                   protocol["links"])[0]["data"]
-            volume_two = link_two_data["volumes"][0]
-            container_two = parent_nodes[0]["data"]["container_name"]
-            locations_two = self.get_locations(protocol, parent_nodes[1])
-
-        container_target = node["data"]["container_name"]
-        locations_result = self.get_locations(protocol, node)
-
-        if node["type"] == "zip":
-
-            well_index = 0
-            for repeat_number in range(0, num_duplicates):
-
-                for i in range(0, len(locations_one)):
-                    target_well = locations_result[well_index]
-
-                    source_well = locations_one[i]
-                    if source_well != target_well:
-                        protocol_str += "* Transfer %s from %s/%s to %s/%s using %s \n" % \
-                                        (volume_one, container_one, source_well, container_target, target_well,
-                                         link_one_data["pipette_name"])
-
-                    source_well = locations_two[i]
-                    if source_well != target_well:
-                        protocol_str += "* Transfer %s from %s/%s to %s/%s using %s \n" % \
-                                        (volume_two, container_two, source_well, container_target, target_well,
-                                         link_two_data["pipette_name"])
-
-                    well_index += 1
-
-            print "\n\n"
-
-        elif node["type"] == "cross":
-
-            i = 0
-            for repeat_number in range(0, num_duplicates):
-
-                for a in locations_one:
-                    for b in locations_two:
-
-                        target_well = locations_result[i]
-                        if a != target_well:
-                            protocol_str += "* Transfer %s from %s/%s to %s/%s using %s \n" % \
-                                            (volume_one, container_one, a, container_target, target_well,
-                                             link_one_data["pipette_name"])
-
-                        if b != target_well:
-                            protocol_str += "* Transfer %s from %s/%s to %s/%s using %s \n" % \
-                                            (volume_two, container_two, b, container_target, target_well,
-                                             link_one_data["pipette_name"])
-
-                        i += 1
-            print "\n\n"
 
 
-            #  "process", "pool", "aliquot", "select"
-        return protocol_str
+    def get_transfer_string(self, pipette_name, volume, container, source_row, container_target, result_row, options_str):
+        return "* Transfer %s from row %s of %s to row %s of %s using %s \n" % \
+               (volume, source_row, container, result_row, container_target, pipette_name)
+
+    def get_transfer_well_string(self, pipette_name, volume, container, source_well, container_target, result_well, options_str):
+        return "* Transfer %s from well %s of %s to well %s of %s using %s \n" % \
+               (volume, source_well, container, result_well, container_target, pipette_name)
+
+    def get_distribute_string(self, pipette_name, volume, container, source, container_target, targets_str, options_str):
+        return "* Distribute %s from well %s of %s to %s of %s using %s \n" % \
+               (volume, source, container, targets_str, container_target, pipette_name)
