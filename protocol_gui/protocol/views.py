@@ -1,7 +1,7 @@
 from protocol_gui.protocol.liquid_handling import *
 from protocol_gui.protocol.opentrons import OpenTrons
 from protocol_gui.protocol.autoprotocol import get_autoprotocol_protocol
-from protocol_gui.protocol.english import get_english_protocol
+from protocol_gui.protocol.english import English
 
 from protocol_gui.protocol.models import Protocol
 from protocol_gui.protocol.forms import ProtocolForm
@@ -147,7 +147,7 @@ def opentrons_protocol(protocol_id):
 
     converter = OpenTrons()
 
-    resp = make_response(converter.convert(protocol_object))
+    resp = make_response(converter.convert(protocol_object, current_protocol.name))
 
     resp.headers['Content-Type'] = "text"
     resp.headers['Content-Disposition'] = "attachment; filename=" + current_protocol.name + "-opentrons.py"
@@ -200,7 +200,8 @@ def english_protocol(protocol_id):
 
     protocol_object = json.loads(current_protocol.protocol)
 
-    resp = make_response(get_english_protocol(protocol_object, current_protocol.name))
+    converter = English()
+    resp = make_response(converter.convert(protocol_object, current_protocol.name))
     resp.headers['Content-Type'] = "text"
     resp.headers['Content-Disposition'] = "attachment; filename=" + current_protocol.name + "-english.md"
     return resp
