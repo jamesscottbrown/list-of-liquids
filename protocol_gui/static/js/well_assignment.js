@@ -37,9 +37,29 @@ function populationWellAssignmentModal(container_name, serialiseDiagram) {
 
 
 function listContentsOfContainer(container_name, serialiseDiagram) {
-    located_nodes = nodes.filter(function (node) {
-        return node.data.container_name == container_name;
-    });
+
+
+    located_nodes = [];
+    var processed_resources = [];
+
+    for (var i = 0; i < nodes.length; i++) {
+        var node = nodes[i];
+
+        if (node.type == "well") {
+            var resource = resources.filter(function (r) {
+                return r.label == node.data.resource
+            })[0];
+            if (resource.data.container_name == container_name && processed_resources.indexOf(node.label) == -1) {
+                processed_resources.push(node.label);
+                located_nodes.push(node);
+            }
+
+        } else if (node.data.container_name == container_name) {
+            located_nodes.push(node);
+        }
+
+
+    }
 
 
     var div = d3.select("#locationModal").select("#well-list");

@@ -58,6 +58,13 @@ def process_node(node, protocol):
     num_duplicates = int(node["data"]["num_duplicates"])
     parent_nodes = filter(lambda x: x["id"] in node["parentIds"], protocol["nodes"])
 
+    for i in range(0, len(parent_nodes)):
+
+        if parent_nodes[i]["type"] == "well":
+            resources = protocol["resources"]
+            resource = list(filter(lambda r: r["label"] == parent_nodes[i]["data"]["resource"], resources))[0]
+            parent_nodes[i] = resource
+
     # skip operation if from somewhere to same place
     link_one_data = filter(lambda x: x["source_id"] == node["parentIds"][0] and x["target_id"] == node["id"],
                            protocol["links"])[0]["data"]
@@ -265,13 +272,15 @@ def get_locations(protocol, node):
 
     locations = []
     for well_address in container["contents"]:
-        contents = container["contents"][well_address]
-        aliquot_index = int(contents["aliquot_index"])
 
-        if int(contents["operation_index"]) == int(node["id"]):
-            while aliquot_index + 1 > len(locations):
-                locations.append(None)
+        for contents in container["contents"][well_address]:
+            aliquot_index = int(contents["aliquot_index"])
 
-            locations[aliquot_index] = well_address
+            print "node:", node
+            if int(contents["operation_index"]) == int(node["id"]):
+                while aliquot_index + 1 > len(locations):
+                    locations.append(None)
+
+                locations[aliquot_index] = well_address
 
     return locations

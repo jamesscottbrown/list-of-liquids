@@ -224,6 +224,11 @@ function addContainerSelect(selected_node, links, restart, form, deleteNode, ser
 function drawWellPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Initially present resource");
 
+    // get the actual resource_node
+    resource_node = resources.filter(function (n) {
+        return n.label == selected_node.label
+    })[0];
+
     var div1 = form.append("div").classed("form-group", true);
     div1.append("label")
         .classed("control-label", true)
@@ -237,11 +242,21 @@ function drawWellPanel(selected_node, links, restart, form, deleteNode, serialis
         .attr("type", "text")
         .attr("name", "name")
         .classed("form-control", true)
-        .attr("value", selected_node.label)
+        .attr("value", resource_node.label)
         .on("change", function () {
-            selected_node.label = this.value;
+
+            // rename all nodes
+            var old_name = resource_node.label;
+            var new_name = this.value;
+
+            for (var i=0; i<nodes.length; i++){
+                var node = nodes[i];
+                if (node.type == "well" && node.label == old_name){
+                    node.label = new_name;
+                }
+            }
+            resource_node.label = new_name;
             restart();
-            console.log(nodes)
         });
 
 
@@ -260,10 +275,10 @@ function drawWellPanel(selected_node, links, restart, form, deleteNode, serialis
         .attr("id", "num-wells")
         .attr("name", "num-wells")
         .classed("form-control", true)
-        .attr("value", selected_node.data.num_wells)
+        .attr("value", resource_node.data.num_wells)
         .on("change", function () {
-            selected_node.data.num_wells = this.value;
-            getContents(serialiseDiagram, selected_node, contentsDiv);
+            resource_node.data.num_wells = this.value;
+            getContents(serialiseDiagram, resource_node, contentsDiv);
         });
 
 
@@ -282,13 +297,13 @@ function drawWellPanel(selected_node, links, restart, form, deleteNode, serialis
         .attr("id", "volume")
         .attr("name", "volume")
         .classed("form-control", true)
-        .attr("value", selected_node.data.volume)
+        .attr("value", resource_node.data.volume)
         .on("change", function () {
-            selected_node.data.volume = this.value;
+            resource_node.data.volume = this.value;
         });
 
 
-    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram);
+    addContainerSelect(resource_node, links, restart, form, deleteNode, serialiseDiagram);
 
     var contentsDiv = form.append("div");
     getContents(serialiseDiagram, selected_node, contentsDiv);

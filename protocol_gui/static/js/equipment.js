@@ -1,4 +1,4 @@
-var containers, pipettes;
+var containers, pipettes, resources;
 
 function update_container_list() {
     d3.select("#containers").selectAll("li").remove();
@@ -150,6 +150,34 @@ function update_pipette_list() {
     });
 
 }
+
+
+function update_resource_list() {
+    d3.select("#resources").selectAll("li").remove();
+
+    var p = d3.select("#resources").select("ul").selectAll("li")
+        .data(resources);
+
+    p.enter().append("li");
+    p.exit().remove();
+
+    var resource_nodes = d3.select("#resources").select("ul").selectAll("li");
+
+    resource_nodes
+        .append("b")
+        .text(function (d) {
+            return d.label;
+        });
+
+    resource_nodes.attr("draggable", true)
+        .on("dragstart", function (d, i) {
+            var ev = d3.event;
+            ev.dataTransfer.setData("custom-data", d.label);
+        })
+        .on("drop", function (a, b, c) {
+        })
+}
+
 
 function addPipette(updateDescriptionPanelCallback) {
     $('#pipetteModal').modal('toggle');

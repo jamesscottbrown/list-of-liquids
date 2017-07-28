@@ -99,8 +99,10 @@ def process_node(protocol_obj, node_id):
 
     if node["type"] == "well":
         # return one aliquot per distinct component, with a volume that is the available volume in well
-        component_names = [node["label"] + "_" + str(i) for i in range(0, int(node_data["num_wells"]))]
-        return map(lambda x: [Aliquot(x, node_data["volume"], container=node_data["container_name"])], component_names)
+        resources = protocol_obj["resources"]
+        resource_data = list(filter(lambda r: r["label"] == node_data["resource"], resources))[0]["data"]
+        component_names = [node["label"] + "_" + str(i) for i in range(0, int(resource_data["num_wells"]))]
+        return map(lambda x: [Aliquot(x, resource_data["volume"], container=resource_data["container_name"])], component_names)
 
     elif node["type"] == "zip":
 

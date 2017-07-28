@@ -13,6 +13,19 @@ function network_editor() {
         .attr('width', width)
         .attr('height', height);
 
+    svg.on("dragover", function (d) {
+        d3.event.preventDefault();
+    })
+        .on("drop", function (d) {
+            var data = d3.event.dataTransfer.getData("custom-data");
+
+            nodes.push({
+                id: ++lastNodeId, type: "well", x: width * Math.random(), y: height / 2, label: data,
+                data: {resource: data}
+            });
+            restart();
+        });
+
     var process_node_types = ['zip', 'cross', 'prod', 'process'];
     var operationLabels = {'zip': 'zip', cross: "×"};
 
@@ -59,6 +72,7 @@ function network_editor() {
         groups = obj.groups;
         containers = obj.containers;
         pipettes = obj.pipettes;
+        resources = obj.resources;
 
     } else {
         nodes = [];
@@ -67,6 +81,7 @@ function network_editor() {
 
         containers = [];
         pipettes = [];
+        resources = [];
     }
     lastNodeId = nodes.length - 1;
 
@@ -270,6 +285,7 @@ function network_editor() {
 
         update_container_list();
         update_pipette_list();
+        update_resource_list();
 
         recolorLabels();
 
@@ -755,6 +771,14 @@ function network_editor() {
             }).style('fill', 'red');
         }
 
+        d3.select("#resources").selectAll("li").style("color", function (d) {
+            var container_index = containers.map(function (x) {
+                return x.name;
+            }).indexOf(d.data.container_name);
+
+            return (container_index == -1) ? "#000" : color(container_index);
+        });
+
     }
 
     function createOptionsMenu(d) {
@@ -910,16 +934,26 @@ function network_editor() {
     }
 
     function addWellNode() {
+
+        var label = prompt('Name:');
+
         nodes.push({
-            id: ++lastNodeId, type: 'well', x: width / 2, y: height / 2, label: prompt('Name:'),
+            id: ++lastNodeId, type: "well", x: width * Math.random(), y: height / 2, label: label,
+            data: {resource: label}
+        });
+
+        resources.push({
+            id: lastNodeId, type: 'well', x: width / 2, y: height / 2, label: label,
             data: {num_wells: 1, container_name: '', well_addresses: '', volume: 1}
         });
-        restart();
 
+        update_resource_list();
         selected_link = false;
         selected_group = false;
-        selected_node = nodes[nodes.length-1];
+        selected_node = nodes[nodes.length - 1];
         updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+
+        restart();
     }
 
     function addProcessNodeToNode(sourceNode, kind) {
@@ -1000,7 +1034,7 @@ function network_editor() {
 
         return JSON.stringify({
             nodes: node_list, links: link_list, groups: group_list,
-            containers: containers, pipettes: pipettes
+            containers: containers, pipettes: pipettes, resources: resources
         });
     }
 
