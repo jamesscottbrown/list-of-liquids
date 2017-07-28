@@ -199,8 +199,7 @@ def process_node(node, protocol):
 
             for source in transfers:
                 targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-
-            protocol_str_two += "%s.distribute(%s, %s.well('%s'), %s.wells(%s)%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source, container_target, targets_str, get_options(link_two_data))
+                protocol_str_two += "%s.distribute(%s, %s.well('%s'), %s.wells(%s)%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source, container_target, targets_str, get_options(link_two_data))
         else:
 
             for target_well in wells_to_fill:
