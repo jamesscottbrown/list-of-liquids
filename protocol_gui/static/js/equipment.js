@@ -53,7 +53,7 @@ function update_container_list() {
                 updateDescriptionPanel();
             });
 
-            d3.select("#DeleteContainerButton").on("click", function(d){
+            d3.select("#DeleteContainerButton").on("click", function (d) {
                 containers.splice(containers.indexOf(d), 1);
                 update_container_list();
                 $('#containerModal').modal('toggle');
@@ -62,14 +62,16 @@ function update_container_list() {
         })
         .append("span").classed("fa", true).classed("fa-pencil", true);
 
-            container_node.append("a")
-            .text("Show or Set well locations")
-            .on("click", function (container) {
-                // need to make sure populationWellAssignmentModal isn't called until modal is shown
-                // as we scale SVG to fit inside it
-                $('#locationModal').one('shown.bs.modal', function(){populationWellAssignmentModal(container.name, serialiseDiagram)});
-                $('#locationModal').modal('toggle');
+    container_node.append("a")
+        .text("Show or Set well locations")
+        .on("click", function (container) {
+            // need to make sure populationWellAssignmentModal isn't called until modal is shown
+            // as we scale SVG to fit inside it
+            $('#locationModal').one('shown.bs.modal', function () {
+                populationWellAssignmentModal(container.name, serialiseDiagram)
             });
+            $('#locationModal').modal('toggle');
+        });
 
 
     container_node.selectAll("b").style('color', function (d) {
@@ -136,7 +138,7 @@ function update_pipette_list() {
 
             });
         })
-    .append("span").classed("fa", true).classed("fa-pencil", true);
+        .append("span").classed("fa", true).classed("fa-pencil", true);
 
     d3.select("#DeletePipetteButton").on("click", function (d) {
         pipettes.splice(pipettes.indexOf(d), 1);
@@ -182,7 +184,7 @@ function update_resource_list() {
 function addPipette(updateDescriptionPanelCallback) {
     $('#pipetteModal').modal('toggle');
     d3.select("#pipetteModal").select(".modal-title").text("Add pipette");
-    
+
     document.getElementById("pipetteName").value = "";
 
     d3.select("#AddPipetteButton").on("click", function () {
@@ -199,7 +201,7 @@ function addPipette(updateDescriptionPanelCallback) {
         $('#pipetteModal').modal('toggle');
         update_pipette_list();
 
-        if (updateDescriptionPanelCallback){
+        if (updateDescriptionPanelCallback) {
             updateDescriptionPanelCallback();
         }
     });
@@ -222,7 +224,7 @@ function addContainer(updateDescriptionPanelCallback) {
         $('#containerModal').modal('toggle');
         update_container_list();
 
-        if (updateDescriptionPanelCallback){
+        if (updateDescriptionPanelCallback) {
             updateDescriptionPanelCallback();
         }
     });

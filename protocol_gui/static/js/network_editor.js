@@ -300,9 +300,9 @@ function network_editor() {
             return d === selected_link;
         })
             .style('marker-start', '')
-            .style('marker-end', function(d){
-                return (d.data.addFirst || d.data.addToThis)? 'url(#end-arrow)' : 'url(#end-arrow-open)'
-            } );
+            .style('marker-end', function (d) {
+                return (d.data.addFirst || d.data.addToThis) ? 'url(#end-arrow)' : 'url(#end-arrow-open)'
+            });
 
         // add new links
         path.enter().append('svg:path')
