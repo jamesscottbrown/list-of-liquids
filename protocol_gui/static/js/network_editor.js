@@ -747,6 +747,20 @@ function network_editor() {
             });
 
 
+        circleLabels.filter(function (d) {
+            return d.type == "well"
+        })
+            .style('fill', function (d) {
+
+                var resource = resources.filter(function(r){return r.label == d.data.resource})[0];
+
+                var container_index = containers.map(function (x) {
+                    return x.name;
+                }).indexOf(resource.data.container_name);
+
+                return (container_index == -1) ? "#000" : color(container_index);
+            });
+
         rectLabels.style('fill', function (d) {
             var container_index = containers.map(function (x) {
                 return x.name;
