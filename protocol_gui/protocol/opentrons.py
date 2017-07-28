@@ -33,6 +33,22 @@ class OpenTrons(Converter):
         opentrons_protocol += "\n"
         return opentrons_protocol
 
+    def get_consolidate_string(self, pipette_name, volume_one, container_one, source_str, container_target, target, options_str):
+        return "%s.consolidate(%s, %s.wells(%s), %s.well('%s')%s)\n" % (pipette_name, volume_one, container_one, source_str, container_target, target, options_str)
+
+    # disitinguish between transfer rows and cells
+    def get_transfer_string(self, pipette_name, volume_one, container_one, source_row, container_target, result_row, options_str):
+        return "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (
+        pipette_name, volume_one, container_one, source_row, container_target, result_row, options_str)
+
+    def get_transfer_well_string(self, pipette_name, volume_one, container_one, source_row, container_target, result_row, options_str):
+        return "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (
+        pipette_name, volume_one, container_one, source_row, container_target, result_row, options_str)
+
+    def get_distribute_string(self, pipette_name, volume_two, container_two, source, container_target, targets_str, options_str):
+        return "%s.distribute(%s, %s.well('%s'), %s.wells(%s)%s)\n" % (pipette_name, volume_two, container_two, source, container_target, targets_str, options_str)
+
+
     def process_node(self, node, protocol):
         protocol_str_one = ""
         protocol_str_two = ""
@@ -96,7 +112,7 @@ class OpenTrons(Converter):
                 source_str = ", ".join(map(lambda x: "'" + x + "'", source))
 
             for target in locations_result:
-                protocol_str += "%s.consolidate(%s, %s.wells(%s), %s.well('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_str, container_target, target, self.get_options(link_one_data))
+                protocol_str += get_consolidate_string(link_one_data["pipette_name"], volume_one, container_one, source_str, container_target, target, self.get_options(link_one_data))
 
             return protocol_str
 
@@ -131,7 +147,9 @@ class OpenTrons(Converter):
                     break
 
             if isValid and not (container_target == container_one and source_row == result_row):
-                protocol_str_one += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_row, container_target, result_row, self.get_options(link_one_data))
+                protocol_str_one += self.get_transfer_string(link_one_data["pipette_name"], volume_one, container_one,
+                                                        source_row, container_target, result_row, self.get_options(link_one_data))
+
                 transfers_made_one.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
             if source_two:
@@ -150,7 +168,7 @@ class OpenTrons(Converter):
                         break
 
                 if isValid and not (container_target == container_one and source_row == result_row):
-                    protocol_str_two += "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_row, container_target, result_row, self.get_options(link_two_data))
+                    protocol_str_two += self.get_transfer_string(link_two_data["pipette_name"], volume_two, container_two, source_row, container_target, result_row, self.get_options(link_two_data))
                     transfers_made_two.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
         # now do remaining individual transfers, grouping transfers from the same well int distribute operations if permitted
@@ -167,12 +185,12 @@ class OpenTrons(Converter):
 
             for source in transfers:
                 targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-                protocol_str_one += "%s.distribute(%s, %s.well('%s'), %s.wells(%s)%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source, container_target, targets_str, self.get_options(link_one_data))
+                protocol_str_one += self.get_distribute_string(link_one_data["pipette_name"], volume_one, container_one, source, container_target, targets_str, self.get_options(link_one_data))
 
         else:
             for target_well in wells_to_fill:
                 source_well = source_one[target_well]
-                protocol_str_one += "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (link_one_data["pipette_name"], volume_one, container_one, source_well, container_target, target_well, self.get_options(link_one_data))
+                protocol_str_one += self.get_transfer_well_string(link_one_data["pipette_name"], volume_one, container_one, source_well, container_target, target_well, self.get_options(link_one_data))
 
         if source_two:
             wells_to_fill = list(set(locations_result) - set(transfers_made_two))
@@ -187,12 +205,12 @@ class OpenTrons(Converter):
 
                 for source in transfers:
                     targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-                    protocol_str_two += "%s.distribute(%s, %s.well('%s'), %s.wells(%s)%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source, container_target, targets_str, self.get_options(link_two_data))
+                    protocol_str_two += self.get_distribute_string(link_two_data["pipette_name"], volume_two, container_two, source, container_target, targets_str, self.get_options(link_two_data))
             else:
 
                 for target_well in wells_to_fill:
                     source_well = source_two[target_well]
-                    protocol_str_two += "%s.transfer(%s, %s.well('%s'), %s.well('%s')%s)\n" % (link_two_data["pipette_name"], volume_two, container_two, source_well, container_target, target_well, self.get_options(link_two_data))
+                    protocol_str_two += sef.get_transfer_well_string(link_two_data["pipette_name"], volume_two, container_two, source_well, container_target, target_well, self.get_options(link_two_data))
 
         if source_two and link_two_data["addFirst"]:
             protocol_str = protocol_str_two + protocol_str_one
