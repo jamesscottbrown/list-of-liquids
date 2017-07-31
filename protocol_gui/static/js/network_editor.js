@@ -359,7 +359,7 @@ function network_editor() {
         path_labels_group
             .selectAll('text')
             .text(function (d) {
-                return (d.data.volumes.length == 1) ? d.data.volumes[0] : "";
+                return (d.data.volumes.length == 1) ? d.data.volumes[0] + " μL" : "";
             })
             .style("visibility", function (d) {
                 return d.data.addToThis ? 'hidden' : 'visible'
