@@ -470,11 +470,122 @@ function placeWells(d) {
         resetAppearances();
 
     } else if (wellPlacementMode == "Rect1") {
-        // TOOO: enable rectangular fill
+        placeWellsRect(placeWellsRect1, row, col, d, operation_index);
+    } else if (wellPlacementMode == "Rect2") {
+        placeWellsRect(placeWellsRect2, row, col, d, operation_index);
 
-    } else if (wellPlacementMode == "Rect 2") {
-        // TOOO: enable rectangular fill
     }
+}
+
+
+function placeWellsRect(placementFunc, row, col, d, operation_index) {
+    var incident_links = links.filter(function (l) {
+        return l.target.id == operation_index;
+    });
+    var parents = incident_links.map(function (l) {
+        return l.source
+    });
+
+
+    var protocol_string = serialiseDiagram();
+    $.ajax({
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        url: window.location.href + "contents",
+        dataType: 'json',
+        async: true,
+        data: {protocol_string: protocol_string, selected_node: parents[0].id},
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRFToken", csrf_token);
+        },
+        success: function (res) {
+            result = res;
+            placeWellsRectInner(result, parents[1], protocol_string, row, col, d, operation_index, placementFunc);
+        },
+        error: function (result, textStatus) {
+            console.log(result);
+            console.log(textStatus);
+        }
+    });
+}
+
+function placeWellsRectInner(contents1, queryNode, protocol_string, row, col, d, operation_index, placementFunc) {
+    $.ajax({
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        url: window.location.href + "contents",
+        dataType: 'json',
+        async: true,
+        data: {protocol_string: protocol_string, selected_node: queryNode.id},
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRFToken", csrf_token);
+        },
+        success: function (res) {
+            result = res;
+            placementFunc(contents1, result, row, col, d, operation_index);
+        },
+        error: function (result, textStatus) {
+            console.log(result);
+            console.log(textStatus);
+        }
+    });
+}
+
+function placeWellsRect1(contents1, contents2, row, col, d, operation_index) {
+    var location;
+    var current_row;
+
+    var num_wells = num_aliquots[operation_index];
+    for (var aliquot_index = 0; aliquot_index < num_wells; aliquot_index++) {
+        clearWell(operation_index, aliquot_index);
+    }
+    aliquot_index = 0;
+
+    for (var i = 0; i < contents1.length; i++) {
+        current_row = row;
+
+        for (var j = 0; j < contents2.length; j++) {
+            location = col + current_row;
+
+            delete selected_container.contents[location];
+            setWellContents(d.container, location, operation_index, aliquot_index);
+            aliquot_index += 1;
+            current_row = current_row - 1;
+        }
+        col = String.fromCharCode(col.charCodeAt(0) + 1);
+    }
+    resetAppearances();
+
+}
+
+function placeWellsRect2(contents1, contents2, row, col, d, operation_index) {
+    var location;
+    var current_col;
+
+    var num_wells = num_aliquots[operation_index];
+    for (var aliquot_index = 0; aliquot_index < num_wells; aliquot_index++) {
+        clearWell(operation_index, aliquot_index);
+    }
+    aliquot_index = 0;
+
+    for (var i = 0; i < contents1.length; i++) {
+        current_col = col;
+
+        for (var j = 0; j < contents2.length; j++) {
+            location = current_col + row;
+
+            console.log(location);
+
+            delete selected_container.contents[location];
+            setWellContents(d.container, location, operation_index, aliquot_index);
+            aliquot_index += 1;
+
+            current_col = String.fromCharCode(current_col.charCodeAt(0) + 1);
+        }
+        row = row - 1;
+    }
+    resetAppearances();
+
 }
 
 
