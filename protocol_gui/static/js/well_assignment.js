@@ -93,20 +93,20 @@ function listContainerContents(result, div, queryNode) {
     }
 
     var outer_list = div
-        .append("ol")
-        .style("margin-top", "20px")
-        .style("border-left", "5px solid " + getColors(queryNode.id))
-        .on("mouseover", function () {
-            if (!single_well_highlighted) {
-                for (var i = 0; i < result.length; i++) {
-                    var d = data[i];
-                    if (getLocation(d.operation_index, d.aliquot_index)) {
-                        highlightWell([d], true)
+            .append("ol")
+            .style("margin-top", "20px")
+            .style("border-left", "5px solid " + getColors(queryNode.id))
+            .on("mouseover", function () {
+                if (!single_well_highlighted) {
+                    for (var i = 0; i < result.length; i++) {
+                        var d = data[i];
+                        if (getLocation(d.operation_index, d.aliquot_index)) {
+                            highlightWell([d], true)
+                        }
                     }
                 }
-            }
-        })
-        .on("mouseout", resetAppearances)
+            })
+            .on("mouseout", resetAppearances)
         ;
 
     outer_list.attr("draggable", true)
@@ -123,37 +123,37 @@ function listContainerContents(result, div, queryNode) {
         });
 
     var outer_list_items = outer_list
-        .selectAll("li")
-        .data(data)
-        .enter()
-        .append("li").style("margin-top", "10px")
+            .selectAll("li")
+            .data(data)
+            .enter()
+            .append("li").style("margin-top", "10px")
 
-        .classed("well-contents", true)
+            .classed("well-contents", true)
 
-        .append("ul")
+            .append("ul")
 
-        .attr("draggable", true)
-        .on("dragstart", function (d, i) {
-            var ev = d3.event;
-            ev.dataTransfer.setData("custom-data", queryNode.id + "," + i);
-            draggingSingleWell = true;
-        })
-        .on("drop", function (a, b, c) {
-            draggingSingleWell = false;
-        })
-        .on("mouseover", function (d) {
+            .attr("draggable", true)
+            .on("dragstart", function (d, i) {
+                var ev = d3.event;
+                ev.dataTransfer.setData("custom-data", queryNode.id + "," + i);
+                draggingSingleWell = true;
+            })
+            .on("drop", function (a, b, c) {
+                draggingSingleWell = false;
+            })
+            .on("mouseover", function (d) {
 
-            single_well_highlighted = true;
+                single_well_highlighted = true;
 
-            resetAppearances(); // clear any highlighting of whole set of wells
-            if (getLocation(d.operation_index, d.aliquot_index)) {
-                highlightWell([d])
-            }
-        })
-        .on("mouseout", function () {
-            single_well_highlighted = false;
-            resetAppearances();
-        })
+                resetAppearances(); // clear any highlighting of whole set of wells
+                if (getLocation(d.operation_index, d.aliquot_index)) {
+                    highlightWell([d])
+                }
+            })
+            .on("mouseout", function () {
+                single_well_highlighted = false;
+                resetAppearances();
+            })
         ;
 
     var items = outer_list_items.selectAll("li")
@@ -672,8 +672,8 @@ function resetAppearances() {
         });
 
     d3.selectAll(".well-contents").style("color", function (d) {
-            return getLocation(d.operation_index, d.aliquot_index) ? 'grey' : 'black';
-        })
+        return getLocation(d.operation_index, d.aliquot_index) ? 'grey' : 'black';
+    })
         .style("border-left", "none");
 }
 
