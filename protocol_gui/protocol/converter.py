@@ -50,34 +50,7 @@ class Converter:
 
     @staticmethod
     def get_options(link_data):
-        opts = []
-
-        # new_tip should be "always" or "never"
-        if link_data["changeTips"] in ["always", "never"]:
-            opts.append("new_tip=%s" % link_data["changeTips"])
-
-        if link_data["disposeTips"] == "rack":
-            opts.append("trash=False")
-
-        if link_data["touchTip"] == "rack":
-            opts.append("touch_tip=True")
-
-        if link_data["blowout"]:
-            opts.append("blow_out=True")
-
-        if int(link_data["mixBefore"]["repeats"]) > 0: # TODO: type conversion?
-            opts.append("mix_before=(%s, %s)" % (link_data["mixBefore"]["repeats"], link_data["mixBefore"]["volume"]))
-
-        if int(link_data["mixAfter"]["repeats"]) > 0: # TODO: type conversion?
-            opts.append("mix_after=(%s, %s)" % (link_data["mixAfter"]["repeats"], link_data["mixAfter"]["volume"]))
-
-        if link_data["airgap"]:
-            opts.append("airgap=%s" % link_data["airgap"])
-
-        opts_str = ", ".join(opts)
-        if opts_str:
-            opts_str = ", " + opts_str
-        return opts_str
+        return ""
 
     @staticmethod
     def get_locations(protocol, node):
@@ -270,7 +243,7 @@ class Converter:
 
                 for target_well in wells_to_fill:
                     source_well = source_two[target_well]
-                    protocol_str_two += sef.get_transfer_well_string(link_two_data["pipette_name"], volume_two,
+                    protocol_str_two += self.get_transfer_well_string(link_two_data["pipette_name"], volume_two,
                                                                      container_two, source_well, container_target,
                                                                      target_well, self.get_options(link_two_data))
 
