@@ -1160,6 +1160,6 @@ function network_editor() {
 
     return {
         addWellNode: addWellNode, clearEverything: clearEverything, save: save,
-        startRepeat: startRepeat
+        startRepeat: startRepeat, deleteNode: deleteNode
     };
 }

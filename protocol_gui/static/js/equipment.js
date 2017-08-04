@@ -165,19 +165,34 @@ function update_resource_list() {
 
     var resource_nodes = d3.select("#resources").select("ul").selectAll("li");
 
-    resource_nodes
+    var label = resource_nodes
         .append("b")
         .text(function (d) {
             return d.label;
         });
 
-    resource_nodes.attr("draggable", true)
+    label.attr("draggable", true)
         .on("dragstart", function (d, i) {
             var ev = d3.event;
             ev.dataTransfer.setData("custom-data", d.label);
         })
         .on("drop", function (a, b, c) {
+        });
+
+    resource_nodes.append("button")
+        .on("click", function (d) {
+            // Delete nodes from diagram
+            var nodesToDelete = nodes.filter(function(n){return n.type == "well" && n.label == d.label});
+            for (var i=0; i<nodesToDelete.length; i++){
+                networkEditor.deleteNode(nodesToDelete[i]);
+            }
+
+            // Delete resource
+            resources.splice(resources.indexOf(d));
+            update_resource_list();
         })
+        .text("Delete ").append("i").classed("fa", true).classed("fa-trash-o", true);
+
 }
 
 
