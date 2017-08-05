@@ -1109,7 +1109,7 @@ function network_editor() {
     function takeAliquot(node) {
         var i = nodes.push({
             id: ++lastNodeId, type: "aliquot", x: width * Math.random(), y: height / 2, label: "aliquot",
-            parents: [node], data: {container_name: ''}
+            parents: [node], data: {container_name: '', num_duplicates: 1}
         });
         i--;
 
