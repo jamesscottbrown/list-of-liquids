@@ -521,8 +521,6 @@ function network_editor() {
                 return d.label;
             });
 
-        circleLabels = circle.selectAll('text');
-
         // show node IDs
         g.append('svg:text')
             .attr('x', 0)
@@ -532,6 +530,8 @@ function network_editor() {
             .text(function (d) {
                 return d.label;
             });
+
+        circleLabels = circle.selectAll('text');
 
     }
 
