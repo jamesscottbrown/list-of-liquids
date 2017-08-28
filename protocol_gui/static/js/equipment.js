@@ -166,7 +166,11 @@ function update_resource_list() {
     var resource_nodes = d3.select("#resources").select("ul").selectAll("li");
 
     var label = resource_nodes
-        .append("b")
+        .append("span");
+
+    label.append("span").attr("class", "fa fa-flask");
+
+    label.append("b")
         .text(function (d) {
             return d.label;
         });
