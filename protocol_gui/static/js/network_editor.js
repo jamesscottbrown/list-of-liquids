@@ -5,7 +5,7 @@ var color = d3.scale.category10();
 
 function network_editor() {
     // set up SVG for D3
-    var width = 960,
+    var width = document.getElementById("network").offsetWidth,
         height = 900;
 
     var svg = d3.select('#network')
