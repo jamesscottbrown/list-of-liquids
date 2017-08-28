@@ -62,8 +62,9 @@ function update_container_list() {
         })
         .append("span").classed("fa", true).classed("fa-pencil", true);
 
-    container_node.append("a")
-        .text("Show or Set well locations")
+    container_node.append("button")
+        .attr("class", "btn btn-default")
+        .text("Well locations ")
         .on("click", function (container) {
             // need to make sure populationWellAssignmentModal isn't called until modal is shown
             // as we scale SVG to fit inside it
@@ -71,7 +72,8 @@ function update_container_list() {
                 populationWellAssignmentModal(container.name, serialiseDiagram)
             });
             $('#locationModal').modal('toggle');
-        });
+        })
+    .append("i").attr("class", "fa fa-table");
 
 
     container_node.selectAll("b").style('color', function (d) {
