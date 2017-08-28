@@ -112,6 +112,7 @@ function network_editor() {
         .nodes(nodes)
         .links(links)
         .groups(groups)
+        .avoidOverlaps(true)
         .on('tick', tick);
 
     // define arrow markers for graph links
@@ -281,6 +282,15 @@ function network_editor() {
 
         redrawCircularNodes(circular_nodes);
         redrawRectangularNodes(process_nodes);
+
+
+        // update node boundary boxes
+        for (var i=0; i<nodes.length; i++){
+            var bb = document.getElementById("label-" + nodes[i].id).getBBox();
+            nodes[i].width = bb.width;
+            nodes[i].height = bb.height;
+        }
+
         force.start();
 
         update_container_list();
@@ -518,6 +528,7 @@ function network_editor() {
             .attr('x', 0)
             .attr('y', 4)
             .attr('class', 'id')
+            .attr("id", function(d){ return "label-" + d.id; })
             .text(function (d) {
                 return d.label;
             });
@@ -724,6 +735,7 @@ function network_editor() {
         g2.append('svg:text')
             .attr('x', 12)
             .attr('y', 4 + 12)
+            .attr("id", function(d){ return "label-" + d.id; })
             .attr('class', 'id')
             .text(function (d) {
                 return d.label;
