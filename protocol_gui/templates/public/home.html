@@ -11,5 +11,20 @@
   <p><a href="https://github.com/jamesscottbrown/protocol_gui" class="btn btn-primary btn-large">Github &raquo;</a></p>
 
 </div>
+
+    {% if current_user.is_authenticated %}
+        <h2>Your protocols</h2>
+        <div>
+            {% if current_user.protocols %}
+                {% for protocol in current_user.protocols %}
+                    <li><a href="/protocols/{{ protocol.id }}">{{ protocol.name }}</a></li>
+                {% endfor %}
+            {% else %}
+                You haven't created any protocols yet.
+            {% endif %}
+        </div>
+        <div><a href="/protocols/add"><i class="fa fa-plus" aria-hidden="true"></i>Add a new protocol</a></div>
+    {% endif %}
+
 {% endblock %}
 
