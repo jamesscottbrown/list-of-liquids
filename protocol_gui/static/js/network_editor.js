@@ -27,7 +27,7 @@ function network_editor() {
         });
 
     var process_node_types = ['zip', 'cross', 'prod', 'process'];
-    var operationLabels = {'zip': 'zip', cross: "×"};
+    var operationLabels = {'zip': 'zip', cross: "cross"};
 
     var selectingGroup = false;
     var selectedNodes = [];
@@ -908,7 +908,7 @@ function network_editor() {
         var operator = "cross";
 
         var i = nodes.push({
-            id: ++lastNodeId, type: operator, x: width * Math.random(), y: height / 2, label: "×",
+            id: ++lastNodeId, type: operator, x: width * Math.random(), y: height / 2, label: "cross",
             parents: [mousedown_node, mouseup_node], data: {container_name: '', num_duplicates: 1}
         });
         i--;
