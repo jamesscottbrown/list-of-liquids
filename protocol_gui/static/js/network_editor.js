@@ -515,23 +515,22 @@ function network_editor() {
         // remove old nodes
         circle.exit().remove();
 
-        // update text of existing labels
-        circle.selectAll('text')
-            .text(function (d) {
-                return d.label;
-            });
-
         // show node IDs
         g.append('svg:text')
             .attr('x', 0)
             .attr('y', 4)
             .attr('class', 'id')
-            .attr("id", function(d){ return "label-" + d.id; })
-            .text(function (d) {
-                return d.label;
-            });
+            .attr("id", function(d){ return "label-" + d.id; });
 
         circleLabels = circle.selectAll('text');
+
+        circleLabels.text(function (d) {
+            if (parseInt(d.data.num_duplicates) > 1) {
+                return d.label + " (×" + d.data.num_duplicates + ")";
+            } else {
+                return d.label;
+            }
+        });
 
     }
 
@@ -622,13 +621,7 @@ function network_editor() {
 
 
     function redrawRectangularNodes(process_nodes) {
-
-        // update existing node labels
-        rect.selectAll("text")
-            .text(function (d) {
-                return d.label;
-            });
-
+        
         // Add new 'process' nodes
         // different shape; no ability to drag line from node; context menu
 
@@ -736,12 +729,17 @@ function network_editor() {
             .attr('x', 12)
             .attr('y', 4 + 12)
             .attr("id", function(d){ return "label-" + d.id; })
-            .attr('class', 'id')
-            .text(function (d) {
-                return d.label;
-            });
+            .attr('class', 'id');
 
         rectLabels = rect.selectAll('text');
+
+        rectLabels.text(function (d) {
+                if (parseInt(d.data.num_duplicates) > 1 ){
+                 return d.label + " (×" + d.data.num_duplicates + ")";
+                } else {
+                  return d.label;
+                }
+            });
 
         // remove old nodes
         rect.exit().remove();
