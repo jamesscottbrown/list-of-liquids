@@ -11,6 +11,8 @@ function update_container_list() {
 
     var container_node = d3.select("#containers").select("ul").selectAll("li");
 
+    container_node.attr("id", function(d,i){ return "container-label-" + i; });
+
     container_node.append("b")
         .text(function (d) {
             return d.name + " (" + d.type + ") "
@@ -168,7 +170,8 @@ function update_resource_list() {
     var resource_nodes = d3.select("#resources").select("ul").selectAll("li");
 
     var label = resource_nodes
-        .append("span");
+        .append("span")
+        .attr("id", function(d,i){ return "resource-label-" + i; });
 
     label.append("span").attr("class", "fa fa-flask");
 

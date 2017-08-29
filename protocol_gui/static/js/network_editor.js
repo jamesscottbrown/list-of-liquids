@@ -317,6 +317,7 @@ function network_editor() {
         // add new links
         path.enter().append('svg:path')
             .attr('class', 'link')
+            .attr("id", function(d,i){return "link-" + i;})
             .classed('selected', function (d) {
                 return d === selected_link;
             })

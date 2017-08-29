@@ -28,6 +28,7 @@ js_network_editor = Bundle(
 	'js/network_editor.js',
 	'js/panel.js',
     'js/well_assignment.js',
+	'js/validate.js',
 	'libs/cola.v3.min.js'
 )
 
