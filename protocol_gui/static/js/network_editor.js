@@ -1174,3 +1174,28 @@ function network_editor() {
         startRepeat: startRepeat, deleteNode: deleteNode
     };
 }
+
+function downloadDiagram() {
+    var serializer = new XMLSerializer();
+    var xmlString = serializer.serializeToString(d3.select('svg').node());
+
+    // Construct an XML string containing CSS rules in network_editor.css
+    var css = "<defs> <style type='text/css'><![CDATA[";
+    for (var i = 0; i < document.styleSheets.length; i++) {
+        var styleSheet = document.styleSheets[i];
+
+        if (styleSheet.ownerNode.href.indexOf("network_editor.css") != -1) {
+            for (var j = 0; j < styleSheet.cssRules.length; j++) {
+                css = css + styleSheet.cssRules[j].cssText + "\n";
+            }
+        }
+    }
+    css = css + "]]></style></defs>";
+
+    // Insert this after the first '>' (i.e. after the initial '<svg ...>')
+    var pos = xmlString.indexOf('>');
+    var img_css = xmlString.slice(0, pos+1) + css + xmlString.slice(pos+1);
+
+    var imgData = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(img_css)));
+    d3.select("#svg-download-link").attr("href", imgData);
+}
