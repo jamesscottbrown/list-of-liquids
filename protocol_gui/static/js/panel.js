@@ -88,21 +88,30 @@ function listContents(result, div, queryNode, serialiseDiagram) {
             return d;
         });
 
+    var container_name = ""
     if (queryNode.data.container_name) {
+        container_name = queryNode.data.container_name;
+    } else if (queryNode.data.hasOwnProperty("resource")) {
+        container_name = resources.filter(function (d) {
+            return d.label == queryNode.data.resource
+        })[0].data.container_name;
+    }
+
+    if (container_name) {
         div.append("a")
             .text("Show or Set well locations")
             .on("click", function () {
                 // need to make sure populationWellAssignmentModal isn't called until modal is shown
                 // as we scale SVG to fit inside it
                 $('#locationModal').one('shown.bs.modal', function () {
-                    populationWellAssignmentModal(queryNode.data.container_name, serialiseDiagram)
+                    populationWellAssignmentModal(container_name, serialiseDiagram)
                 });
                 $('#locationModal').modal('toggle');
             });
-
     } else {
         div.append("p").text("To set well locations you must first set the container")
     }
+
 }
 
 
