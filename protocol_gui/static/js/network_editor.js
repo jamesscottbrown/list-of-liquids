@@ -10,6 +10,7 @@ function network_editor() {
 
     var svg = d3.select('#network')
         .append('svg')
+        .attr('id', 'network-svg')
         .attr('width', width)
         .attr('height', height);
 
@@ -1177,7 +1178,7 @@ function network_editor() {
 
 function downloadDiagram() {
     var serializer = new XMLSerializer();
-    var xmlString = serializer.serializeToString(d3.select('svg').node());
+    var xmlString = serializer.serializeToString(d3.select('#network-svg').node());
 
     // Construct an XML string containing CSS rules in network_editor.css
     var css = "<defs> <style type='text/css'><![CDATA[";
