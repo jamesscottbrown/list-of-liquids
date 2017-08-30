@@ -389,7 +389,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
         .classed("control-label", true)
         .classed("col-sm-5", true)
         .attr("for", "container")
-        .text("Add to this container");
+        .text("Add to these wells");
 
     var containerSelect = containerDiv.append("select")
         .classed("control-input", true)
