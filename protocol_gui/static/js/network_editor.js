@@ -306,24 +306,10 @@ function network_editor() {
         // path (link) group
         path = path.data(links);
 
-        // update existing links
-        path.classed('selected', function (d) {
-            return d === selected_link;
-        })
-            .style('marker-start', '')
-            .style('marker-end', function (d) {
-                return (d.data.addFirst || d.data.addToThis) ? 'url(#end-arrow)' : 'url(#end-arrow-open)'
-            });
-
         // add new links
         path.enter().append('svg:path')
             .attr('class', 'link')
             .attr("id", function(d,i){return "link-" + i;})
-            .classed('selected', function (d) {
-                return d === selected_link;
-            })
-            .style('marker-start', '')
-            .style('marker-end', 'url(#end-arrow)')
             .on('mousedown', function (d) {
                 // select link
                 mousedown_link = d;
@@ -332,6 +318,15 @@ function network_editor() {
                 selected_node = null;
                 updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
                 restart();
+            });
+
+        // style  links
+        path.classed('selected', function (d) {
+                return d === selected_link;
+            })
+            .style('marker-start', '')
+            .style('marker-end', function (d) {
+                return (d.data.addFirst || d.data.addToThis) ? 'url(#end-arrow)' : 'url(#end-arrow-open)'
             });
 
         // remove old links
