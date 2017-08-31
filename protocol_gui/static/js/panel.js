@@ -198,6 +198,15 @@ function addContainerSelect(selected_node, links, restart, form, deleteNode, ser
         .on("change", function () {
             clearOperation(selected_node.id);
             selected_node.data.container_name = this.value;
+
+            var contentsDiv = d3.select("#contents-div");
+            if (selected_node && selected_node.type == "select") {
+                getContents(serialiseDiagram, parentNode, contentsDiv, selectContents(selected_node));
+
+            } else {
+                getContents(serialiseDiagram, selected_node, contentsDiv);
+            }
+
             restart(); // really only need to call recolorLabels
         });
 
@@ -314,7 +323,7 @@ function drawWellPanel(selected_node, links, restart, form, deleteNode, serialis
 
     addContainerSelect(resource_node, links, restart, form, deleteNode, serialiseDiagram);
 
-    var contentsDiv = form.append("div");
+    var contentsDiv = form.append("div").attr("id", "contents-div");
     getContents(serialiseDiagram, selected_node, contentsDiv);
     addDeleteButton(form, selected_node, deleteNode);
 }
@@ -369,7 +378,7 @@ function drawAliquotPanel(selected_node, links, restart, form, deleteNode, seria
 
     addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram);
 
-    var contentsDiv = form.append("div");
+    var contentsDiv = form.append("div").attr("id", "contents-div");
     getContents(serialiseDiagram, selected_node, contentsDiv);
 
     addDeleteButton(form, selected_node, deleteNode);
@@ -901,7 +910,7 @@ function drawPoolPanel(selected_node, links, restart, form, deleteNode, serialis
     duplicatesInput.node().value = selected_node.data.num_duplicates;
 
 
-    var contentsDiv = form.append("div");
+    var contentsDiv = form.append("div").attr("id", "contents-div");
     getContents(serialiseDiagram, selected_node, contentsDiv);
 
 
@@ -941,7 +950,7 @@ function drawSelectPanel(selected_node, links, restart, form, deleteNode, serial
 
     // Note that the user selects from the contents of the parent node, not the contents of the selected node
     // (which consists only of what the user has selected)
-    var contentsDiv = form.append("div");
+    var contentsDiv = form.append("div").attr("id", "contents-div");
     var parentNode = links.filter(function (x) {
         return x.target == selected_node
     })[0].source;
@@ -990,7 +999,7 @@ function drawOperationPanel(selected_node, links, restart, form, deleteNode, ser
     duplicatesInput.node().value = selected_node.data.num_duplicates;
 
 
-    var contentsDiv = form.append("div");
+    var contentsDiv = form.append("div").attr("id", "contents-div");
     getContents(serialiseDiagram, selected_node, contentsDiv);
 
     addDeleteButton(form, selected_node, deleteNode);
