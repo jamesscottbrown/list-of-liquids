@@ -227,6 +227,8 @@ def get_contents(protocol_id):
     protocol_obj = json.loads(request.args.get("protocol_string"))
 
     result = process_node(protocol_obj, node_id)
-    return json.dumps( map(lambda x: map(lambda y: '{0:.2f}'.format(y.volume) + " of " + y.resource, x), result) )
+    result = collapse_contents(result)
+
+    return json.dumps( map(lambda x: map(lambda y: '{0:.2f}'.format(float(y.volume)) + " of " + y.resource, x), result) )
 
 

@@ -180,3 +180,27 @@ def get_constituent_aliquots(protocol_obj, link):
         all_aliquots.append(aliquot_list)
 
     return all_aliquots
+
+
+def collapse_contents(result):
+    # In some protocols, the same resource ends up being added to a well multiple times
+    # (e.g. during serial dilution down a plate)
+    # This function aggregates all instances of the same resource in the contents of each well.
+
+    collapsed_result = []
+    for well in result:
+        total_volume = {}
+        well_collapsed_contents = []
+        for a in well:
+
+            if a.resource in total_volume.keys():
+                total_volume[a.resource] += float(a.volume)
+            else:
+                total_volume[a.resource] = float(a.volume)
+
+        for resource in total_volume:
+            well_collapsed_contents.append(Aliquot(resource, total_volume[resource]))
+
+        collapsed_result.append(well_collapsed_contents)
+
+    return collapsed_result
