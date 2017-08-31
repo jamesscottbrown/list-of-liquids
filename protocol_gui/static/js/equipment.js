@@ -144,6 +144,21 @@ function update_pipette_list() {
         })
         .append("span").classed("fa", true).classed("fa-pencil", true);
 
+        pippette_nodes
+        .append("button")
+        .text(" Assign remaining transfers to this pipette ")
+        .attr("class", "btn btn-default")
+        .on("click", function (d) {
+
+            for (var j=0; j<links.length; j++){
+                if (!links[j].data.pipette_name){
+                    links[j].data.pipette_name = d.name;
+                }
+            }
+
+           networkEditor.restart();
+        });
+
     d3.select("#DeletePipetteButton").on("click", function (d) {
         pipettes.splice(pipettes.indexOf(d), 1);
         update_pipette_list();
