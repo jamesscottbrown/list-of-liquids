@@ -51,6 +51,7 @@ def protocol(protocol_id):
                        '384-plate', 'trough-1row-25ml', '96-PCR-flat', '24-well-plate', '48-well-plate',
                        'alum-block-pcr-strips', 'wheaton_vial_rack', 'tiprack-200ul', 'PCR-strip-tall',
                        'hampton-1ml-deep-block']
+    container_types.sort()
 
     return render_template('protocols/protocol.html', protocol=current_protocol,
                            protocol_obj=protocol_obj, container_types=container_types)
