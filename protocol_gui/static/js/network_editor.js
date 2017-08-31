@@ -1005,7 +1005,7 @@ function network_editor() {
 
         var i = nodes.push({
             id: ++lastNodeId, type: type, x: width * Math.random(), y: height / 2, label: operation,
-            data: {operation: operation, selection: [], num_duplicates: 1}, parents: [sourceNode]
+            data: {operation: operation, selection: [], num_duplicates: 1, container_name: ""}, parents: [sourceNode]
         });
         i--;
         selected_node = nodes[i];
