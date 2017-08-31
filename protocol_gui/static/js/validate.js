@@ -22,7 +22,7 @@ function validateOpenTrons() {
         }
     }
 
-    if (resources_errors) {
+    if (resources_errors.length > 0) {
         errorsFound = true;
 
         error_div.append("h3").text("Problems with resources");
@@ -47,7 +47,7 @@ function validateOpenTrons() {
         }
     }
 
-    if (container_errors) {
+    if (container_errors.length > 0) {
         errorsFound = true;
 
         error_div.append("h3").text("Problems with containers");
@@ -71,7 +71,7 @@ function validateOpenTrons() {
         }
     }
 
-    if (operation_errors) {
+    if (operation_errors.length > 0) {
         errorsFound = true;
 
         error_div.append("h3").text("Problems with operations");
@@ -96,7 +96,7 @@ function validateOpenTrons() {
         }
     }
 
-    if (link_errors) {
+    if (link_errors.length > 0) {
         errorsFound = true;
 
         error_div.append("h3").text("Problems with liquid transfers");
