@@ -77,7 +77,11 @@ class Converter:
         protocol_str_two = ""
 
         num_duplicates = int(node["data"]["num_duplicates"])
-        parent_nodes = filter(lambda x: x["id"] in node["parentIds"], protocol["nodes"])
+
+        parent_nodes = []
+        parent_nodes.extend(filter(lambda x: x["id"] == node["parentIds"][0], protocol["nodes"]))
+        if len(node["parentIds"]) > 1:
+            parent_nodes.extend(filter(lambda x: x["id"] == node["parentIds"][1], protocol["nodes"]))
 
         for i in range(0, len(parent_nodes)):
 
