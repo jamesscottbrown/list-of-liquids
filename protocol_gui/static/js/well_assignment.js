@@ -239,9 +239,19 @@ function drawContainer(container) {
         return d.y;
     }));
 
-    // Pick the width such that it fits horizontally, then pick height so x and y scales are the same
-    var width = document.getElementById("well-diagram").offsetWidth;
-    var height = (2 * padding) + (width - 2 * padding) * (yExtent[1] - yExtent[0]) / (xExtent[1] - xExtent[0]);
+
+    if (xExtent[1] > xExtent[0]) {
+        // Pick the width such that it fits horizontally, then pick height so x and y scales are the same
+        var width = document.getElementById("well-diagram").offsetWidth;
+        var height = (2 * padding) + (width - 2 * padding) * (yExtent[1] - yExtent[0]) / (xExtent[1] - xExtent[0]);
+    } else {
+        // All wells in trough have the same x-coordinate
+        var width = document.getElementById("well-diagram").offsetWidth;
+        var height = 0;
+        for (var well in container_data.locations) {
+            height += 25;
+        }
+    }
 
     d3.select("#locationModal").select("#well-diagram").selectAll("svg").remove();
     var svg = d3.select("#locationModal").select("#well-diagram")
@@ -265,9 +275,7 @@ function drawContainer(container) {
 
     d3.select("#container_group")
         .selectAll(".pie-group")
-        .data(data.filter(function (d) {
-            return d.diameter
-        }))
+        .data(data)
         .enter()
         .append("g")
         .attr("transform", function (d) {
@@ -322,12 +330,13 @@ function drawContainer(container) {
         }));
 
 
-    g.selectAll("rect")
+    g.selectAll(".rect-container")
         .data(data.filter(function (d) {
             return d.width
         }))
         .enter()
         .append("rect")
+        .classed("rect-container", true)
         .attr("x", function (d) {
             return xScale(d.x);
         })
@@ -345,7 +354,28 @@ function drawContainer(container) {
             return d.name;
         })
         .style("stroke", "black")
-        .style("stroke-width", "2px");
+        .style("stroke-width", "2px")
+        .style("fill", "white").style("fill-opacity", 0)// N.B. if fill is "none", context menu and dropping break
+        .on("mouseover", function (d) {
+            var contents = selected_container.contents[d.name];
+            if (contents) {
+                highlightWell(contents);
+            }
+        })
+        .on("mouseout", resetAppearances)
+        .on("drop", function (d) {
+            placeWells(d)
+        })
+        .on("contextmenu", d3.contextMenu(function (d) {
+            return [{
+                title: 'Clear',
+                disabled: !selected_container.contents[d.name],
+                action: function (elm, d) {
+                    delete selected_container.contents[d.name];
+                    resetAppearances();
+                }
+            }]
+        }));
 
 
     var g_columns = svg.append("g").attr("transform", "translate(" + container_data["origin-offset"].x + ", 0)");
@@ -655,6 +685,7 @@ function resetAppearances() {
 
     // Color wells to indicate their contents
     d3.selectAll(".pie-group").selectAll("path").remove();
+    d3.selectAll(".pie-group").selectAll("rect").remove();
 
     for (var name in container_data.locations) {
         var datum = container_data.locations[name];
@@ -666,10 +697,8 @@ function resetAppearances() {
 
     }
 
-    containerDiagram.selectAll("rect")
-        .style("fill", function (d) {
-            return selected_container.contents[d.name] ? "black" : "white";
-        });
+    containerDiagram.selectAll(".rect-container")
+        .style("stroke", "black").style("stroke-width", "2px")
 
     d3.selectAll(".well-contents").style("color", function (d) {
         return getLocation(d.operation_index, d.aliquot_index) ? 'grey' : 'black';
@@ -696,7 +725,6 @@ function getLocation(operation_index, aliquot_index) {
 
 
 function highlightWell(contents_list, highlightWholeSet) {
-    // Highlight circle
 
     d3.select("#locationModal")
         .selectAll(".well-contents")
@@ -707,11 +735,20 @@ function highlightWell(contents_list, highlightWholeSet) {
 
         var wellName = getLocation(contents.operation_index, contents.aliquot_index);
 
-        d3.select("#locationModal").selectAll("circle")
-            .filter(function (d) {
-                return d.name == wellName;
-            })
-            .style("stroke", "yellow").style("stroke-width", "7px");
+        if (container_data.locations[wellName].width) {
+            d3.select("#locationModal").selectAll(".rect-container")
+                .filter(function (d) {
+                    return d.name == wellName;
+                })
+                .style("stroke", "yellow").style("stroke-width", "3px");
+
+        } else {
+            d3.select("#locationModal").selectAll("circle")
+                .filter(function (d) {
+                    return d.name == wellName;
+                })
+                .style("stroke", "yellow").style("stroke-width", "7px");
+        }
 
 
         d3.select("#locationModal")
@@ -725,7 +762,15 @@ function highlightWell(contents_list, highlightWholeSet) {
 
 function drawWell(contents, name) {
 
-    var radius = 10;
+    if (container_data.locations[name].width){
+        drawWellRect(contents, name);
+    } else {
+         drawWellCirc(contents, name);
+    }
+}
+
+function drawWellCirc(contents, name){
+     var radius = 10;
 
     var arc = d3.svg.arc()
         .innerRadius(0)
@@ -746,6 +791,27 @@ function drawWell(contents, name) {
         .append('path')
         .attr('d', arc)
         .attr('fill', function (d) {
-            return color(d.id);
+            return getColors(d.id);
+        });
+}
+
+function drawWellRect(contents, name) {
+    var g = d3.select("#pie-" + name);
+
+    var width = container_data.locations[name].width;
+    var height = container_data.locations[name].length;
+
+    var rect = g.selectAll('rect')
+        .data(contents)
+        .enter()
+        .append('rect')
+        .attr("x", function (d, i) {
+            return i * (width / contents.length)
+        })
+        .attr("width", (width / contents.length))
+        .attr("y", "0")
+        .attr("height", height)
+        .style('fill', function (d) {
+            return getColors(d.operation_index);
         });
 }
