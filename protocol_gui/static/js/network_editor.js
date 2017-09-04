@@ -577,19 +577,16 @@ function network_editor() {
 
     function deleteNode(d) {
 
-        if (process_node_types.indexOf(d.type) == "well") {
-            deleteDownFromNode(d);
-        } else {
-            // delete arrows to this process node
+        // delete arrows to this node
+        if (process_node_types.indexOf(d.type) != "well") {
             var inLinks = links.filter(function (l) {
                 return l.target.id == d.id;
             });
             for (var i = 0; i < inLinks.length; i++) {
                 links.splice(links.indexOf(inLinks[i]), 1);
             }
-
-            deleteDownFromNode(d);
         }
+        deleteDownFromNode(d);
 
         // clear line
         drag_line
@@ -597,18 +594,45 @@ function network_editor() {
             .style('marker-end', '');
         resetMouseVars();
 
+        // update index field for each node
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].index = i;
+        }
+
+        force.nodes(nodes).links(links).groups(groups);
         restart();
     }
 
 
     function deleteDownFromNode(d) {
 
+        // Do not call this function directly: always call deleteNode() instead
         var i;
+        var node = nodes.filter(function (n) {
+            return n.id == d.id
+        })[0];
+
+        // delete results of this operation from contents of container
+        var containerName = node.data.container_name;
+        if (containerName) {
+            var container = containers.filter(function (d) {
+                return d.name == containerName;
+            })[0];
+
+            for (var well in container.contents) {
+
+                var aliquots_to_remove = container.contents[well].filter(function (d) {
+                    return d.operation_index == node.id
+                });
+
+                for (var j = 0; j < aliquots_to_remove.length; j++) {
+                    container.contents[well].splice(container.contents[well].indexOf(aliquots_to_remove[j]), 1);
+                }
+            }
+        }
 
         // delete this node
-        var index = nodes.indexOf(nodes.filter(function (n) {
-            return n.id == d.id
-        })[0]);
+        var index = nodes.indexOf(node);
         nodes.splice(index, 1);
 
         // delete incoming links
