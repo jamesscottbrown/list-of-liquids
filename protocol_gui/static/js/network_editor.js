@@ -262,10 +262,33 @@ function network_editor() {
         var constraints = [];
         for (i = 0; i < links.length; i++) {
             var link = links[i];
+
+            // try to direct all edges downwards
             constraints.push({
                 "axis": "y", "left": nodePosition[link.source.id],
                 "right": nodePosition[link.target.id], "gap": 50
-            })
+            });
+
+            // try to direct the solid edges right
+            if (link.data.addToThis || link.data.addFirst) {
+                constraints.push({
+                    "axis": "x", "left": nodePosition[link.source.id],
+                    "right": nodePosition[link.target.id], "gap": 50
+                });
+            }
+
+            // try to direct the dashed edges left - but only if there is a solid arrow too
+            var otherLinks = links.filter(function (d) {
+                return d.target.id == link.target.id && d.source.id != link.source.id
+                                       && (d.data.addFirst || d.data.addToThis);
+            });
+
+            if (otherLinks.length > 0) {
+                constraints.push({
+                    "axis": "x", "left": nodePosition[link.target.id],
+                    "right": nodePosition[link.source.id], "gap": 50
+                });
+            }
         }
         force.constraints(constraints);
 
@@ -292,14 +315,13 @@ function network_editor() {
             nodes[i].height = bb.height;
         }
 
-        force.start();
+        force.start(10, 15, 20);
 
         update_container_list();
         update_pipette_list();
         update_resource_list();
 
         recolorLabels();
-
     }
 
     function redrawLinks() {
