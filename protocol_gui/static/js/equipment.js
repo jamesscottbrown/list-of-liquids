@@ -56,6 +56,17 @@ function update_container_list() {
             });
 
             d3.select("#DeleteContainerButton").on("click", function (d) {
+
+                // ensure container is not listed as tip rack or trash container for any pipettes after being deleted
+                for (var i=0; i<pipettes.length; i++){
+                    if (pipettes[i].data.tipracks == d.name){
+                        pipettes[i].data.tipracks = "";
+                    }
+                    if (pipettes[i].data.trash == d.name){
+                        pipettes[i].data.trash = "";
+                    }
+                }
+                
                 containers.splice(containers.indexOf(d), 1);
                 update_container_list();
                 $('#containerModal').modal('toggle');
@@ -114,6 +125,27 @@ function update_pipette_list() {
             d3.select("#pipetteName").property('value', d.name);
             d3.select("#pipetteVolume").property('value', d.volume);
 
+            d3.select("#pipetteTipRacks")
+                .selectAll("option")
+                .data(containers.filter(function (d) {
+                    return d.type.startsWith("tiprack");
+                }))
+                .enter()
+                .append("option")
+                .text(function (d) { return d.name; })
+                .attr("value", function (d) { return d.name; });
+
+            d3.select("#pipetteTrash")
+                .selectAll("option")
+                .data(containers.filter(function (d) {
+                    return d.type.startsWith("trash");
+                }))
+                .enter()
+                .append("option")
+                .text(function (d) { return d.name; })
+                .attr("value", function (d) { return d.name; });
+
+
             d3.select("#AddPipetteButton").on("click", function () {
 
                 var oldName = d.name;
@@ -132,6 +164,7 @@ function update_pipette_list() {
                     min_volume: d3.select("#pipetteMinVolume").node().value,
                     axis: d3.select("#pipetteAxis").node().value,
                     tipracks: d3.select("#pipetteTipRacks").node().value,
+                    trash:  d3.select("#pipetteTrash").node().value,
                     channels: d3.select("#pipetteChannels").node().value,
                     aspirateSpeed: d3.select("#pipetteAspirateSpeed").node().value,
                     dispenseSpeed: d3.select("#pipetteDispenseSpeed").node().value
@@ -227,6 +260,24 @@ function addPipette(updateDescriptionPanelCallback) {
 
     document.getElementById("pipetteName").value = "";
 
+    d3.select("#pipetteTipRacks")
+        .selectAll("option")
+        .data(containers.filter(function(d){ return d.type.startsWith("tiprack"); }))
+        .enter()
+        .append("option")
+        .text(function (d){ return d.name; })
+        .attr("value", function (d) { return d.name; });
+
+    d3.select("#pipetteTrash")
+        .selectAll("option")
+        .data(containers.filter(function (d) {
+            return d.type.startsWith("trash");
+        }))
+        .enter()
+        .append("option")
+        .text(function (d) { return d.name; })
+        .attr("value", function (d) { return d.name; });
+
     d3.select("#AddPipetteButton").on("click", function () {
         pipettes.push({
             name: d3.select("#pipetteName").node().value,
@@ -234,6 +285,7 @@ function addPipette(updateDescriptionPanelCallback) {
             min_volume: d3.select("#pipetteMinVolume").node().value,
             axis: d3.select("#pipetteAxis").node().value,
             tipracks: d3.select("#pipetteTipRacks").node().value,
+            trash:  d3.select("#pipetteTrash").node().value,
             channels: d3.select("#pipetteChannels").node().value,
             aspirateSpeed: d3.select("#pipetteAspirateSpeed").node().value,
             dispenseSpeed: d3.select("#pipetteDispenseSpeed").node().value

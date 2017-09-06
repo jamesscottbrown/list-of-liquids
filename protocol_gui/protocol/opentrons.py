@@ -26,9 +26,10 @@ class OpenTrons(Converter):
         aspirate_speed="%s",
         dispense_speed="%s",
         tip_racks=%s,
+        trash_container=%s,
         name="%s")\n\n""" \
             % (pipette["name"], pipette["axis"], pipette["volume"], pipette["min_volume"],  pipette["channels"],
-               pipette["aspirateSpeed"], pipette["dispenseSpeed"], pipette["tipracks"], pipette["name"])
+               pipette["aspirateSpeed"], pipette["dispenseSpeed"], pipette["tipracks"], pipette["trash"], pipette["name"])
 
         opentrons_protocol += "\n"
         return opentrons_protocol
