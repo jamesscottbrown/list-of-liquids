@@ -194,11 +194,26 @@ function network_editor() {
             return 'M' + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
         });
 
-        path_labels.attr("x", function (d) {
-            return 8 + (d.source.x + d.target.x) / 2;
-        })
-            .attr("y", function (d) {
+        path_labels.attr("y", function (d) {
+                // bottom of text box is half-way between nodes vertically
                 return (d.source.y + d.target.y) / 2;
+            })
+            .attr("x", function (d) {
+                var meanPos = (d.source.x + d.target.x) / 2;
+
+                // find position of top edge of bounding box of text
+                var yTop = (d.source.y + d.target.y) / 2 + this.getBBox().height;
+
+                // find x-coordinate of position along edge with this y-coordinate
+                var xTopCorner = d.source.x + (yTop - d.source.y) * (d.target.x - d.source.x) / (d.target.y - d.source.y);
+
+                if (d.source.x > d.target.x) {
+                    // arrow directed left:  position text so upper-left corner of bounding box touches edge
+                    return xTopCorner;
+                } else {
+                    // arrow directed right: position text so upper-right corner of bounding box touches edge
+                    return xTopCorner - this.getBBox().width;
+                }
             });
 
         circle.attr('transform', function (d) {
