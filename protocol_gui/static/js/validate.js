@@ -32,6 +32,35 @@ function validateOpenTrons() {
         return false;
     }
 
+    // validate pipettes
+    var pipette_errors = [];
+    for (var i = 0; i < pipettes.length; i++) {
+        if (!pipettes[i].tipracks ) {
+            pipette_errors.push(pipettes[i].name + " has no tip rack set");
+        }
+        if (!pipettes[i].trash ) {
+            pipette_errors.push(pipettes[i].name + " has no trash container set");
+        }
+    }
+
+     if (pipette_errors.length > 0) {
+        errorsFound = true;
+
+        error_div.append("h3").text("Problems with pipettes");
+
+        error_div.append("ul")
+            .selectAll("li")
+            .data(pipette_errors)
+            .enter()
+            .append("li")
+            .text(function (d) {
+                return d;
+            });
+    }
+
+
+
+
     // - resources must have a container assigned and a well
     var resources_errors = [];
 
