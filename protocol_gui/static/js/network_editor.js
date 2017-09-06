@@ -200,7 +200,7 @@ function network_editor() {
             })
             .attr("x", function (d) {
                 // find position of top edge of bounding box of text
-                var yTop = (d.source.y + d.target.y) / 2 + this.getBBox().height;
+                var yTop = (d.source.y + d.target.y) / 2 - this.getBBox().height;
 
                 // find x-coordinate of position along edge with this y-coordinate
                 var xTopCorner = d.source.x + (yTop - d.source.y) * (d.target.x - d.source.x) / (d.target.y - d.source.y);
