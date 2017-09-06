@@ -199,8 +199,6 @@ function network_editor() {
                 return (d.source.y + d.target.y) / 2;
             })
             .attr("x", function (d) {
-                var meanPos = (d.source.x + d.target.x) / 2;
-
                 // find position of top edge of bounding box of text
                 var yTop = (d.source.y + d.target.y) / 2 + this.getBBox().height;
 
@@ -307,7 +305,7 @@ function network_editor() {
         }
         force.constraints(constraints);
 
-        redrawGroups(); // draw groups ebfore nodes so that they are in the background
+        redrawGroups(); // draw groups before nodes so that they are in the background
         redrawLinks();
         redrawLinkLabels();
 
