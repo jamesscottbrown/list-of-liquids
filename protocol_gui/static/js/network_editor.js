@@ -551,7 +551,7 @@ function network_editor() {
         g.append('svg:text')
             .attr('x', 0)
             .attr('y', 4)
-            .attr('class', 'id')
+            .attr('class', 'node-label')
             .attr("id", function(d){ return "label-" + d.id; });
 
         circleLabels = circle.selectAll('text');
@@ -785,7 +785,7 @@ function network_editor() {
             .attr('x', 12)
             .attr('y', 4 + 12)
             .attr("id", function(d){ return "label-" + d.id; })
-            .attr('class', 'id');
+            .attr('class', 'node-label');
 
         rectLabels = rect.selectAll('text');
 

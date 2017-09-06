@@ -1,11 +1,36 @@
 function validateOpenTrons() {
-
     var errorsFound = false;
 
     // first clear list
     var error_div = d3.select("#protocol-error-div");
     document.getElementById("protocol-error-div").innerHTML = "";
 
+    // AJAX request to find aliquots with no assigned wells
+    var unassigned_wells;
+    var protocol_string = serialiseDiagram();
+    $.ajax({
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        url: window.location.href + "checkWellsAssigned",
+        dataType: 'json',
+        async: false, // this is not an asynchronous request
+        data: {protocol_string: protocol_string},
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRFToken", csrf_token);
+        },
+        success: function (res) {
+            unassigned_wells = res;
+            console.log(res);
+        },
+        error: function (result, textStatus) {
+            console.log(result);
+            console.log(textStatus);
+            errorsFound = true;
+        }
+    });
+    if (errorsFound) {
+        return false;
+    }
 
     // - resources must have a container assigned and a well
     var resources_errors = [];
@@ -15,14 +40,16 @@ function validateOpenTrons() {
             resources_errors.push(resources[i].label + " has no container set");
             d3.select("#resource-label-" + i).style("color", "#ffc200");
         }
-
-        if (!resources[i].data.well_addresses) {
-            resources_errors.push(resources[i].label + " is not assigned to specific wells");
-            d3.select("#resource-label-" + i).style("color", "#ffc200");
-        }
     }
 
-    if (resources_errors.length > 0) {
+    d3.selectAll(".node-label")
+        .filter(function (d) {
+            return unassigned_wells.unassigned_resources.indexOf(d.id) != -1;
+        })
+        .style("fill", "#ffc200");
+
+
+    if (resources_errors.length > 0 || unassigned_wells.unassigned_resources.length >0) {
         errorsFound = true;
 
         error_div.append("h3").text("Problems with resources");
@@ -35,6 +62,13 @@ function validateOpenTrons() {
             .text(function (d) {
                 return d;
             });
+
+        if (unassigned_wells.unassigned_resources.length > 0) {
+            error_div.append("p")
+                .text(function (d) {
+                    return "Some resources have a container assigned, but no well assigned";
+                });
+        }
     }
 
 
@@ -71,7 +105,14 @@ function validateOpenTrons() {
         }
     }
 
-    if (operation_errors.length > 0) {
+       d3.selectAll(".node-label")
+        .filter(function (d) {
+            return unassigned_wells.unassigned_operations.indexOf(d.id) != -1;
+        })
+        .style("color", "#ffc200");
+
+
+    if (operation_errors.length > 0 || unassigned_wells.unassigned_operations.length > 0) {
         errorsFound = true;
 
         error_div.append("h3").text("Problems with operations");
@@ -83,6 +124,11 @@ function validateOpenTrons() {
             .append("li")
             .text(function (d) {
                 return d;
+            });
+
+        error_div.append("p")
+            .text(function (d) {
+                return "Some operations have a container assigned, but not all wells assigned";
             });
     }
 
@@ -111,8 +157,6 @@ function validateOpenTrons() {
             });
     }
 
-
-    // TODO: also check that well locations are assigned
 
     if (errorsFound) {
         $("#errorModal").modal('toggle');

@@ -232,3 +232,65 @@ def get_contents(protocol_id):
     return json.dumps( map(lambda x: map(lambda y: '{0:.2f}'.format(float(y.volume)) + " of " + y.resource, x), result) )
 
 
+@blueprint.route('/<int:protocol_id>/checkWellsAssigned', methods=['GET'])
+def check_assigned(protocol_id):
+    """Check whether all aliquots in a protocol with a container assigned have been assigned to a well."""
+
+    current_protocol = Protocol.query.filter_by(id=protocol_id).first()
+    if not current_protocol:
+        flash('No such specification!', 'danger')
+        return redirect('.')
+
+    if current_protocol.user != current_user and not current_protocol.public:
+        flash('Not your project!', 'danger')
+        return redirect('.')
+
+    protocol_obj = json.loads(request.args.get("protocol_string"))
+
+    unassigned_operations = []
+    unassigned_resources = []
+    processed_resource_ids = set()
+
+    for node in protocol_obj["nodes"]:
+
+        if node["type"] == "well":
+            resource = filter(lambda x: x["label"] == node["label"], protocol_obj["resources"])[0]
+
+            # only process the first node corresponding to each resource
+            if resource["id"] in processed_resource_ids:
+                continue
+            processed_resource_ids.add(resource["id"])
+
+            num_aliquots = int(resource["data"]["num_wells"])
+
+            if "container_name" not in resource["data"].keys() or not resource["data"]["container_name"]:
+                continue
+
+            container_name = resource["data"]["container_name"]
+            if nodeHAsUnassignedAliquots(num_aliquots, node["id"], container_name, protocol_obj):
+                unassigned_resources.append(node["id"])
+
+        else:
+            if "container_name" not in node["data"].keys() or not node["data"]["container_name"]:
+                continue
+            container_name = node["data"]["container_name"]
+
+            num_aliquots = len( process_node(protocol_obj, node["id"]) )
+            if nodeHAsUnassignedAliquots(num_aliquots, node["id"], container_name, protocol_obj):
+                unassigned_operations.append(node["id"])
+
+    return json.dumps({"unassigned_operations": unassigned_operations, "unassigned_resources": unassigned_resources})
+
+
+def nodeHAsUnassignedAliquots(num_aliquots, operation_id, container_name, protocol_obj):
+    container = filter(lambda x: x["name"] == container_name, protocol_obj["containers"])[0]
+
+    aliquots_listed = set()
+    for well in container["contents"]:
+        for contents in container["contents"][well]:
+            if contents["operation_index"] == operation_id:
+                aliquots_listed.add(contents["aliquot_index"])
+
+    return len(aliquots_listed) != num_aliquots
+
+

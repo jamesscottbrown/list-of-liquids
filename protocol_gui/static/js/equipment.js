@@ -186,7 +186,8 @@ function update_resource_list() {
 
     var label = resource_nodes
         .append("span")
-        .attr("id", function(d,i){ return "resource-label-" + i; });
+        .attr("id", function(d,i){ return "resource-label-" + i; })
+        .classed("resource-label", true);
 
     label.append("span").attr("class", "fa fa-flask");
 
