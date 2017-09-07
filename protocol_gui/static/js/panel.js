@@ -321,7 +321,7 @@ function drawWellPanel(selected_node, links, restart, form, deleteNode, serialis
         });
 
 
-    addContainerSelect(resource_node, links, restart, form, deleteNode, serialiseDiagram);
+    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram);
 
     var contentsDiv = form.append("div").attr("id", "contents-div");
     getContents(serialiseDiagram, selected_node, contentsDiv);
