@@ -851,6 +851,7 @@ function network_editor() {
             });
 
 
+        // Color nodes of type ''well'' based on data in resource object with same name, not node object
         circleLabels.filter(function (d) {
             return d.type == "well"
         })

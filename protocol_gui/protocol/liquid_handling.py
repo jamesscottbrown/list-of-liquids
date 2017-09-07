@@ -175,7 +175,7 @@ def get_constituent_aliquots(protocol_obj, link):
         aliquot_list = []
         for i in range(0, len(input)):
             a = input[i]
-            aliquot_list.append(Aliquot(a.resource, (transfered_volume * float(a.volume)/total_volume)))
+            aliquot_list.append(Aliquot(a.resource, ( float(transfered_volume) * float(a.volume)/total_volume)))
 
         all_aliquots.append(aliquot_list)
 

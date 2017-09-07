@@ -139,7 +139,7 @@ class Converter:
                 source_str = ", ".join(map(lambda x: "'" + x + "'", source))
 
             for target in locations_result:
-                protocol_str += get_consolidate_string(link_one_data["pipette_name"], volume_one, container_one, source_str,
+                protocol_str += self.get_consolidate_string(link_one_data["pipette_name"], volume_one, container_one, source_str,
                                                        container_target, target, self.get_options(link_one_data))
 
             return protocol_str
