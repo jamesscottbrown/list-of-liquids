@@ -84,7 +84,13 @@ function network_editor() {
         pipettes = [];
         resources = [];
     }
-    lastNodeId = nodes.length - 1;
+
+    lastNodeId = 0;
+    for (var i=0; i<nodes.length; i++){
+        if (nodes[i].id > lastNodeId) {
+            lastNodeId = nodes[i].id;
+        }
+    }
 
     function getDefaultLinkData(addToThis) {
         var default_link_data = {
