@@ -649,7 +649,7 @@ function network_editor() {
             for (var well in container.contents) {
 
                 var aliquots_to_remove = container.contents[well].filter(function (d) {
-                    return d.operation_index == node.id
+                    return d.node_id == node.id
                 });
 
                 for (var j = 0; j < aliquots_to_remove.length; j++) {
@@ -674,7 +674,7 @@ function network_editor() {
                 for (var i = 0; i < containers.length; i++) {
                     for (var well in containers[i].contents) {
                         for (var j = 1; j < containers[i].contents[well].length; j++) {
-                            containers[i].contents[well][j].operation_index == otherNodes[0].id;
+                            containers[i].contents[well][j].node_id == otherNodes[0].id;
                         }
                     }
                 }

@@ -63,7 +63,7 @@ class Converter:
                 aliquot_index = int(contents["aliquot_index"])
 
                 print "node:", node
-                if int(contents["operation_index"]) == int(node["id"]):
+                if int(contents["node_id"]) == int(node["id"]):
                     while aliquot_index + 1 > len(locations):
                         locations.append(None)
 

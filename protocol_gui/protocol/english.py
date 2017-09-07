@@ -41,7 +41,7 @@ class English(Converter):
 
         for location in container["contents"]:
             for contents in container["contents"][location]:
-                if int(contents["operation_index"]) == int(node["id"]):
+                if int(contents["node_id"]) == int(node["id"]):
                     locations.append(location)
 
         return ", ".join(locations)

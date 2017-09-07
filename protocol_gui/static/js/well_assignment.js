@@ -89,7 +89,7 @@ function listContainerContents(result, div, queryNode) {
 
     var data = [];
     for (var i = 0; i < result.length; i++) {
-        data.push({contents: result[i], aliquot_index: i, operation_index: queryNode.id});
+        data.push({contents: result[i], aliquot_index: i, node_id: queryNode.id});
     }
 
     var outer_list = div
@@ -100,7 +100,7 @@ function listContainerContents(result, div, queryNode) {
                 if (!single_well_highlighted) {
                     for (var i = 0; i < result.length; i++) {
                         var d = data[i];
-                        if (getLocation(d.operation_index, d.aliquot_index)) {
+                        if (getLocation(d.node_id, d.aliquot_index)) {
                             highlightWell([d], true)
                         }
                     }
@@ -146,7 +146,7 @@ function listContainerContents(result, div, queryNode) {
                 single_well_highlighted = true;
 
                 resetAppearances(); // clear any highlighting of whole set of wells
-                if (getLocation(d.operation_index, d.aliquot_index)) {
+                if (getLocation(d.node_id, d.aliquot_index)) {
                     highlightWell([d])
                 }
             })
@@ -415,18 +415,18 @@ function drawContainer(container) {
 
 function placeWells(d) {
     var data = d3.event.dataTransfer.getData("custom-data").split(","); // add well
-    var operation_index = data[0];
+    var node_id = data[0];
     var aliquot_index = data[1];
 
     var location = d.name;
     var col = location[0];
     var row = location.substr(1);
 
-    var num_wells = num_aliquots[operation_index];
+    var num_wells = num_aliquots[node_id];
 
 
     var operation = nodes.filter(function (n) {
-        return n.id == operation_index;
+        return n.id == node_id;
     })[0];
 
     if (draggingSingleWell) {
@@ -435,15 +435,15 @@ function placeWells(d) {
         } // ensure well is empty
 
         // if already placed somewhere else, remove from there first
-        clearWell(operation_index, aliquot_index);
-        setWellContents(d.container, d.name, operation_index, aliquot_index);
+        clearWell(node_id, aliquot_index);
+        setWellContents(d.container, d.name, node_id, aliquot_index);
         resetAppearances();
         draggingSingleWell = false;
 
     } else if (wellPlacementMode == "Row") {
 
         for (aliquot_index = 0; aliquot_index < num_wells; aliquot_index++) {
-            clearWell(operation_index, aliquot_index);
+            clearWell(node_id, aliquot_index);
         }
         aliquot_index = 0;
 
@@ -452,7 +452,7 @@ function placeWells(d) {
             location = col + row;
 
             if (!d.container.contents[location]) {
-                setWellContents(d.container, location, operation_index, aliquot_index);
+                setWellContents(d.container, location, node_id, aliquot_index);
                 aliquot_index += 1;
             }
 
@@ -474,7 +474,7 @@ function placeWells(d) {
     } else if (wellPlacementMode == "Col") {
 
         for (aliquot_index = 0; aliquot_index < num_wells; aliquot_index++) {
-            clearWell(operation_index, aliquot_index);
+            clearWell(node_id, aliquot_index);
         }
         aliquot_index = 0;
 
@@ -483,7 +483,7 @@ function placeWells(d) {
             location = col + row;
 
             if (!d.container.contents[location]) {
-                setWellContents(d.container, location, operation_index, aliquot_index);
+                setWellContents(d.container, location, node_id, aliquot_index);
                 aliquot_index += 1;
             }
 
@@ -500,17 +500,17 @@ function placeWells(d) {
         resetAppearances();
 
     } else if (wellPlacementMode == "Rect1") {
-        placeWellsRect(placeWellsRect1, row, col, d, operation_index);
+        placeWellsRect(placeWellsRect1, row, col, d, node_id);
     } else if (wellPlacementMode == "Rect2") {
-        placeWellsRect(placeWellsRect2, row, col, d, operation_index);
+        placeWellsRect(placeWellsRect2, row, col, d, node_id);
 
     }
 }
 
 
-function placeWellsRect(placementFunc, row, col, d, operation_index) {
+function placeWellsRect(placementFunc, row, col, d, node_id) {
     var incident_links = links.filter(function (l) {
-        return l.target.id == operation_index;
+        return l.target.id == node_id;
     });
     var parents = incident_links.map(function (l) {
         return l.source
@@ -530,7 +530,7 @@ function placeWellsRect(placementFunc, row, col, d, operation_index) {
         },
         success: function (res) {
             result = res;
-            placeWellsRectInner(result, parents[1], protocol_string, row, col, d, operation_index, placementFunc);
+            placeWellsRectInner(result, parents[1], protocol_string, row, col, d, node_id, placementFunc);
         },
         error: function (result, textStatus) {
             console.log(result);
@@ -539,7 +539,7 @@ function placeWellsRect(placementFunc, row, col, d, operation_index) {
     });
 }
 
-function placeWellsRectInner(contents1, queryNode, protocol_string, row, col, d, operation_index, placementFunc) {
+function placeWellsRectInner(contents1, queryNode, protocol_string, row, col, d, node_id, placementFunc) {
     $.ajax({
         type: "GET",
         contentType: "application/json; charset=utf-8",
@@ -552,7 +552,7 @@ function placeWellsRectInner(contents1, queryNode, protocol_string, row, col, d,
         },
         success: function (res) {
             result = res;
-            placementFunc(contents1, result, row, col, d, operation_index);
+            placementFunc(contents1, result, row, col, d, node_id);
         },
         error: function (result, textStatus) {
             console.log(result);
@@ -561,13 +561,13 @@ function placeWellsRectInner(contents1, queryNode, protocol_string, row, col, d,
     });
 }
 
-function placeWellsRect1(contents1, contents2, row, col, d, operation_index) {
+function placeWellsRect1(contents1, contents2, row, col, d, node_id) {
     var location;
     var current_row;
 
-    var num_wells = num_aliquots[operation_index];
+    var num_wells = num_aliquots[node_id];
     for (var aliquot_index = 0; aliquot_index < num_wells; aliquot_index++) {
-        clearWell(operation_index, aliquot_index);
+        clearWell(node_id, aliquot_index);
     }
     aliquot_index = 0;
 
@@ -578,7 +578,7 @@ function placeWellsRect1(contents1, contents2, row, col, d, operation_index) {
             location = col + current_row;
 
             delete selected_container.contents[location];
-            setWellContents(d.container, location, operation_index, aliquot_index);
+            setWellContents(d.container, location, node_id, aliquot_index);
             aliquot_index += 1;
             current_row = current_row - 1;
         }
@@ -588,13 +588,13 @@ function placeWellsRect1(contents1, contents2, row, col, d, operation_index) {
 
 }
 
-function placeWellsRect2(contents1, contents2, row, col, d, operation_index) {
+function placeWellsRect2(contents1, contents2, row, col, d, node_id) {
     var location;
     var current_col;
 
-    var num_wells = num_aliquots[operation_index];
+    var num_wells = num_aliquots[node_id];
     for (var aliquot_index = 0; aliquot_index < num_wells; aliquot_index++) {
-        clearWell(operation_index, aliquot_index);
+        clearWell(node_id, aliquot_index);
     }
     aliquot_index = 0;
 
@@ -607,7 +607,7 @@ function placeWellsRect2(contents1, contents2, row, col, d, operation_index) {
             console.log(location);
 
             delete selected_container.contents[location];
-            setWellContents(d.container, location, operation_index, aliquot_index);
+            setWellContents(d.container, location, node_id, aliquot_index);
             aliquot_index += 1;
 
             current_col = String.fromCharCode(current_col.charCodeAt(0) + 1);
@@ -619,47 +619,47 @@ function placeWellsRect2(contents1, contents2, row, col, d, operation_index) {
 }
 
 
-function clearWell(operation_index, aliquot_index) {
-    var oldLocation = getLocation(operation_index, aliquot_index);
+function clearWell(node_id, aliquot_index) {
+    var oldLocation = getLocation(node_id, aliquot_index);
     if (oldLocation) {
         delete selected_container.contents[oldLocation];
     }
 }
 
-function setWellContents(container, well_name, operation_index, aliquot_index) {
+function setWellContents(container, well_name, node_id, aliquot_index) {
 
-    var indexes = [parseInt(operation_index)];
+    var indexes = [parseInt(node_id)];
 
     for (var i = 0; i < links.length; i++) {
         var link = links[i];
         if (link.data.addToThis) {
 
-            if (link.source.id == operation_index) {
+            if (link.source.id == node_id) {
                 indexes.push(link.target.id);
-            } else if (link.target.id == operation_index) {
+            } else if (link.target.id == node_id) {
                 indexes.push(link.source.id);
             }
         }
     }
 
-    container.contents[well_name] = indexes.map(function (operation_index) {
-        return {operation_index: operation_index, aliquot_index: aliquot_index}
+    container.contents[well_name] = indexes.map(function (node_id) {
+        return {node_id: node_id, aliquot_index: aliquot_index}
     });
 }
 
-function clearOperation(operation_index) {
+function clearOperation(node_id) {
     // Clear locations of all aliquots corresponding to a particular operation
     for (var i = 0; i < containers.length; i++) {
         var container = containers[i];
         for (var well in container.contents) {
             container.contents[well] = container.contents[well].filter(function (x) {
-                return x.operation_index != operation_index;
+                return x.node_id != node_id;
             });
         }
     }
 }
 
-function moveDescendents(source_operation_index, target_operation_index) {
+function moveDescendents(source_node_id, target_node_id) {
     // Set location of all aliquots produced by an operation to the locations occupied by another operation
     for (var i = 0; i < containers.length; i++) {
         var container = containers[i];
@@ -667,8 +667,8 @@ function moveDescendents(source_operation_index, target_operation_index) {
             var contents = container.contents[well];
 
             for (var j = 0; j < contents.length; j++) {
-                if (contents[j].operation_index == source_operation_index) {
-                    contents.push({operation_index: target_operation_index, aliquot_index: contents[j].aliquot_index})
+                if (contents[j].node_id == source_node_id) {
+                    contents.push({node_id: target_node_id, aliquot_index: contents[j].aliquot_index})
                 }
             }
         }
@@ -701,20 +701,20 @@ function resetAppearances() {
         .style("stroke", "black").style("stroke-width", "2px")
 
     d3.selectAll(".well-contents").style("color", function (d) {
-        return getLocation(d.operation_index, d.aliquot_index) ? 'grey' : 'black';
+        return getLocation(d.node_id, d.aliquot_index) ? 'grey' : 'black';
     })
         .style("border-left", "none");
 }
 
 
-function getLocation(operation_index, aliquot_index) {
+function getLocation(node_id, aliquot_index) {
 
     for (var well in selected_container.contents) {
         var contents = selected_container.contents[well];
 
         for (var i = 0; i < contents.length; i++) {
             var c = contents[i];
-            if (c.operation_index == operation_index && c.aliquot_index == aliquot_index) {
+            if (c.node_id == node_id && c.aliquot_index == aliquot_index) {
                 return well;
             }
         }
@@ -733,7 +733,7 @@ function highlightWell(contents_list, highlightWholeSet) {
     for (var i = 0; i < contents_list.length; i++) {
         var contents = contents_list[i];
 
-        var wellName = getLocation(contents.operation_index, contents.aliquot_index);
+        var wellName = getLocation(contents.node_id, contents.aliquot_index);
 
         if (container_data.locations[wellName].width) {
             d3.select("#locationModal").selectAll(".rect-container")
@@ -754,7 +754,7 @@ function highlightWell(contents_list, highlightWholeSet) {
         d3.select("#locationModal")
             .selectAll(".well-contents")
             .filter(function (d) {
-                return d.operation_index == contents.operation_index && (d.aliquot_index == contents.aliquot_index || highlightWholeSet)
+                return d.node_id == contents.node_id && (d.aliquot_index == contents.aliquot_index || highlightWholeSet)
             })
             .style("border-left", "5px solid yellow");
     }
@@ -781,7 +781,7 @@ function drawWellCirc(contents, name){
     var path = g.selectAll('.arcs')
         .data(contents.map(function (content, i) {
             return {
-                id: parseInt(content.operation_index),
+                id: parseInt(content.node_id),
                 startAngle: i * (2 * Math.PI / contents.length),
                 endAngle: (i + 1) * (2 * Math.PI / contents.length),
                 padding: 0
@@ -812,6 +812,6 @@ function drawWellRect(contents, name) {
         .attr("y", "0")
         .attr("height", height)
         .style('fill', function (d) {
-            return getColors(d.operation_index);
+            return getColors(d.node_id);
         });
 }

@@ -288,7 +288,7 @@ def nodeHAsUnassignedAliquots(num_aliquots, operation_id, container_name, protoc
     aliquots_listed = set()
     for well in container["contents"]:
         for contents in container["contents"][well]:
-            if contents["operation_index"] == operation_id:
+            if contents["node_id"] == operation_id:
                 aliquots_listed.add(contents["aliquot_index"])
 
     return len(aliquots_listed) != num_aliquots
