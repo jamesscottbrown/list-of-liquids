@@ -1,5 +1,5 @@
 // set up initial nodes and links
-var nodes, lastNodeId, links, groups, serialiseDiagram;
+var nodes, lastNodeId, lastResourceId, links, groups, serialiseDiagram;
 var color = d3.scale.category10();
 
 
@@ -91,6 +91,14 @@ function network_editor() {
             lastNodeId = nodes[i].id;
         }
     }
+
+    lastResourceId = 0;
+    for (var i=0; i<resources.length; i++){
+        if (resources[i].id > lastResourceId) {
+            lastResourceId = resources[i].id;
+        }
+    }
+
 
     function getDefaultLinkData(addToThis) {
         var default_link_data = {
@@ -650,9 +658,33 @@ function network_editor() {
             }
         }
 
-        // delete this node
-        var index = nodes.indexOf(node);
-        nodes.splice(index, 1);
+        // if node represents a resource, then adjust container contents to refer to the next node
+        // corresponding to the same resource; if there is no such node, then do not delete the node
+        // if it has, then it should not be deleted
+        var allowDeletion = true;
+        if (node.type == "well") {
+
+            var otherNodes = nodes.filter(function (d) {
+                return (d.data.resource == node.data.resource) && (d.id != node.id);
+            });
+
+            if (otherNodes.length == 0) {
+                allowDeletion = false;
+            } else {
+                for (var i = 0; i < containers.length; i++) {
+                    for (var well in containers[i].contents) {
+                        for (var j = 1; j < containers[i].contents[well].length; j++) {
+                            containers[i].contents[well][j].operation_index == otherNodes[0].id;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (allowDeletion) {
+            var index = nodes.indexOf(node);
+            nodes.splice(index, 1);
+        }
 
         // delete incoming links
         var inLinks = links.filter(function (l) {
@@ -1029,8 +1061,7 @@ function network_editor() {
         });
 
         resources.push({
-            id: lastNodeId, type: 'well', x: width / 2, y: height / 2, label: label,
-            data: {num_wells: 1, container_name: '', well_addresses: '', volume: 1}
+            id: ++lastResourceId, label: label, data: {num_wells: 1, container_name: '', well_addresses: '', volume: 1}
         });
 
         update_resource_list();
