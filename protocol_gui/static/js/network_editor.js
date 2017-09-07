@@ -1061,7 +1061,7 @@ function network_editor() {
         });
 
         resources.push({
-            id: ++lastResourceId, label: label, data: {num_wells: 1, container_name: '', well_addresses: '', volume: 1}
+            id: ++lastResourceId, label: label, data: {num_wells: 1, container_name: '', volume: 1}
         });
 
         update_resource_list();
