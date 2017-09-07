@@ -66,7 +66,7 @@ function update_container_list() {
                         pipettes[i].data.trash = "";
                     }
                 }
-                
+
                 containers.splice(containers.indexOf(d), 1);
                 update_container_list();
                 $('#containerModal').modal('toggle');
@@ -257,6 +257,7 @@ function update_resource_list() {
 function addPipette(updateDescriptionPanelCallback) {
     $('#pipetteModal').modal('toggle');
     d3.select("#pipetteModal").select(".modal-title").text("Add pipette");
+    d3.select("#pipetteName-help").text("");
 
     document.getElementById("pipetteName").value = "";
 
@@ -279,8 +280,14 @@ function addPipette(updateDescriptionPanelCallback) {
         .attr("value", function (d) { return d.name; });
 
     d3.select("#AddPipetteButton").on("click", function () {
+        var pipetteName = d3.select("#pipetteName").node().value;
+        if (!pipetteName || pipettes.filter( function(d){ return d.name == pipetteName}).length > 0 ){
+            d3.select("#pipetteName-help").text("Pipette name must be non-empty and unique.");
+            return false;
+        }
+
         pipettes.push({
-            name: d3.select("#pipetteName").node().value,
+            name: pipetteName,
             volume: d3.select("#pipetteVolume").node().value,
             min_volume: d3.select("#pipetteMinVolume").node().value,
             axis: d3.select("#pipetteAxis").node().value,
@@ -302,13 +309,21 @@ function addPipette(updateDescriptionPanelCallback) {
 function addContainer(updateDescriptionPanelCallback) {
     $('#containerModal').modal('toggle');
     d3.select("#containerModal").select(".modal-title").text("Add container");
+    d3.select("#containerName-help").text("");
 
     document.getElementById("containerName").value = "";
     document.getElementById("containerLocation").value = "";
 
     d3.select("#AddContainerButton").on("click", function () {
+
+        var containerName = d3.select("#containerName").node().value;
+        if (!containerName || containers.filter( function(d){ return d.name == containerName}).length > 0 ){
+            d3.select("#containerName-help").text("Container name must be non-empty and unique.");
+            return false;
+        }
+
         containers.push({
-            name: d3.select("#containerName").node().value,
+            name: containerName,
             type: d3.select("#containerType").node().value,
             location: d3.select("#containerLocation").node().value,
             contents: {}
