@@ -37,7 +37,7 @@ class English(Converter):
         container = filter(lambda x: x["name"] == resource["data"]["container_name"], protocol["containers"])[0]
 
         node = \
-        filter(lambda x: (x["type"] == "well" and x["data"]["resource"] == resource["label"]), protocol["nodes"])[0]
+        filter(lambda x: (x["type"] == "resource" and x["data"]["resource"] == resource["label"]), protocol["nodes"])[0]
 
         for location in container["contents"]:
             for contents in container["contents"][location]:

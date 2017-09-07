@@ -240,7 +240,7 @@ function update_resource_list() {
     resource_nodes.append("button")
         .on("click", function (d) {
             // Delete nodes from diagram
-            var nodesToDelete = nodes.filter(function(n){return n.type == "well" && n.label == d.label});
+            var nodesToDelete = nodes.filter(function(n){return n.type == "resource" && n.label == d.label});
             for (var i=0; i<nodesToDelete.length; i++){
                 networkEditor.deleteNode(nodesToDelete[i]);
             }

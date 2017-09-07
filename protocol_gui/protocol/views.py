@@ -253,7 +253,7 @@ def check_assigned(protocol_id):
 
     for node in protocol_obj["nodes"]:
 
-        if node["type"] == "well":
+        if node["type"] == "resource":
             resource = filter(lambda x: x["label"] == node["label"], protocol_obj["resources"])[0]
 
             # only process the first node corresponding to each resource

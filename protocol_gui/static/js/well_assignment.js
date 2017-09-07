@@ -45,7 +45,7 @@ function listContentsOfContainer(container_name, serialiseDiagram) {
     for (var i = 0; i < nodes.length; i++) {
         var node = nodes[i];
 
-        if (node.type == "well") {
+        if (node.type == "resource") {
             var resource = resources.filter(function (r) {
                 return r.label == node.data.resource
             })[0];

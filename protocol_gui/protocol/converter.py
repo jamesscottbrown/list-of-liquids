@@ -8,7 +8,7 @@ class Converter:
         # do a topological sort on the operations graph; then convert each operation to a stamp or pipette
         operation_nodes = filter(lambda x: x["type"] in ["zip", "cross", "process", "pool", "aliquot", "select"],
                                  protocol["nodes"])
-        processed_nodes = filter(lambda x: x["type"] == "well", protocol["nodes"])
+        processed_nodes = filter(lambda x: x["type"] == "resource", protocol["nodes"])
 
         while len(operation_nodes) > 0:
             for node in operation_nodes:
@@ -85,7 +85,7 @@ class Converter:
 
         for i in range(0, len(parent_nodes)):
 
-            if parent_nodes[i]["type"] == "well":
+            if parent_nodes[i]["type"] == "resource":
                 resources = protocol["resources"]
                 resource = list(filter(lambda r: r["label"] == parent_nodes[i]["data"]["resource"], resources))[0]
                 parent_nodes[i] = resource

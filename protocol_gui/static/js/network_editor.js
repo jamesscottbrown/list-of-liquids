@@ -21,7 +21,7 @@ function network_editor() {
             var data = d3.event.dataTransfer.getData("custom-data");
 
             nodes.push({
-                id: ++lastNodeId, type: "well", x: width * Math.random(), y: height / 2, label: data,
+                id: ++lastNodeId, type: "resource", x: width * Math.random(), y: height / 2, label: data,
                 data: {resource: data}
             });
             restart();
@@ -443,8 +443,8 @@ function network_editor() {
 
         g.append('svg:circle')
             .attr('class', 'node')
-            .classed('well', function (d) {
-                return d.type == "well"
+            .classed('resource', function (d) {
+                return d.type == "resource"
             })
             .classed('volume', function (d) {
                 return d.type == "volume"
@@ -605,7 +605,7 @@ function network_editor() {
     function deleteNode(d) {
 
         // delete arrows to this node
-        if (process_node_types.indexOf(d.type) != "well") {
+        if (process_node_types.indexOf(d.type) != "resource") {
             var inLinks = links.filter(function (l) {
                 return l.target.id == d.id;
             });
@@ -662,7 +662,7 @@ function network_editor() {
         // corresponding to the same resource; if there is no such node, then do not delete the node
         // if it has, then it should not be deleted
         var allowDeletion = true;
-        if (node.type == "well") {
+        if (node.type == "resource") {
 
             var otherNodes = nodes.filter(function (d) {
                 return (d.data.resource == node.data.resource) && (d.id != node.id);
@@ -728,8 +728,8 @@ function network_editor() {
 
         g2.append('svg:rect')
             .attr('class', 'node')
-            .classed('well', function (d) {
-                return d.type == "well"
+            .classed('resource', function (d) {
+                return d.type == "resource"
             })
             .classed('volume', function (d) {
                 return d.type == "volume"
@@ -851,9 +851,9 @@ function network_editor() {
             });
 
 
-        // Color nodes of type ''well'' based on data in resource object with same name, not node object
+        // Color nodes of type ''resource'' based on data in resource object with same name, not node object
         circleLabels.filter(function (d) {
-            return d.type == "well"
+            return d.type == "resource"
         })
             .style('fill', function (d) {
 
@@ -1057,7 +1057,7 @@ function network_editor() {
         var label = prompt('Name:');
 
         nodes.push({
-            id: ++lastNodeId, type: "well", x: width * Math.random(), y: height / 2, label: label,
+            id: ++lastNodeId, type: "resource", x: width * Math.random(), y: height / 2, label: label,
             data: {resource: label}
         });
 

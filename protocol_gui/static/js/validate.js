@@ -128,7 +128,7 @@ function validateOpenTrons() {
     // - operations must have a container assigned
     var operation_errors = [];
     for (var i = 0; i < nodes.length; i++) {
-        if (nodes[i].type != "well" && !nodes[i].data.container_name) {
+        if (nodes[i].type != "resource" && !nodes[i].data.container_name) {
             operation_errors.push("A operation of type " + nodes[i].type + " does not have a location set");
             d3.select("#label-" + nodes[i].id).style("fill", "#ffc200");
         }

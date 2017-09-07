@@ -13,7 +13,7 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
         .classed("info-box", true)
         .attr("onsubmit", "return false;");
 
-    if (selected_node && selected_node.type == "well") {
+    if (selected_node && selected_node.type == "resource") {
         drawWellPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
     } else if (selected_node && selected_node.type == "aliquot") {
         drawAliquotPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram)
@@ -269,7 +269,7 @@ function drawWellPanel(selected_node, links, restart, form, deleteNode, serialis
 
             for (var i=0; i<nodes.length; i++){
                 var node = nodes[i];
-                if (node.type == "well" && node.label == old_name){
+                if (node.type == "resource" && node.label == old_name){
                     node.label = new_name;
                 }
             }
@@ -390,7 +390,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     form.selectAll("h2").remove();
 
     var title;
-    if (selected_link.source.type == "well") {
+    if (selected_link.source.type == "resource") {
         title = "Transfer of " + selected_link.source.label;
     } else {
         title = "Transfer"

@@ -97,7 +97,7 @@ def process_node(protocol_obj, node_id):
     node = list(filter(lambda n: n["id"] == node_id, nodes))[0]
     node_data = node["data"]
 
-    if node["type"] == "well":
+    if node["type"] == "resource":
         # return one aliquot per distinct component, with a volume that is the available volume in well
         resources = protocol_obj["resources"]
         resource_data = list(filter(lambda r: r["label"] == node_data["resource"], resources))[0]["data"]
