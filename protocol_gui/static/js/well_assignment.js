@@ -266,6 +266,8 @@ function drawContainer(container) {
         }
     }
 
+    d3.select("#well-list").style("max-height", (window.innerHeight - 300)+ "px" );
+
     d3.select("#locationModal").select("#well-diagram").selectAll("svg").remove();
     var svg = d3.select("#locationModal").select("#well-diagram")
         .append("svg").attr("width", width).attr("height", height)
