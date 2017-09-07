@@ -106,8 +106,21 @@ function listContainerContents(result, div, queryNode) {
                     }
                 }
             })
-            .on("mouseout", resetAppearances)
-        ;
+            .on("mouseout", resetAppearances);
+
+    outer_list.append('i')
+        .attr('id', 'collapse-icon')
+        .attr('class', "fa fa-minus")
+        .style("margin-left", "-30px")
+        .on("click", function (d) {
+            if (d3.select(this).classed("fa-minus")) {
+                d3.select(this.parentNode).selectAll('li').style('display', 'none');
+                d3.select(this).attr('class', "fa fa-plus")
+            } else {
+                d3.select(this.parentNode).selectAll('li').style('display', 'block');
+                d3.select(this).attr('class', "fa fa-minus")
+            }
+        });
 
     outer_list.attr("draggable", true)
         .on("dragstart", function (d, i) {
