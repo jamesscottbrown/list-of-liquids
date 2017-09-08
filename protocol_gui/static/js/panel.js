@@ -14,7 +14,7 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
         .attr("onsubmit", "return false;");
 
     if (selected_node && selected_node.type == "resource") {
-        drawWellPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
+        drawResourcePanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
     } else if (selected_node && selected_node.type == "aliquot") {
         drawAliquotPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram)
     } else if (selected_node && selected_node.type == "process") {
@@ -239,7 +239,7 @@ function addContainerSelect(selected_node, links, restart, form, deleteNode, ser
 
 // Functions to draw specific types of panel:
 
-function drawWellPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
+function drawResourcePanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Initially present resource");
 
     // get the actual resource_node
