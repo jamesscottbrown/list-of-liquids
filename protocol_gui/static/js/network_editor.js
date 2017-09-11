@@ -456,14 +456,6 @@ function network_editor() {
             .style('opacity', function (d) {
                 return (d === selected_node) ? '1' : '0.5';
             })
-            .on('mouseover', function (d) {
-                if (!mousedown_node || d === mousedown_node) return;
-                d3.select(this).attr('transform', 'scale(1.1)'); // enlarge target node
-            })
-            .on('mouseout', function (d) {
-                if (!mousedown_node || d === mousedown_node) return;
-                d3.select(this).attr('transform', ''); // unenlarge target node
-            })
             .on('mousedown', function (d) {
 
                 // ignore right click
@@ -748,14 +740,6 @@ function network_editor() {
             .attr('height', 24)
 
             .style('opacity', '0.5')
-            .on('mouseover', function (d) {
-                if (!mousedown_node || d === mousedown_node) return;
-                d3.select(this).attr('transform', 'scale(1.1)'); // enlarge target node
-            })
-            .on('mouseout', function (d) {
-                if (!mousedown_node || d === mousedown_node) return;
-                d3.select(this).attr('transform', ''); // unenlarge target node
-            })
             .on('mousedown', function (d) {
                 // ignore right click
                 if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
@@ -807,9 +791,6 @@ function network_editor() {
                     resetMouseVars();
                     return;
                 }
-
-                // un-enlarge target node
-                d3.select(this).attr('transform', '');
 
                 // add link to graph (update if exists)
                 addEdge();
