@@ -44,13 +44,18 @@ class AutoProtocol(Converter):
             opts_str = ", " + opts_str
         return opts_str
 
-
     def get_footer(self, protocol_name):
         return """
 if __name__ == '__main__':
     from autoprotocol.harness import run
     run(%s, '%s')
             """ % (protocol_name, protocol_name)
+
+    @staticmethod
+    def sanitise_name(name):
+        name = name.replace(' ', '_')
+        name = name.replace('-', '_')
+        return name
 
     def get_consolidate_string(self, pipette_name, volume, container_one, source_str, container_target, target, options_str):
         return "    protocol.consolidate(%s.wells(%s), %s.well('%s'), '%s:microliter'%s)\n" % (container_one, source_str, container_target, target, volume, options_str)

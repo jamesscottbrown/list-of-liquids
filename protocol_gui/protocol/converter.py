@@ -53,6 +53,10 @@ class Converter:
         return ""
 
     @staticmethod
+    def sanitise_name(name):
+        return name
+
+    @staticmethod
     def get_locations(protocol, node):
         container = filter(lambda x: x["name"] == node["data"]["container_name"], protocol["containers"])[0]
 
@@ -94,17 +98,19 @@ class Converter:
         link_one_data = filter(lambda x: x["source_id"] == node["parentIds"][0] and x["target_id"] == node["id"],
                                protocol["links"])[0]["data"]
         volume_one = link_one_data["volumes"][0]
-        container_one = parent_nodes[0]["data"]["container_name"]
+        container_one = self.sanitise_name(parent_nodes[0]["data"]["container_name"])
+        pipette_name_one = self.sanitise_name(link_one_data["pipette_name"])
         locations_one = self.get_locations(protocol, parent_nodes[0])
 
         if len(node["parentIds"]) > 1:
             link_two_data = filter(lambda x: x["source_id"] == node["parentIds"][1] and x["target_id"] == node["id"],
                                    protocol["links"])[0]["data"]
             volume_two = link_two_data["volumes"][0]
-            container_two = parent_nodes[1]["data"]["container_name"]
+            container_two = self.sanitise_name(parent_nodes[1]["data"]["container_name"])
+            pipette_name_two = self.sanitise_name(link_two_data["pipette_name"])
             locations_two = self.get_locations(protocol, parent_nodes[1])
 
-        container_target = node["data"]["container_name"]
+        container_target = self.sanitise_name(node["data"]["container_name"])
         locations_result = self.get_locations(protocol, node)
 
         # First work out which liquids are transferred into which wells
@@ -137,7 +143,7 @@ class Converter:
             source_str = ", ".join(map(lambda x: "'" + x + "'", locations_one))
 
             for target in locations_result:
-                protocol_str += self.get_consolidate_string(link_one_data["pipette_name"], volume_one, container_one, source_str,
+                protocol_str += self.get_consolidate_string(pipette_name_one, volume_one, container_one, source_str,
                                                        container_target, target, self.get_options(link_one_data))
 
             return protocol_str
@@ -173,7 +179,7 @@ class Converter:
                     break
 
             if isValid and not (container_target == container_one and source_row == result_row):
-                protocol_str_one += self.get_transfer_string(link_one_data["pipette_name"], volume_one, container_one,
+                protocol_str_one += self.get_transfer_string(pipette_name_one, volume_one, container_one,
                                                              source_row, container_target, result_row,
                                                              self.get_options(link_one_data))
 
@@ -195,7 +201,7 @@ class Converter:
                         break
 
                 if isValid and not (container_target == container_one and source_row == result_row):
-                    protocol_str_two += self.get_transfer_string(link_two_data["pipette_name"], volume_two, container_two,
+                    protocol_str_two += self.get_transfer_string(pipette_name_two, volume_two, container_two,
                                                                  source_row, container_target, result_row,
                                                                  self.get_options(link_two_data))
                     transfers_made_two.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
@@ -214,14 +220,14 @@ class Converter:
 
             for source in transfers:
                 targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-                protocol_str_one += self.get_distribute_string(link_one_data["pipette_name"], volume_one, container_one,
+                protocol_str_one += self.get_distribute_string(pipette_name_one, volume_one, container_one,
                                                                source, container_target, targets_str,
                                                                self.get_options(link_one_data))
 
         else:
             for target_well in wells_to_fill:
                 source_well = source_one[target_well]
-                protocol_str_one += self.get_transfer_well_string(link_one_data["pipette_name"], volume_one, container_one,
+                protocol_str_one += self.get_transfer_well_string(pipette_name_one, volume_one, container_one,
                                                                   source_well, container_target, target_well,
                                                                   self.get_options(link_one_data))
 
@@ -238,14 +244,14 @@ class Converter:
 
                 for source in transfers:
                     targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-                    protocol_str_two += self.get_distribute_string(link_two_data["pipette_name"], volume_two, container_two,
+                    protocol_str_two += self.get_distribute_string(pipette_name_two, volume_two, container_two,
                                                                    source, container_target, targets_str,
                                                                    self.get_options(link_two_data))
             else:
 
                 for target_well in wells_to_fill:
                     source_well = source_two[target_well]
-                    protocol_str_two += self.get_transfer_well_string(link_two_data["pipette_name"], volume_two,
+                    protocol_str_two += self.get_transfer_well_string(pipette_name_two, volume_two,
                                                                      container_two, source_well, container_target,
                                                                      target_well, self.get_options(link_two_data))
 

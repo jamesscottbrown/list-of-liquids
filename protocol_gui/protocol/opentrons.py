@@ -15,7 +15,7 @@ class OpenTrons(Converter):
 
         for container in protocol["containers"]:
             opentrons_protocol += '%s = containers.load("%s", "%s")\n' \
-                                  % (container["name"], container["type"], container["location"])
+                                  % (self.sanitise_name(container["name"]), container["type"], container["location"])
         opentrons_protocol += "\n"
 
         for pipette in protocol["pipettes"]:
@@ -28,11 +28,17 @@ class OpenTrons(Converter):
         tip_racks=%s,
         trash_container=%s,
         name="%s")\n\n""" \
-            % (pipette["name"], pipette["axis"], pipette["volume"], pipette["min_volume"],  pipette["channels"],
-               pipette["aspirateSpeed"], pipette["dispenseSpeed"], pipette["tipracks"], pipette["trash"], pipette["name"])
+            % (self.sanitise_name(pipette["name"]), pipette["axis"], pipette["volume"], pipette["min_volume"],  pipette["channels"],
+               pipette["aspirateSpeed"], pipette["dispenseSpeed"], self.sanitise_name(pipette["tipracks"]), self.sanitise_name(pipette["trash"]), pipette["name"])
 
         opentrons_protocol += "\n"
         return opentrons_protocol
+
+    @staticmethod
+    def sanitise_name(name):
+        name = name.replace(' ', '_')
+        name = name.replace('-', '_')
+        return name
 
     @staticmethod
     def get_options(link_data):
