@@ -192,6 +192,9 @@ function network_editor() {
 
     // update force layout (called automatically each iteration)
     function tick() {
+
+        if (mousedown_node){ return; }
+
         // draw directed edges with proper padding from node centers
         path.attr('d', function (d) {
             var deltaX = d.target.x - d.source.x,
