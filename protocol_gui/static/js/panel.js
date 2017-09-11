@@ -63,11 +63,29 @@ function getContents(serialiseDiagram, queryNode, div, drawFunction) {
 }
 
 
-function listContents(result, div, queryNode, serialiseDiagram) {
+function listContents(result, parentDiv, queryNode, serialiseDiagram) {
 
+    var div = parentDiv.append("div");
     div.node().innerHTML = "";
 
-    div.append("h3").text("Contents");
+    div.append("h3").text("Contents")
+
+        .append('i')
+        .attr('class', "fa fa-minus")
+        //.style("margin-left", "-30px")
+        .on("click", function (d) {
+            if (d3.select(this).classed("fa-minus")) {
+                d3.select(this.parentNode.parentNode).selectAll('ol').style('display', 'none');
+                d3.select(this).attr('class', "fa fa-plus")
+            } else {
+                d3.select(this.parentNode.parentNode).selectAll('ol').style('display', 'block');
+                d3.select(this).attr('class', "fa fa-minus")
+            }
+        });
+
+
+    div.style("max-height", parseInt(d3.select("#network-svg").attr("height"))-200 + "px" ).style("overflow-y", "scroll");
+
 
     var outer_list_items = div
         .append("ol")
@@ -76,7 +94,6 @@ function listContents(result, div, queryNode, serialiseDiagram) {
         .enter()
         .append("li").style("margin-top", "10px")
         .append("ul");
-
 
     var items = outer_list_items.selectAll("li")
         .data(function (d) {
@@ -98,7 +115,7 @@ function listContents(result, div, queryNode, serialiseDiagram) {
     }
 
     if (container_name) {
-        div.append("a")
+        parentDiv.append("a")
             .text("Show or Set well locations")
             .on("click", function () {
                 // need to make sure populationWellAssignmentModal isn't called until modal is shown
@@ -109,7 +126,7 @@ function listContents(result, div, queryNode, serialiseDiagram) {
                 $('#locationModal').modal('toggle');
             });
     } else {
-        div.append("p").text("To set well locations you must first set the container")
+        parentDiv.append("p").text("To set well locations you must first set the container")
     }
 
 }
