@@ -197,7 +197,13 @@ function addContainerSelect(selected_node, links, restart, form, deleteNode, ser
         .property("value", selected_node.data.container_name)
         .on("change", function () {
             clearOperation(selected_node.id);
-            selected_node.data.container_name = this.value;
+
+            if (selected_node.type == "resource"){
+                var resource = resources.filter(function(r){return r.label == selected_node.data.resource})[0];
+               resource.data.container_name = this.value;
+            } else {
+               selected_node.data.container_name = this.value;
+            }
 
             var contentsDiv = d3.select("#contents-div");
             if (selected_node && selected_node.type == "select") {
@@ -221,7 +227,14 @@ function addContainerSelect(selected_node, links, restart, form, deleteNode, ser
         });
 
     // N.B. need to add the options to the select before the value can be set
-    containerInput.property("value", selected_node.data.container_name);
+    if (selected_node.type == "resource"){
+        var resource = resources.filter(function(r){return r.label == selected_node.data.resource})[0];
+           containerInput.property("value", resource.data.container_name);
+    } else {
+           containerInput.property("value", selected_node.data.container_name);
+    }
+
+
 
 
     var updateDescriptionPanelCallback = function () {
@@ -526,9 +539,48 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
             var new_volumes = [];
             var volumeInputs = volumeDivs.selectAll("input");
             for (var i = 0; i < volumeInputs.length; i++) {
-                new_volumes.push(parseFloat(volumeInputs[i][0].value))
+                new_volumes.push(volumeInputs[i][0].value) // TODO: allow multiple volumes only if parent has unique contents
             }
-            selected_link.data.volumes = new_volumes;
+
+
+            var protocol_string = serialiseDiagram();
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: window.location.href + "contents",
+                    dataType: 'json',
+                    async: true,
+                    data: {protocol_string: protocol_string, selected_node: selected_link.source.id},
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                    },
+                    success: function (res) {
+                        result = res;
+
+                        // volumes is an array that contains one element
+                        // if node at source of arrow contains only one thing, don't cast to float, allowing multiple volumes as a comma-separated string like ["10,20"]
+                        if (res[0].length > 1){
+                            new_volumes[0] = parseFloat(new_volumes[0]);
+                            selected_link.data.volumes = new_volumes;
+                        } else {
+                            selected_link.data.volumes = new_volumes;
+                        }
+
+                        volumeInputs[0][0].value = new_volumes[0]; // update input box
+                        redrawLinkLabels(); // update diagram
+
+                        console.log(result);
+                        console.log(res[0].length )
+                        console.log(new_volumes)
+                        //placeWellsRectInner(result, parents[1], protocol_string, row, col, d, operation_index, placementFunc);
+                    },
+                    error: function (result, textStatus) {
+                        console.log(result);
+                        console.log(textStatus);
+                    }
+                });
+
+
             redrawLinkLabels();
         });
 
