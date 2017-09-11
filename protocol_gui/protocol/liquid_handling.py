@@ -201,6 +201,7 @@ def collapse_contents(result):
         for resource in total_volume:
             well_collapsed_contents.append(Aliquot(resource, total_volume[resource]))
 
+        well_collapsed_contents.sort(key=lambda x: x.resource)
         collapsed_result.append(well_collapsed_contents)
 
     return collapsed_result
