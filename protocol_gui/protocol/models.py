@@ -7,7 +7,7 @@ class Protocol(SurrogatePK, Model):
     """A protocol, owned by a user."""
 
     __tablename__ = 'protocols'
-    name = Column(db.String(80), unique=False, nullable=False)
+    name = Column(db.String(250), unique=False, nullable=False)
     description = Column(db.Text, unique=False, nullable=True)
     protocol = Column(db.Text, unique=False, nullable=True)
     public = Column(db.Boolean)
