@@ -1076,9 +1076,16 @@ function network_editor() {
 
     function addProcessNodeToNode(sourceNode, kind) {
         i = addProcessNode(sourceNode, kind);
+
+        var data = getDefaultLinkData(true);
+
+        if (kind == "pool"){
+            data.addToThis = false;
+        }
+
         links.push({
             source: sourceNode, target: nodes[i],
-            data: getDefaultLinkData(true)
+            data: data
         });
         restart();
     }
