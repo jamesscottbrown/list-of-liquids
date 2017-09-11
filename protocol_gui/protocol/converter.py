@@ -134,9 +134,7 @@ class Converter:
 
         elif node["type"] == "pool":
             protocol_str = ""
-            source_str = ""
-            for source in locations_one:
-                source_str = ", ".join(map(lambda x: "'" + x + "'", source))
+            source_str = ", ".join(map(lambda x: "'" + x + "'", locations_one))
 
             for target in locations_result:
                 protocol_str += self.get_consolidate_string(link_one_data["pipette_name"], volume_one, container_one, source_str,
