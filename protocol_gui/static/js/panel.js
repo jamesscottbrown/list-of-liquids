@@ -65,6 +65,7 @@ function getContents(serialiseDiagram, queryNode, div, drawFunction) {
 
 function listContents(result, parentDiv, queryNode, serialiseDiagram) {
 
+    parentDiv.node().innerHTML = "";
     var div = parentDiv.append("div");
     div.node().innerHTML = "";
 
