@@ -670,6 +670,10 @@ function clearOperation(node_id) {
             container.contents[well] = container.contents[well].filter(function (x) {
                 return x.node_id != node_id;
             });
+
+            if (container.contents[well].length == 0 ){
+                delete container.contents[well];
+            }
         }
     }
 }
