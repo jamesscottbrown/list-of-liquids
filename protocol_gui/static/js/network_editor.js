@@ -222,8 +222,21 @@ function network_editor() {
                 // find x-coordinate of position along edge with this y-coordinate
                 var xTopCorner = d.source.x + (yTop - d.source.y) * (d.target.x - d.source.x) / (d.target.y - d.source.y);
 
+                // similarly for the bottom corner
+                var yBottom = yTop + this.getBBox().height;
+                var xBottomCorner = d.source.x + (yBottom - d.source.y) * (d.target.x - d.source.x) / (d.target.y - d.source.y);
+
+
                 if (d.source.x > d.target.x) {
-                    // arrow directed left:  position text so upper-left corner of bounding box touches edge
+                    // arrow directed left:
+
+                    // if parent has another child, position text so bottom-right corner of bounding box touches edge
+                    var linksToThisNode = links.filter(function(l){return l.source.id == d.source.id});
+                    if (linksToThisNode.length > 1){
+                        return xBottomCorner - this.getBBox().width;
+                    }
+
+                    // otherwise, position text so upper-left corner of bounding box touches edge
                     return xTopCorner;
                 } else {
                     // arrow directed right: position text so upper-right corner of bounding box touches edge
