@@ -612,6 +612,11 @@ function network_editor() {
 
     function deleteNode(d) {
 
+        if (selected_node == d){
+            selected_node = false;
+            updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+        }
+
         // delete arrows to this node
         if (process_node_types.indexOf(d.type) != "resource") {
             var inLinks = links.filter(function (l) {
