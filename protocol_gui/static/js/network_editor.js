@@ -1223,6 +1223,7 @@ function network_editor() {
 
         selected_link = null;
         selected_node = nodes[i];
+        updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
 
         // clear line
         drag_line
