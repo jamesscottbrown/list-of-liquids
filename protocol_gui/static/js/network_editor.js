@@ -984,17 +984,6 @@ function network_editor() {
 
     function addEdge() {
 
-        // handle arrow draw from well/aliquot to process (e.g. thermocycle)
-        if (mouseup_node.type == "process" && (mousedown_node.type != "volume")) {
-            links.push({
-                source: mousedown_node,
-                target: mouseup_node,
-                data: getDefaultLinkData(true)
-            });
-            selected_node = mouseup_node;
-            return;
-        }
-
         var operator = "cross";
 
         var i = nodes.push({
