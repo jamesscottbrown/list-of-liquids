@@ -936,7 +936,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
         .classed("control-label", true)
         .classed("col-sm-5", true)
         .attr("for", "options")
-        .text("Options:");
+        .text("Commands:");
 
     div2.append("div")
         .classed("col-sm-8", true)
@@ -944,9 +944,10 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
         .attr("cols", "80")
         .attr("rows", "20")
         .attr("name", "options")
-        .text(selected_node.data)
+        .style("max-width", (div1.node().offsetWidth - 60) + "px")
+        .text(selected_node.data.command)
         .on("change", function () {
-            selected_node.data = this.value;
+            selected_node.data.command = this.value;
             restart();
         });
 

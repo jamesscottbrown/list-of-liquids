@@ -1062,6 +1062,7 @@ function network_editor() {
         i = addProcessNode(sourceNode, kind);
 
         var data = getDefaultLinkData(true);
+        data.command = "";
 
         if (kind == "pool"){
             data.addToThis = false;
@@ -1071,6 +1072,10 @@ function network_editor() {
             source: sourceNode, target: nodes[i],
             data: data
         });
+
+        selected_node = nodes[nodes.length - 1];
+        updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+
         restart();
     }
 

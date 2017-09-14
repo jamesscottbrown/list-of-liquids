@@ -84,3 +84,6 @@ class OpenTrons(Converter):
 
     def get_distribute_string(self, pipette_name, volume, container, source, container_target, targets_str, options_str):
         return "%s.distribute(%s, %s.well('%s'), %s.wells(%s)%s)\n" % (pipette_name, volume, container, source, container_target, targets_str, options_str)
+
+    def get_process_string(self, command_string):
+        return command_string

@@ -58,6 +58,11 @@ class Converter:
 
     @staticmethod
     def get_locations(protocol, node):
+
+        # process nodes have no container
+        if "container_name" not in node["data"].keys() or not node["data"]["container_name"]:
+            return []
+
         container = filter(lambda x: x["name"] == node["data"]["container_name"], protocol["containers"])[0]
 
         locations = []
@@ -136,7 +141,7 @@ class Converter:
                         well_index += 1
 
         elif node["type"] == "process":
-            pass
+            return self.get_process_string(node["data"]["command"])
 
         elif node["type"] == "pool":
             protocol_str = ""

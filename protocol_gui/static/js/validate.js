@@ -128,7 +128,7 @@ function validateOpenTrons() {
     // - operations must have a container assigned
     var operation_errors = [];
     for (var i = 0; i < nodes.length; i++) {
-        if (nodes[i].type != "resource" && !nodes[i].data.container_name) {
+        if (nodes[i].type != "resource" && nodes[i].type != "process" && !nodes[i].data.container_name) {
             operation_errors.push("A operation of type " + nodes[i].type + " does not have a location set");
             d3.select("#label-" + nodes[i].id).style("fill", "#ffc200");
         }
@@ -165,7 +165,7 @@ function validateOpenTrons() {
     // - edges must have a pipette assigned
     var link_errors = [];
     for (var i = 0; i < links.length; i++) {
-        if (!links[i].data.pipette_name) {
+        if (!links[i].data.pipette_name && links[i].target.type != "process") {
             link_errors.push("An edge does not have a pipette associated");
             d3.select("#link-" + i).style("stroke", "#ffc200");
         }
