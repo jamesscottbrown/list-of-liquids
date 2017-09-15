@@ -1068,6 +1068,8 @@ function network_editor() {
     function addProcessNodeToNode(sourceNode, kind) {
         i = addProcessNode(sourceNode, kind);
 
+        nodes[i].data.container_name = sourceNode.data.container_name;
+
         var data = getDefaultLinkData(true);
         data.command = "";
 
