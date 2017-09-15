@@ -97,7 +97,7 @@ class Converter:
             if parent_nodes[i]["type"] == "resource":
                 resources = protocol["resources"]
                 resource = list(filter(lambda r: r["label"] == parent_nodes[i]["data"]["resource"], resources))[0]
-                parent_nodes[i] = resource
+                parent_nodes[i]["data"]["container_name"] = resource["data"]["container_name"]
 
         # skip operation if from somewhere to same place
         link_one_data = filter(lambda x: x["source_id"] == node["parentIds"][0] and x["target_id"] == node["id"],
