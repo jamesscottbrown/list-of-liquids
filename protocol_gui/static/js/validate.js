@@ -165,7 +165,7 @@ function validateOpenTrons() {
     // - edges must have a pipette assigned
     var link_errors = [];
     for (var i = 0; i < links.length; i++) {
-        if (!links[i].data.pipette_name && links[i].target.type != "process") {
+        if (!links[i].data.pipette_name && links[i].target.type != "process" && !links[i].data.addToThis) {
             link_errors.push("An edge does not have a pipette associated");
             d3.select("#link-" + i).style("stroke", "#ffc200");
         }
