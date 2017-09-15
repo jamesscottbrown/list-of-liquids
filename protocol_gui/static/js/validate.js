@@ -67,7 +67,7 @@ function validateOpenTrons() {
     for (var i = 0; i < resources.length; i++) {
         if (!resources[i].data.container_name) {
             resources_errors.push(resources[i].label + " has no container set");
-            d3.select("#resource-label-" + i).style("color", "#ffc200");
+            d3.select("#resource-label-" + i).style("fill", "#ffc200");
         }
     }
 
@@ -138,7 +138,7 @@ function validateOpenTrons() {
         .filter(function (d) {
             return unassigned_wells.unassigned_operations.indexOf(d.id) != -1;
         })
-        .style("color", "#ffc200");
+        .style("fill", "#ffc200");
 
 
     if (operation_errors.length > 0 || unassigned_wells.unassigned_operations.length > 0) {
