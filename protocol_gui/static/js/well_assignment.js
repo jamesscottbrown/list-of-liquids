@@ -641,19 +641,34 @@ function clearWell(node_id, aliquot_index) {
 
 function setWellContents(container, well_name, node_id, aliquot_index) {
 
-    var indexes = [parseInt(node_id)];
+    // Do breadth-first transversal of network to finds all nodes that share locations due to 'addToThis'
+    var nodes_to_examine = [parseInt(node_id)];
+    var indexes = [];
 
-    for (var i = 0; i < links.length; i++) {
-        var link = links[i];
-        if (link.data.addToThis) {
+    while (nodes_to_examine.length > 0){
 
-            if (link.source.id == node_id) {
-                indexes.push(link.target.id);
-            } else if (link.target.id == node_id) {
-                indexes.push(link.source.id);
+        var id = nodes_to_examine[0];
+
+        for (var i = 0; i < links.length; i++) {
+            var link = links[i];
+            if (link.data.addToThis) {
+
+                var source_id = link.source.id;
+                var target_id = link.target.id;
+
+                if (source_id == id && nodes_to_examine.indexOf(target_id) == -1 && indexes.indexOf(target_id) == -1) {
+                    nodes_to_examine.push(target_id);
+                }
+
+                if (target_id == id && nodes_to_examine.indexOf(source_id) == -1 && indexes.indexOf(source_id) == -1) {
+                    nodes_to_examine.push(source_id);
+                }
             }
         }
+
+        indexes.push( nodes_to_examine.shift() )
     }
+
 
     container.contents[well_name] = indexes.map(function (node_id) {
         return {node_id: node_id, aliquot_index: aliquot_index}
