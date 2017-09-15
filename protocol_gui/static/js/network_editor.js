@@ -1045,7 +1045,8 @@ function network_editor() {
 
     function addWellNode() {
 
-        var label = prompt('Name:');
+        var label = prompt('Name:').trim();
+        if (!label){ return; }
 
         nodes.push({
             id: ++lastNodeId, type: "resource", x: width * Math.random(), y: height / 2, label: label,
