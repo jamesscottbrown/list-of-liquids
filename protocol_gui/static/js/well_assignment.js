@@ -139,12 +139,10 @@ function listContainerContents(result, div, queryNode) {
             .selectAll("li")
             .data(data)
             .enter()
-            .append("li").style("margin-top", "10px")
-
+            .append("li")
+            .style("margin-top", "10px")
             .classed("well-contents", true)
-
             .append("ul")
-
             .attr("draggable", true)
             .on("dragstart", function (d, i) {
                 var ev = d3.event;
