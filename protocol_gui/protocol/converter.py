@@ -13,13 +13,25 @@ class Converter:
         while len(operation_nodes) > 0:
             for node in operation_nodes:
 
-                has_unprocessed_parents = False
+                can_process_node = True
                 parentIDs = node["parentIds"]
                 for pid in parentIDs:
-                    if not filter(lambda x: x["id"] == pid, processed_nodes):
-                        has_unprocessed_parents = True
 
-                if not has_unprocessed_parents:
+                    # if parent has not been processed, cannot process node yet
+                    if not filter(lambda x: x["id"] == pid, processed_nodes):
+                        can_process_node = False
+
+                    # if edge is 'addToThis', we must do any other operations involving the parent first
+                    # (since this operation will alter it)
+                    node_id = node["id"]
+                    links_from_parent_to_other_nodes = filter(lambda x: x["source_id"] == pid and not x["target_id"] == node_id, protocol["links"])
+                    links_from_parent_to_node = filter(lambda x: x["source_id"] == pid and x["target_id"] == node_id, protocol["links"])[0]
+                    added_to_this_node = links_from_parent_to_node["data"]["addToThis"]
+                    for link in links_from_parent_to_other_nodes:
+                        if added_to_this_node and (link["target_id"] not in map(lambda x: x["id"], processed_nodes)):
+                            can_process_node = False
+
+                if can_process_node:
                     protocol_str += self.process_node(node, protocol)
                     processed_nodes.append(node)
                     operation_nodes.remove(node)
