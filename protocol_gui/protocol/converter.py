@@ -137,6 +137,13 @@ class Converter:
         container_target = self.sanitise_name(node["data"]["container_name"])
         locations_result = self.get_locations(protocol, node)
 
+        # if the user takes an aliquot, and sets container to be a trash_container, then all target wells will be A1
+        # This violates the one-to-one/one-to-many mapping from source wells to target wells (it is many-to-one)
+        # it therefore needs to be handled as a 'pool' operation
+        if len(set(locations_result)) == 1 and len(locations_one) > 1:
+            node["type"] = "pool"
+            locations_result = locations_result[0:1]
+
         # First work out which liquids are transferred into which wells
         source_one = {}
         source_two = {}
