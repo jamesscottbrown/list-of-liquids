@@ -167,7 +167,11 @@ def get_constituent_aliquots(protocol_obj, link):
 
     inputs = process_node(protocol_obj, link["source_id"])
 
-    volume = link["data"]["volumes"][0]
+    # If an edge has the addToThis attribute set, ignore whatever is set as the transfer volume
+    if link["data"]["addToThis"]:
+        volume = "all"
+    else:
+        volume = link["data"]["volumes"][0]
 
     input_volume_tuples = []
     for input in inputs:
@@ -176,6 +180,9 @@ def get_constituent_aliquots(protocol_obj, link):
     # each input corresponds to a link on the diagram
     for (input, transfered_volume) in input_volume_tuples:
         total_volume = sum(map(lambda x: float(x.volume), input))  # total volume of mixture of aliquots we are drawing from
+
+        if transfered_volume == "all":
+            transfered_volume = total_volume
 
         # Loop over all individual resources included on this link
         aliquot_list = []
