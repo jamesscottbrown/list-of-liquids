@@ -183,14 +183,14 @@ class Converter:
                     isValid = False
                     break
 
-            if isValid and not (container_target == container_one and source_row == result_row):
+            if isValid and not (container_target == container_one and source_row == result_row) and not link_one_data["addToThis"]:
                 protocol_str_one += self.get_transfer_string(pipette_name_one, volume_one, container_one,
                                                              source_row, container_target, result_row,
                                                              self.get_options(link_one_data))
 
                 transfers_made_one.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
-            if source_two:
+            if source_two and not link_two_data["addToThis"]:
                 source_row = source_two['A' + result_row][1:]
                 # check corresponding wells in first source are in a row, and columns are in consistent order with results
                 isValid = True
@@ -214,7 +214,7 @@ class Converter:
         # now do remaining individual transfers, grouping transfers from the same well int distribute operations if permitted
         wells_to_fill = list(set(locations_result) - set(transfers_made_one))
 
-        if link_one_data["distribute"]:
+        if link_one_data["distribute"] and not link_one_data["addToThis"]:
             transfers = {}
 
             for target_well in wells_to_fill:
@@ -229,14 +229,14 @@ class Converter:
                                                                source, container_target, targets_str,
                                                                self.get_options(link_one_data))
 
-        else:
+        elif not link_one_data["addToThis"]:
             for target_well in wells_to_fill:
                 source_well = source_one[target_well]
                 protocol_str_one += self.get_transfer_well_string(pipette_name_one, volume_one, container_one,
                                                                   source_well, container_target, target_well,
                                                                   self.get_options(link_one_data))
 
-        if source_two:
+        if source_two and not link_two_data["addToThis"]:
             wells_to_fill = list(set(locations_result) - set(transfers_made_two))
             if link_two_data["distribute"]:
                 transfers = {}
@@ -252,7 +252,7 @@ class Converter:
                     protocol_str_two += self.get_distribute_string(pipette_name_two, volume_two, container_two,
                                                                    source, container_target, targets_str,
                                                                    self.get_options(link_two_data))
-            else:
+            elif not link_two_data["addToThis"]:
 
                 for target_well in wells_to_fill:
                     source_well = source_two[target_well]
