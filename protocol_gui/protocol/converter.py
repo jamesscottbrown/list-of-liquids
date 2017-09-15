@@ -97,6 +97,13 @@ class Converter:
             if parent_nodes[i]["type"] == "resource":
                 resources = protocol["resources"]
                 resource = list(filter(lambda r: r["label"] == parent_nodes[i]["data"]["resource"], resources))[0]
+
+                # replace reference to reference to lowest node_id with same target
+                for n in protocol["nodes"]:
+                    if n["type"] == "resource" and n["data"]["resource"] == parent_nodes[i]["data"]["resource"] and n["id"] <  parent_nodes[i]["id"]:
+                        parent_nodes[i] = n
+
+
                 parent_nodes[i]["data"]["container_name"] = resource["data"]["container_name"]
 
         # skip operation if from somewhere to same place
