@@ -216,12 +216,27 @@ function addContainerSelect(selected_node, links, restart, form, deleteNode, ser
         .on("change", function () {
             clearOperation(selected_node.id);
 
+            var newContainerName = this.value;
             if (selected_node.type == "resource"){
                 var resource = resources.filter(function(r){return r.label == selected_node.data.resource})[0];
-               resource.data.container_name = this.value;
+               resource.data.container_name = newContainerName;
             } else {
-               selected_node.data.container_name = this.value;
+               selected_node.data.container_name = newContainerName;
             }
+
+
+            var container = containers.filter(function(c){return c.name == newContainerName})[0];
+            if (container.type == "trash-box"){
+                if (!container.contents.A1){
+                    container.contents.A1 = [];
+                }
+
+                for (var i=0; i < d3.select("#contents-div").selectAll("ul")[0].length; i++){
+                    // TODO: get number of aliquots in a less brittle way
+                    container.contents.A1.push({node_id: selected_node.id, aliquot_index: i})
+                }
+            }
+
 
             var contentsDiv = d3.select("#contents-div");
             if (selected_node && selected_node.type == "select") {
