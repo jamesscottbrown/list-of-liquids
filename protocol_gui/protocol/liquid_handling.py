@@ -174,8 +174,17 @@ def get_constituent_aliquots(protocol_obj, link):
         volume = link["data"]["volumes"][0]
 
     input_volume_tuples = []
-    for input in inputs:
-        input_volume_tuples.append((input, volume))
+    if "," in str(volume):
+        volumes = volume.split(',')
+
+        if len(volumes) == len(inputs):
+            input_volume_tuples = zip(inputs, volumes)
+        elif len(inputs) == 1:
+            input_volume_tuples = map(lambda volume: (inputs[0], volume), volumes)
+
+    else:
+        for input in inputs:
+            input_volume_tuples.append((input, volume))
 
     # each input corresponds to a link on the diagram
     for (input, transfered_volume) in input_volume_tuples:

@@ -137,6 +137,16 @@ class Converter:
         container_target = self.sanitise_name(node["data"]["container_name"])
         locations_result = self.get_locations(protocol, node)
 
+        volumes_one = str(volume_one).split(",")
+        if len(volumes_one) == 1:
+            volumes_one = volumes_one * len(locations_one)
+
+        if len(node["parentIds"]) > 1:
+            volumes_two = str(volume_two).split(",")
+            if len(volumes_two) == 1:
+                volumes_two = volumes_two * len(locations_two)
+
+
         # if the user takes an aliquot, and sets container to be a trash_container, then all target wells will be A1
         # This violates the one-to-one/one-to-many mapping from source wells to target wells (it is many-to-one)
         # it therefore needs to be handled as a 'pool' operation
@@ -181,8 +191,8 @@ class Converter:
             protocol_str = ""
             source_str = ", ".join(map(lambda x: "'" + x + "'", locations_one))
 
-            for target in locations_result:
-                protocol_str += self.get_consolidate_string(pipette_name_one, volume_one, container_one, source_str,
+            for (target, volume) in zip(locations_result, volumes_one):
+                protocol_str += self.get_consolidate_string(pipette_name_one, volume, container_one, source_str,
                                                        container_target, target, self.get_options(link_one_data))
 
             return protocol_str
@@ -196,6 +206,9 @@ class Converter:
                     source_one[target_well] = locations_one[i]
                     well_index += 1
 
+            # do further extension if needed due to repeats
+            volumes_one = volumes_one * num_duplicates
+
         # Then make the transfers
         transfers_made_one = []
         transfers_made_two = []
@@ -206,6 +219,11 @@ class Converter:
             source_row = source_one['A' + result_row][1:]
             # check corresponding wells in first source are in a row, and columns are in consistent order with results
             isValid = True
+
+            # all volumes must be equal for a multi-well transfer
+            if len(set(volumes_one)) > 1:
+                isValid = False
+
             for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
                 source_well = source_one[column + result_row]
 
@@ -228,6 +246,10 @@ class Converter:
                 source_row = source_two['A' + result_row][1:]
                 # check corresponding wells in first source are in a row, and columns are in consistent order with results
                 isValid = True
+
+                if len(set(volumes_two)) > 1:
+                    isValid = False
+
                 for column in ['A', 'C', 'D', 'E', 'F', 'G', 'H']:
                     source_well = source_two[column + result_row]
 
@@ -258,16 +280,17 @@ class Converter:
                     transfers[source_well] = []
                 transfers[source_well].append(target_well)
 
-            for source in transfers:
+            for (source, volume) in zip(transfers, volumes_one):
                 targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-                protocol_str_one += self.get_distribute_string(pipette_name_one, volume_one, container_one,
+                protocol_str_one += self.get_distribute_string(pipette_name_one, volume, container_one,
                                                                source, container_target, targets_str,
                                                                self.get_options(link_one_data))
 
         elif not link_one_data["addToThis"]:
-            for target_well in wells_to_fill:
+
+            for (target_well, volume) in zip(wells_to_fill, volumes_one):
                 source_well = source_one[target_well]
-                protocol_str_one += self.get_transfer_well_string(pipette_name_one, volume_one, container_one,
+                protocol_str_one += self.get_transfer_well_string(pipette_name_one, volume, container_one,
                                                                   source_well, container_target, target_well,
                                                                   self.get_options(link_one_data))
 
@@ -284,16 +307,16 @@ class Converter:
                         transfers[source_well] = []
                     transfers[source_well].append(target_well)
 
-                for source in transfers:
+                for (source, volume) in zip(transfers, volumes_two):
                     targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-                    protocol_str_two += self.get_distribute_string(pipette_name_two, volume_two, container_two,
+                    protocol_str_two += self.get_distribute_string(pipette_name_two, volume, container_two,
                                                                    source, container_target, targets_str,
                                                                    self.get_options(link_two_data))
             elif not link_two_data["addToThis"]:
 
-                for target_well in wells_to_fill:
+                for (target_well, volume) in zip(wells_to_fill, volumes_two):
                     source_well = source_two[target_well]
-                    protocol_str_two += self.get_transfer_well_string(pipette_name_two, volume_two,
+                    protocol_str_two += self.get_transfer_well_string(pipette_name_two, volume,
                                                                      container_two, source_well, container_target,
                                                                      target_well, self.get_options(link_two_data))
 
