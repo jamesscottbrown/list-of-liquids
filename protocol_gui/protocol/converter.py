@@ -246,7 +246,8 @@ class Converter:
                     transfers_made_two.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
         # now do remaining individual transfers, grouping transfers from the same well int distribute operations if permitted
-        wells_to_fill = list(set(locations_result) - set(transfers_made_one))
+        wells_to_fill = locations_result
+        map(lambda x: locations_result.remove(x), transfers_made_one)
 
         if link_one_data["distribute"] and not link_one_data["addToThis"]:
             transfers = {}
@@ -271,7 +272,9 @@ class Converter:
                                                                   self.get_options(link_one_data))
 
         if source_two and not link_two_data["addToThis"]:
-            wells_to_fill = list(set(locations_result) - set(transfers_made_two))
+            wells_to_fill = locations_result
+            map(lambda x: locations_result.remove(x), transfers_made_two)
+
             if link_two_data["distribute"]:
                 transfers = {}
 
