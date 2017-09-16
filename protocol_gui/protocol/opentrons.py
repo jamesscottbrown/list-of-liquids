@@ -46,7 +46,7 @@ class OpenTrons(Converter):
 
         # new_tip should be "always" or "never"
         if link_data["changeTips"] in ["always", "never"]:
-            opts.append("new_tip=%s" % link_data["changeTips"])
+            opts.append("new_tip='%s'" % link_data["changeTips"])
 
         if link_data["disposeTips"] == "rack":
             opts.append("trash=False")
