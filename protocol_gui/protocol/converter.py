@@ -175,6 +175,15 @@ class Converter:
                     well_index += 1
 
         elif node["type"] == "cross":
+
+            if len(volumes_one) == 1:
+                volumes_one = volumes_one * (len(locations_one) * len(locations_two))
+            volumes_one = volumes_one * num_duplicates
+
+            if len(volumes_two) == 1:
+                volumes_two = volumes_two * (len(locations_one) * len(locations_two))
+            volumes_two = volumes_two * num_duplicates
+
             well_index = 0
             for repeat_number in range(0, num_duplicates):
                 for a in locations_one:
