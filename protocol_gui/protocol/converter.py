@@ -154,7 +154,7 @@ class Converter:
                 locations_one = locations_one * len(locations_two)
 
             if len(locations_two) == 1:
-                locations_two = locations_one * len(locations_one)
+                locations_two = locations_two * len(locations_two)
 
             well_index = 0
             for repeat_number in range(0, num_duplicates):
