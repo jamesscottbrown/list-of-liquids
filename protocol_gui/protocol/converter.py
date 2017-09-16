@@ -148,6 +148,14 @@ class Converter:
         source_one = {}
         source_two = {}
         if node["type"] == "zip":
+
+            # if we are zipping with a single well, extend
+            if len(locations_one) == 1:
+                locations_one = locations_one * len(locations_two)
+
+            if len(locations_two) == 1:
+                locations_two = locations_one * len(locations_one)
+
             well_index = 0
             for repeat_number in range(0, num_duplicates):
                 for i in range(0, len(locations_one)):
