@@ -25,7 +25,7 @@ class OpenTrons(Converter):
         channels="%s",
         aspirate_speed="%s",
         dispense_speed="%s",
-        tip_racks=%s,
+        tip_racks=[%s],
         trash_container=%s,
         name="%s")\n\n""" \
             % (self.sanitise_name(pipette["name"]), pipette["axis"], pipette["volume"], pipette["min_volume"],  pipette["channels"],
