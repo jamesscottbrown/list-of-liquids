@@ -157,11 +157,13 @@ class Converter:
             protocol_str = ""
             source_str = ", ".join(map(lambda x: "'" + x + "'", locations_one))
 
-            if len(volumes_one) == 1 and len(locations_one) > 1:
-                volumes_one = volumes_one * len(locations_one)
+            if len(volumes_one) == 1:
+                volumes_str = volumes_one[0]
+            else:
+                volumes_str = "[" + ", ".join(volumes_one) + "]"
 
-            for (target, volume) in zip(locations_result, volumes_one):
-                protocol_str += self.get_consolidate_string(pipette_name_one, volume, container_one, source_str,
+            for target in locations_result:
+                protocol_str += self.get_consolidate_string(pipette_name_one, volumes_str, container_one, source_str,
                                                             container_target, target, self.get_options(link_one_data))
 
             return protocol_str
@@ -237,14 +239,14 @@ class Converter:
     def do_single_transfer(self, source, container, volumes, pipette_name, link_data,
                            locations_result, container_target):
 
+        if link_data["addToThis"]:
+            return ""
+
         transfers_made = []
         protocol_str = ""
 
         # Look for rows that can be pipetted together
         for result_row in self.get_complete_rows(locations_result):
-
-            if link_data["addToThis"]:
-                return ""
 
             source_row = source['A' + result_row][1:]
             # check corresponding wells in first source are in a row, and columns are in consistent order with results
@@ -287,7 +289,13 @@ class Converter:
 
             for (source, volume) in zip(transfers, volumes):
                 targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-                volume_str = "[" + ", ".join(map(lambda x: "'" + volumes[x] + "'", transfers[source])) + "]"
+
+                these_volumes = map(lambda x: volumes[x], transfers[source])
+                if len(set(these_volumes)) == 1:
+                    volume_str = these_volumes[0]
+                else:
+                    volume_str = "[" + ", ".join(these_volumes) + "]"
+
                 protocol_str += self.get_distribute_string(pipette_name, volume_str, container, source,
                                                            container_target, targets_str, self.get_options(link_data))
 
