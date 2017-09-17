@@ -151,7 +151,21 @@ class Converter:
         # First work out which liquids are transferred into which wells
         source_one = {}
         source_two = {}
-        if node["type"] == "zip":
+
+        if node["type"] == "process":
+            return self.get_process_string(node["data"]["command"])
+
+        elif node["type"] == "pool":
+            protocol_str = ""
+            source_str = ", ".join(map(lambda x: "'" + x + "'", locations_one))
+
+            for (target, volume) in zip(locations_result, volumes_one):
+                protocol_str += self.get_consolidate_string(pipette_name_one, volume, container_one, source_str,
+                                                            container_target, target, self.get_options(link_one_data))
+
+            return protocol_str
+
+        elif node["type"] == "zip":
 
             # if we are zipping with a single well, extend
             if len(locations_one) == 1:
@@ -191,20 +205,9 @@ class Converter:
                         source_two[target_well] = b
                         well_index += 1
 
-            return self.do_transfer()
-
-        elif node["type"] == "process":
-            return self.get_process_string(node["data"]["command"])
-
-        elif node["type"] == "pool":
-            protocol_str = ""
-            source_str = ", ".join(map(lambda x: "'" + x + "'", locations_one))
-
-            for (target, volume) in zip(locations_result, volumes_one):
-                protocol_str += self.get_consolidate_string(pipette_name_one, volume, container_one, source_str,
-                                                            container_target, target, self.get_options(link_one_data))
-
-            return protocol_str
+            return self.do_transfer(self, source_one, container_one, volume_one, volumes_one, pipette_name_one, link_one_data,
+                                          source_two, container_two, volume_two, volumes_two, pipette_name_two, link_two_data,
+                                          locations_result, container_target)
 
         elif node["type"] == "select" or node["type"] == "aliquot":
 
