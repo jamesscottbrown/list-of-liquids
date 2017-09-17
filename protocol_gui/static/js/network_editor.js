@@ -35,6 +35,8 @@ function network_editor() {
 
     var rectLabels, circleLabels;
 
+    var linkToChangeParent = false;
+
     if (protocol_string) {
 
         console.log(protocol_string);
@@ -419,7 +421,32 @@ function network_editor() {
             }).style('stroke', 'red');
         }
 
+        // context-menu
+        path.on("contextmenu", d3.contextMenu(function (d) {
+            return [{
+                title: 'Change parent',
+                action: function (elm, d) {
+                    linkToChangeParent = d;
+                }
+            }]
+        }))
+    }
 
+    function changeParent(newParent){
+
+        // update link
+        linkToChangeParent.source = newParent;
+
+        // update list of parent stored in child node
+        if (linkToChangeParent.target.parents[0] == linkToChangeParent.source){
+            linkToChangeParent.target.parents[0] = newParent;
+        } else {
+           linkToChangeParent.target.parents[1] = newParent;
+        }
+
+        // redraw
+        linkToChangeParent = false;
+        restart();
     }
 
     function redrawLinkLabels() {
@@ -473,6 +500,11 @@ function network_editor() {
                 return (d === selected_node) ? '1' : '0.5';
             })
             .on('mousedown', function (d) {
+
+                if (linkToChangeParent){
+                    changeParent(d);
+                    return;
+                }
 
                 // ignore right click
                 if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
@@ -762,6 +794,12 @@ function network_editor() {
 
             .style('opacity', '0.5')
             .on('mousedown', function (d) {
+
+                if (linkToChangeParent) {
+                    changeParent(d);
+                    return;
+                }
+
                 // ignore right click
                 if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
                     || ("button" in d3.event && d3.event.button == 2))  // IE
