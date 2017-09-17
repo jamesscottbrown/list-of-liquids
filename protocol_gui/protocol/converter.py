@@ -233,29 +233,25 @@ class Converter:
                                           source_two, container_two, volume_two, volumes_two, pipette_name_two, link_two_data,
                                           locations_result, container_target)
 
+    def do_single_transfer(self, source, container, volume, volumes, pipette_name, link_data,
+                           locations_result, container_target):
 
-    def do_transfer(self, source_one, container_one, volume_one, volumes_one, pipette_name_one, link_one_data,
-                          source_two, container_two, volume_two, volumes_two, pipette_name_two, link_two_data,
-                          locations_result, container_target):
-        protocol_str_one = ""
-        protocol_str_two = ""
-
-        transfers_made_one = []
-        transfers_made_two = []
+        transfers_made = []
+        protocol_str = ""
 
         # Look for rows that can be pipetted together
         for result_row in self.get_complete_rows(locations_result):
 
-            source_row = source_one['A' + result_row][1:]
+            source_row = source['A' + result_row][1:]
             # check corresponding wells in first source are in a row, and columns are in consistent order with results
             is_valid = True
 
             # all volumes must be equal for a multi-well transfer
-            if len(set(volumes_one)) > 1:
+            if len(set(volumes)) > 1:
                 is_valid = False
 
             for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
-                source_well = source_one[column + result_row]
+                source_well = source[column + result_row]
 
                 if source_well[1:] != source_row:
                     is_valid = False
@@ -265,93 +261,62 @@ class Converter:
                     is_valid = False
                     break
 
-            if is_valid and not (container_target == container_one and source_row == result_row) and not link_one_data["addToThis"]:
-                protocol_str_one += self.get_transfer_string(pipette_name_one, volume_one, container_one,
+            if is_valid and not (container_target == container and source_row == result_row) and not link_data["addToThis"]:
+                protocol_str += self.get_transfer_string(pipette_name, volume, container,
                                                              source_row, container_target, result_row,
-                                                             self.get_options(link_one_data))
+                                                             self.get_options(link_data))
 
-                transfers_made_one.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
+                transfers_made.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
-            if source_two and not link_two_data["addToThis"]:
-                source_row = source_two['A' + result_row][1:]
-                # check corresponding wells in first source are in a row, and columns are in consistent order with results
-                is_valid = True
 
-                if len(set(volumes_two)) > 1:
-                    is_valid = False
-
-                for column in ['A', 'C', 'D', 'E', 'F', 'G', 'H']:
-                    source_well = source_two[column + result_row]
-
-                    if source_well[1:] != source_row:
-                        is_valid = False
-                        break
-
-                    if source_well[0] != column:
-                        is_valid = False
-                        break
-
-                if is_valid and not (container_target == container_one and source_row == result_row):
-                    protocol_str_two += self.get_transfer_string(pipette_name_two, volume_two, container_two,
-                                                                 source_row, container_target, result_row,
-                                                                 self.get_options(link_two_data))
-                    transfers_made_two.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
 
         # now do remaining individual transfers, grouping transfers from the same well int distribute operations if permitted
         wells_to_fill = locations_result
-        map(lambda x: locations_result.remove(x), transfers_made_one)
+        map(lambda x: locations_result.remove(x), transfers_made)
 
-        if link_one_data["distribute"] and not link_one_data["addToThis"]:
+        if link_data["distribute"] and not link_data["addToThis"]:
             transfers = {}
 
             # TODO: keep track fo volume array correctly
 
             for target_well in wells_to_fill:
-                source_well = source_one[target_well]
+                source_well = source[target_well]
                 if source_well not in transfers.keys():
                     transfers[source_well] = []
                 transfers[source_well].append(target_well)
 
-            for (source, volume) in zip(transfers, volumes_one):
+            for (source, volume) in zip(transfers, volumes):
                 targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-                protocol_str_one += self.get_distribute_string(pipette_name_one, volume, container_one,
+                protocol_str += self.get_distribute_string(pipette_name, volume, container,
                                                                source, container_target, targets_str,
-                                                               self.get_options(link_one_data))
+                                                               self.get_options(link_data))
 
-        elif not link_one_data["addToThis"]:
+        elif not link_data["addToThis"]:
 
-            for (target_well, volume) in zip(wells_to_fill, volumes_one):
-                source_well = source_one[target_well]
-                protocol_str_one += self.get_transfer_well_string(pipette_name_one, volume, container_one,
+            for (target_well, volume) in zip(wells_to_fill, volumes):
+                source_well = source[target_well]
+                protocol_str += self.get_transfer_well_string(pipette_name, volume, container,
                                                                   source_well, container_target, target_well,
-                                                                  self.get_options(link_one_data))
+                                                                  self.get_options(link_data))
 
-        if source_two and not link_two_data["addToThis"]:
-            wells_to_fill = locations_result
-            map(lambda x: locations_result.remove(x), transfers_made_two)
+        return protocol_str
 
-            if link_two_data["distribute"]:
-                transfers = {}
 
-                for target_well in wells_to_fill:
-                    source_well = source_two[target_well]
-                    if source_well not in transfers.keys():
-                        transfers[source_well] = []
-                    transfers[source_well].append(target_well)
+    def do_transfer(self, source_one, container_one, volume_one, volumes_one, pipette_name_one, link_one_data,
+                          source_two, container_two, volume_two, volumes_two, pipette_name_two, link_two_data,
+                          locations_result, container_target):
 
-                for (source, volume) in zip(transfers, volumes_two):
-                    targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
-                    protocol_str_two += self.get_distribute_string(pipette_name_two, volume, container_two,
-                                                                   source, container_target, targets_str,
-                                                                   self.get_options(link_two_data))
-            elif not link_two_data["addToThis"]:
+        # Do transfer from first parent node
+        protocol_str_one = self.do_single_transfer(source_one, container_one, volume_one, volumes_one, pipette_name_one, link_one_data,
+                           locations_result, container_target)
 
-                for (target_well, volume) in zip(wells_to_fill, volumes_two):
-                    source_well = source_two[target_well]
-                    protocol_str_two += self.get_transfer_well_string(pipette_name_two, volume,
-                                                                      container_two, source_well, container_target,
-                                                                      target_well, self.get_options(link_two_data))
+        # Do transfer from second parent node
+        protocol_str_two = ""
+        if source_two:
+            protocol_str_two = self.do_single_transfer(source_two, container_two, volume_two, volumes_two, pipette_name_two, link_two_data,
+                               locations_result, container_target)
 
+        # Return complete commands
         if source_two and link_two_data["addFirst"]:
             protocol_str = protocol_str_two + protocol_str_one
         else:
