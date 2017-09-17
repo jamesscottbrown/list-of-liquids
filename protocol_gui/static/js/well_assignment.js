@@ -122,6 +122,12 @@ function listContainerContents(result, div, queryNode) {
             }
         });
 
+    outer_list.append("button")
+        .text(" Clear")
+        .on("click", function(){
+            clearOperation(queryNode.id);
+        });
+
     outer_list.attr("draggable", true)
         .on("dragstart", function (d, i) {
 
