@@ -92,8 +92,6 @@ class Converter:
         return locations
 
     def process_node(self, node, protocol):
-        protocol_str_one = ""
-        protocol_str_two = ""
 
         num_duplicates = int(node["data"]["num_duplicates"])
 
@@ -170,6 +168,10 @@ class Converter:
                     source_two[target_well] = locations_two[i]
                     well_index += 1
 
+            return self.do_transfer(self, source_one, container_one, volume_one, volumes_one, pipette_name_one, link_one_data,
+                                          source_two, container_two, volume_two, volumes_two, pipette_name_two, link_two_data,
+                                          locations_result, container_target)
+
         elif node["type"] == "cross":
 
             if len(volumes_one) == 1:
@@ -188,6 +190,8 @@ class Converter:
                         source_one[target_well] = a
                         source_two[target_well] = b
                         well_index += 1
+
+            return self.do_transfer()
 
         elif node["type"] == "process":
             return self.get_process_string(node["data"]["command"])
@@ -222,7 +226,17 @@ class Converter:
             # do further extension if needed due to repeats
             volumes_one = volumes_one * num_duplicates
 
-        # Then make the transfers
+            return self.do_transfer(self, source_one, container_one, volume_one, volumes_one, pipette_name_one, link_one_data,
+                                          source_two, container_two, volume_two, volumes_two, pipette_name_two, link_two_data,
+                                          locations_result, container_target)
+
+
+    def do_transfer(self, source_one, container_one, volume_one, volumes_one, pipette_name_one, link_one_data,
+                          source_two, container_two, volume_two, volumes_two, pipette_name_two, link_two_data,
+                          locations_result, container_target):
+        protocol_str_one = ""
+        protocol_str_two = ""
+
         transfers_made_one = []
         transfers_made_two = []
 
@@ -286,6 +300,8 @@ class Converter:
 
         if link_one_data["distribute"] and not link_one_data["addToThis"]:
             transfers = {}
+
+            # TODO: keep track fo volume array correctly
 
             for target_well in wells_to_fill:
                 source_well = source_one[target_well]
