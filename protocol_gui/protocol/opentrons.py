@@ -6,6 +6,7 @@
 # multi-channel transfer
 from protocol_gui.protocol.converter import Converter
 
+
 class OpenTrons(Converter):
 
     def get_header(self, protocol, protocol_name):
@@ -57,10 +58,10 @@ class OpenTrons(Converter):
         if link_data["blowout"]:
             opts.append("blow_out=True")
 
-        if int(link_data["mixBefore"]["repeats"]) > 0: # TODO: type conversion?
+        if int(link_data["mixBefore"]["repeats"]) > 0:  # TODO: type conversion?
             opts.append("mix_before=(%s, %s)" % (link_data["mixBefore"]["repeats"], link_data["mixBefore"]["volume"]))
 
-        if int(link_data["mixAfter"]["repeats"]) > 0: # TODO: type conversion?
+        if int(link_data["mixAfter"]["repeats"]) > 0:  # TODO: type conversion?
             opts.append("mix_after=(%s, %s)" % (link_data["mixAfter"]["repeats"], link_data["mixAfter"]["volume"]))
 
         if link_data["airgap"]:

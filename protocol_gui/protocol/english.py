@@ -1,5 +1,6 @@
 from protocol_gui.protocol.converter import Converter
 
+
 class English(Converter):
     def get_header(self, protocol, name):
 
@@ -45,8 +46,6 @@ class English(Converter):
                     locations.append(location)
 
         return ", ".join(locations)
-
-
 
     def get_transfer_string(self, pipette_name, volume, container, source_row, container_target, result_row, options_str):
         return "* Transfer %s from row %s of %s to row %s of %s using %s \n" % \

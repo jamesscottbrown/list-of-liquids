@@ -199,7 +199,6 @@ function update_pipette_list() {
     });
 
     pippette_nodes.selectAll("b").style('color', function (d) {
-        console.log(d)
         return color(pipettes.indexOf(d));
     });
 
@@ -230,11 +229,11 @@ function update_resource_list() {
         });
 
     label.attr("draggable", true)
-        .on("dragstart", function (d, i) {
+        .on("dragstart", function (d) {
             var ev = d3.event;
             ev.dataTransfer.setData("custom-data", d.label);
         })
-        .on("drop", function (a, b, c) {
+        .on("drop", function () {
         });
 
     resource_nodes.append("button")

@@ -23,9 +23,11 @@ def list_protocols():
     """List all user's protocol."""
     return render_template('protocols/list_protocols.html')
 
+
 @blueprint.route('/<int:protocol_id>')
 def protocol_no_backslash(protocol_id):
     return redirect(url_for('protocol.protocol', protocol_id=protocol_id))
+
 
 @blueprint.route('/<int:protocol_id>/')
 def protocol(protocol_id):
@@ -55,6 +57,7 @@ def protocol(protocol_id):
 
     return render_template('protocols/protocol.html', protocol=current_protocol,
                            protocol_obj=protocol_obj, container_types=container_types)
+
 
 @blueprint.route('/<int:protocol_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -101,13 +104,12 @@ def new_protocol():
     form = ProtocolForm(request.form)
     if form.validate_on_submit():
         new_protocol = Protocol.create(name=form.name.data, description=form.description.data,
-                        user_id=current_user.id, public=form.public.data, protocol="")
+                                       user_id=current_user.id, public=form.public.data, protocol="")
         flash('New protocol created.', 'success')
         return redirect(url_for('protocol.protocol', protocol_id=new_protocol.id))
     else:
         flash_errors(form)
     return render_template('protocols/new_protocol.html', form=form)
-
 
 
 @blueprint.route('/<int:protocol_id>/save', methods=['POST'])
@@ -128,7 +130,6 @@ def save_protocol(protocol_id):
     current_protocol.save()
 
     return "SUCCESS"
-
 
 
 @blueprint.route('/<int:protocol_id>/opentrons', methods=['GET'])
@@ -209,7 +210,6 @@ def english_protocol(protocol_id):
     return resp
 
 
-
 @blueprint.route('/<int:protocol_id>/contents', methods=['GET'])
 def get_contents(protocol_id):
     """Determine what a given node on a protocol diagram represents."""
@@ -229,7 +229,7 @@ def get_contents(protocol_id):
     result = process_node(protocol_obj, node_id)
     result = collapse_contents(result)
 
-    return json.dumps( map(lambda x: map(lambda y: '{0:.2f}'.format(float(y.volume)) + " of " + y.resource, x), result) )
+    return json.dumps(map(lambda x: map(lambda y: '{0:.2f}'.format(float(y.volume)) + " of " + y.resource, x), result))
 
 
 @blueprint.route('/<int:protocol_id>/checkWellsAssigned', methods=['GET'])
@@ -267,7 +267,7 @@ def check_assigned(protocol_id):
                 continue
 
             container_name = resource["data"]["container_name"]
-            if nodeHAsUnassignedAliquots(num_aliquots, node["id"], container_name, protocol_obj):
+            if node_has_unassigned_aliquots(num_aliquots, node["id"], container_name, protocol_obj):
                 unassigned_resources.append(node["id"])
 
         else:
@@ -275,14 +275,14 @@ def check_assigned(protocol_id):
                 continue
             container_name = node["data"]["container_name"]
 
-            num_aliquots = len( process_node(protocol_obj, node["id"]) )
-            if nodeHAsUnassignedAliquots(num_aliquots, node["id"], container_name, protocol_obj):
+            num_aliquots = len(process_node(protocol_obj, node["id"]))
+            if node_has_unassigned_aliquots(num_aliquots, node["id"], container_name, protocol_obj):
                 unassigned_operations.append(node["id"])
 
     return json.dumps({"unassigned_operations": unassigned_operations, "unassigned_resources": unassigned_resources})
 
 
-def nodeHAsUnassignedAliquots(num_aliquots, operation_id, container_name, protocol_obj):
+def node_has_unassigned_aliquots(num_aliquots, operation_id, container_name, protocol_obj):
     container = filter(lambda x: x["name"] == container_name, protocol_obj["containers"])[0]
 
     aliquots_listed = set()

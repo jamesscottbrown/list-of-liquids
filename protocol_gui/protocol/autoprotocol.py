@@ -1,5 +1,6 @@
 from protocol_gui.protocol.converter import Converter
 
+
 class AutoProtocol(Converter):
 
     def get_header(self, protocol, protocol_name):
@@ -7,7 +8,6 @@ class AutoProtocol(Converter):
         protocol_str = "from autoprotocol.util import make_dottable_dict\n\n"
         protocol_str += "def %s(protocol, params):\n\n" % protocol_name
         return protocol_str
-
 
     @staticmethod
     def get_options(link_data):
@@ -19,7 +19,6 @@ class AutoProtocol(Converter):
             opts.append("allow_carryover=False")
         elif link_data["changeTips"] == "never":
             opts.append("allow_carryover=True")
-
 
         # Unlike in OpenTrons, mixBefore/After use same options
         mix_options = []

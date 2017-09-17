@@ -80,13 +80,12 @@ class AliquotList:
         return self.aliquots[item]
 
 
-def cross(a,b):
+def cross(a, b):
     res = []
     for i in range(0, len(a)):
         for j in range(0, len(b)):
             res.append(a[i] + b[j])
     return res
-
 
 
 def process_node(protocol_obj, node_id):
@@ -114,7 +113,7 @@ def process_node(protocol_obj, node_id):
 
         components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
         components2 = get_constituent_aliquots(protocol_obj, incident_links[1])
-        return map(lambda(x,y): x+y, zip(components1, components2)) * int(node["data"]["num_duplicates"])
+        return map(lambda(x, y): x+y, zip(components1, components2)) * int(node["data"]["num_duplicates"])
 
     elif node["type"] == "cross":
 
@@ -197,7 +196,7 @@ def get_constituent_aliquots(protocol_obj, link):
         aliquot_list = []
         for i in range(0, len(input)):
             a = input[i]
-            aliquot_list.append(Aliquot(a.resource, ( float(transfered_volume) * float(a.volume)/total_volume)))
+            aliquot_list.append(Aliquot(a.resource, (float(transfered_volume) * float(a.volume)/total_volume)))
 
         all_aliquots.append(aliquot_list)
 

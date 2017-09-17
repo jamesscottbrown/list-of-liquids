@@ -94,7 +94,7 @@ function validateOpenTrons() {
 
         if (unassigned_wells.unassigned_resources.length > 0) {
             error_div.append("p")
-                .text(function (d) {
+                .text(function () {
                     return "Some resources have a container assigned, but no well assigned";
                 });
         }
@@ -156,7 +156,7 @@ function validateOpenTrons() {
             });
 
         error_div.append("p")
-            .text(function (d) {
+            .text(function () {
                 return "Some operations have a container assigned, but not all wells assigned";
             });
     }

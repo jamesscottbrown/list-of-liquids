@@ -14,8 +14,8 @@ class Converter:
             for node in operation_nodes:
 
                 can_process_node = True
-                parentIDs = node["parentIds"]
-                for pid in parentIDs:
+                parent_ids = node["parentIds"]
+                for pid in parent_ids:
 
                     # if parent has not been processed, cannot process node yet
                     if not filter(lambda x: x["id"] == pid, processed_nodes):
@@ -38,7 +38,6 @@ class Converter:
 
         protocol_str += self.get_footer(protocol_name)
         return protocol_str
-
 
     def get_footer(self, protocol_name):
         return ""
@@ -92,7 +91,6 @@ class Converter:
 
         return locations
 
-
     def process_node(self, node, protocol):
         protocol_str_one = ""
         protocol_str_two = ""
@@ -112,9 +110,8 @@ class Converter:
 
                 # replace reference to reference to lowest node_id with same target
                 for n in protocol["nodes"]:
-                    if n["type"] == "resource" and n["data"]["resource"] == parent_nodes[i]["data"]["resource"] and n["id"] <  parent_nodes[i]["id"]:
+                    if n["type"] == "resource" and n["data"]["resource"] == parent_nodes[i]["data"]["resource"] and n["id"] < parent_nodes[i]["id"]:
                         parent_nodes[i] = n
-
 
                 parent_nodes[i]["data"]["container_name"] = resource["data"]["container_name"]
 
@@ -145,7 +142,6 @@ class Converter:
             volumes_two = str(volume_two).split(",")
             if len(volumes_two) == 1:
                 volumes_two = volumes_two * len(locations_two)
-
 
         # if the user takes an aliquot, and sets container to be a trash_container, then all target wells will be A1
         # This violates the one-to-one/one-to-many mapping from source wells to target wells (it is many-to-one)
@@ -202,7 +198,7 @@ class Converter:
 
             for (target, volume) in zip(locations_result, volumes_one):
                 protocol_str += self.get_consolidate_string(pipette_name_one, volume, container_one, source_str,
-                                                       container_target, target, self.get_options(link_one_data))
+                                                            container_target, target, self.get_options(link_one_data))
 
             return protocol_str
 
@@ -227,24 +223,24 @@ class Converter:
 
             source_row = source_one['A' + result_row][1:]
             # check corresponding wells in first source are in a row, and columns are in consistent order with results
-            isValid = True
+            is_valid = True
 
             # all volumes must be equal for a multi-well transfer
             if len(set(volumes_one)) > 1:
-                isValid = False
+                is_valid = False
 
             for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
                 source_well = source_one[column + result_row]
 
                 if source_well[1:] != source_row:
-                    isValid = False
+                    is_valid = False
                     break
 
                 if source_well[0] != column:
-                    isValid = False
+                    is_valid = False
                     break
 
-            if isValid and not (container_target == container_one and source_row == result_row) and not link_one_data["addToThis"]:
+            if is_valid and not (container_target == container_one and source_row == result_row) and not link_one_data["addToThis"]:
                 protocol_str_one += self.get_transfer_string(pipette_name_one, volume_one, container_one,
                                                              source_row, container_target, result_row,
                                                              self.get_options(link_one_data))
@@ -254,23 +250,23 @@ class Converter:
             if source_two and not link_two_data["addToThis"]:
                 source_row = source_two['A' + result_row][1:]
                 # check corresponding wells in first source are in a row, and columns are in consistent order with results
-                isValid = True
+                is_valid = True
 
                 if len(set(volumes_two)) > 1:
-                    isValid = False
+                    is_valid = False
 
                 for column in ['A', 'C', 'D', 'E', 'F', 'G', 'H']:
                     source_well = source_two[column + result_row]
 
                     if source_well[1:] != source_row:
-                        isValid = False
+                        is_valid = False
                         break
 
                     if source_well[0] != column:
-                        isValid = False
+                        is_valid = False
                         break
 
-                if isValid and not (container_target == container_one and source_row == result_row):
+                if is_valid and not (container_target == container_one and source_row == result_row):
                     protocol_str_two += self.get_transfer_string(pipette_name_two, volume_two, container_two,
                                                                  source_row, container_target, result_row,
                                                                  self.get_options(link_two_data))
@@ -326,8 +322,8 @@ class Converter:
                 for (target_well, volume) in zip(wells_to_fill, volumes_two):
                     source_well = source_two[target_well]
                     protocol_str_two += self.get_transfer_well_string(pipette_name_two, volume,
-                                                                     container_two, source_well, container_target,
-                                                                     target_well, self.get_options(link_two_data))
+                                                                      container_two, source_well, container_target,
+                                                                      target_well, self.get_options(link_two_data))
 
         if source_two and link_two_data["addFirst"]:
             protocol_str = protocol_str_two + protocol_str_one

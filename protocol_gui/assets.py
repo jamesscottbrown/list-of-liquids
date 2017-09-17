@@ -10,7 +10,7 @@ css = Bundle(
 )
 
 css_network_editor = Bundle(
-	'css/network_editor.css'
+    'css/network_editor.css'
 )
 
 js = Bundle(
@@ -22,14 +22,14 @@ js = Bundle(
 )
 
 js_network_editor = Bundle(
-	'libs/d3.v3.min.js',
-	'libs/d3-context-menu.js',
-	'js/equipment.js',
-	'js/network_editor.js',
-	'js/panel.js',
+    'libs/d3.v3.min.js',
+    'libs/d3-context-menu.js',
+    'js/equipment.js',
+    'js/network_editor.js',
+    'js/panel.js',
     'js/well_assignment.js',
-	'js/validate.js',
-	'libs/cola.v3.min.js'
+    'js/validate.js',
+    'libs/cola.v3.min.js'
 )
 
 assets = Environment()

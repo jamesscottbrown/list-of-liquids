@@ -63,7 +63,6 @@ function listContentsOfContainer(container_name, serialiseDiagram) {
 
 
     var div = d3.select("#locationModal").select("#well-list");
-    var color = d3.scale.category10().domain(located_nodes.length);
 
     for (var i = 0; i < located_nodes.length; i++) {
         getContents(serialiseDiagram, located_nodes[i], div, listContainerContents);
@@ -112,7 +111,7 @@ function listContainerContents(result, div, queryNode) {
         .attr('id', 'collapse-icon')
         .attr('class', "fa fa-minus")
         .style("margin-left", "-30px")
-        .on("click", function (d) {
+        .on("click", function () {
             if (d3.select(this).classed("fa-minus")) {
                 d3.select(this.parentNode).selectAll('li').style('display', 'none');
                 d3.select(this).attr('class', "fa fa-plus")
@@ -129,7 +128,7 @@ function listContainerContents(result, div, queryNode) {
         });
 
     outer_list.attr("draggable", true)
-        .on("dragstart", function (d, i) {
+        .on("dragstart", function () {
 
             // A drag event on the ol item corresponding set of wells will also
             // be triggered if a single well is dragged
@@ -138,7 +137,7 @@ function listContainerContents(result, div, queryNode) {
                 ev.dataTransfer.setData("custom-data", queryNode.id + ",");
             }
         })
-        .on("drop", function (a, b, c) {
+        .on("drop", function () {
         });
 
     var outer_list_items = outer_list
@@ -155,7 +154,7 @@ function listContainerContents(result, div, queryNode) {
                 ev.dataTransfer.setData("custom-data", queryNode.id + "," + i);
                 draggingSingleWell = true;
             })
-            .on("drop", function (a, b, c) {
+            .on("drop", function () {
                 draggingSingleWell = false;
             })
             .on("mouseover", function (d) {
@@ -173,7 +172,7 @@ function listContainerContents(result, div, queryNode) {
             })
         ;
 
-    var items = outer_list_items.selectAll("li")
+    outer_list_items.selectAll("li")
         .data(function (d) {
             return d.contents
         })
@@ -275,7 +274,7 @@ function drawContainer(container) {
     d3.select("#locationModal").select("#well-diagram").selectAll("svg").remove();
     var svg = d3.select("#locationModal").select("#well-diagram")
         .append("svg").attr("width", width).attr("height", height)
-        .on("dragover", function (d) {
+        .on("dragover", function () {
             d3.event.preventDefault();
         });
 
@@ -305,7 +304,7 @@ function drawContainer(container) {
             return "pie-" + d.name;
         });
 
-    var circles = g.selectAll("circle")
+    g.selectAll("circle")
         .data(data.filter(function (d) {
             return d.diameter
         }))
@@ -442,11 +441,6 @@ function placeWells(d) {
     var row = location.substr(1);
 
     var num_wells = num_aliquots[node_id];
-
-
-    var operation = nodes.filter(function (n) {
-        return n.id == node_id;
-    })[0];
 
     if (draggingSingleWell) {
         if (d.container.contents[d.name]) {
@@ -726,17 +720,13 @@ function resetAppearances() {
     d3.selectAll(".pie-group").selectAll("rect").remove();
 
     for (var name in container_data.locations) {
-        var datum = container_data.locations[name];
-
-        var contents = '';
         if (selected_container.contents && selected_container.contents[name]) {
             drawWell(selected_container.contents[name], name)
         }
-
     }
 
     containerDiagram.selectAll(".rect-container")
-        .style("stroke", "black").style("stroke-width", "2px")
+        .style("stroke", "black").style("stroke-width", "2px");
 
     d3.selectAll(".well-contents").style("color", function (d) {
         return getLocation(d.node_id, d.aliquot_index) ? 'grey' : 'black';
@@ -816,7 +806,7 @@ function drawWellCirc(contents, name){
 
     var g = d3.select("#pie-" + name);
 
-    var path = g.selectAll('.arcs')
+    g.selectAll('.arcs')
         .data(contents.map(function (content, i) {
             return {
                 id: parseInt(content.node_id),
@@ -839,7 +829,7 @@ function drawWellRect(contents, name) {
     var width = container_data.locations[name].width;
     var height = container_data.locations[name].length;
 
-    var rect = g.selectAll('rect')
+    g.selectAll('rect')
         .data(contents)
         .enter()
         .append('rect')

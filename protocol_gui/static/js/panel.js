@@ -74,7 +74,7 @@ function listContents(result, parentDiv, queryNode, serialiseDiagram) {
         .append('i')
         .attr('class', "fa fa-minus")
         //.style("margin-left", "-30px")
-        .on("click", function (d) {
+        .on("click", function () {
             if (d3.select(this).classed("fa-minus")) {
                 d3.select(this.parentNode.parentNode).selectAll('ol').style('display', 'none');
                 d3.select(this).attr('class', "fa fa-plus")
@@ -96,7 +96,7 @@ function listContents(result, parentDiv, queryNode, serialiseDiagram) {
         .append("li").style("margin-top", "10px")
         .append("ul");
 
-    var items = outer_list_items.selectAll("li")
+    outer_list_items.selectAll("li")
         .data(function (d) {
             return d
         })
@@ -106,7 +106,7 @@ function listContents(result, parentDiv, queryNode, serialiseDiagram) {
             return d;
         });
 
-    var container_name = ""
+    var container_name = "";
     if (queryNode.data.container_name) {
         container_name = queryNode.data.container_name;
     } else if (queryNode.data.hasOwnProperty("resource")) {
@@ -170,7 +170,7 @@ function selectContents(selected_node) {
                 selected_node.data.selection[d.index] = this.checked;
             });
 
-        var items = outer_list_divs.append("ul").selectAll("li")
+        outer_list_divs.append("ul").selectAll("li")
             .data(function (d) {
                 return d
             })
@@ -557,9 +557,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
         .classed("col-sm-5", true)
         .attr("for", "volume");
 
-    label.append("b").text(function (d, i) {
-        return "Volume:";
-    });
+    label.append("b").text("Volume:");
 
     volumeDivs.append("input")
         .classed("control-input", true)
@@ -603,8 +601,6 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
                         redrawLinkLabels(); // update diagram
 
                         console.log(result);
-                        console.log(res[0].length )
-                        console.log(new_volumes)
                         //placeWellsRectInner(result, parents[1], protocol_string, row, col, d, operation_index, placementFunc);
                     },
                     error: function (result, textStatus) {
@@ -1010,7 +1006,7 @@ function drawSelectPanel(selected_node, links, restart, form, deleteNode, serial
     form.append("h2").style().text("Select");
 
     // Set container
-    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
+    addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram);
 
     // Form to set number of duplicates
     var duplicatesDiv = form.append("div").append("div")
@@ -1048,11 +1044,10 @@ function drawSelectPanel(selected_node, links, restart, form, deleteNode, serial
 function drawOperationPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Operation");
 
-    var containerInput = addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram)
+    var containerInput = addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram);
 
     // If incident edge has 'addToThis' true, ensure container_name for this is consistent with this
     // and disable field to prevent it being changed
-    var container = false;
     for (var i = 0; i < links.length; i++) {
         if (links[i].target.id == selected_node.id && links[i].data.addToThis) {
             selected_node.data.container_name = links[i].source.data.container_name;

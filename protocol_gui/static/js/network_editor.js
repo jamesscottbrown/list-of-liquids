@@ -14,10 +14,10 @@ function network_editor() {
         .attr('width', width)
         .attr('height', height);
 
-    svg.on("dragover", function (d) {
+    svg.on("dragover", function () {
         d3.event.preventDefault();
     })
-        .on("drop", function (d) {
+        .on("drop", function () {
             var data = d3.event.dataTransfer.getData("custom-data");
 
             nodes.push({
@@ -422,7 +422,7 @@ function network_editor() {
         }
 
         // context-menu
-        path.on("contextmenu", d3.contextMenu(function (d) {
+        path.on("contextmenu", d3.contextMenu(function () {
             return [{
                 title: 'Change parent',
                 action: function (elm, d) {
@@ -719,7 +719,7 @@ function network_editor() {
                 for (var i = 0; i < containers.length; i++) {
                     for (var well in containers[i].contents) {
                         for (var j = 1; j < containers[i].contents[well].length; j++) {
-                            containers[i].contents[well][j].node_id == otherNodes[0].id;
+                            containers[i].contents[well][j].node_id = otherNodes[0].id;
                         }
                     }
                 }
@@ -1198,7 +1198,7 @@ function network_editor() {
             nodes: node_list, links: link_list, groups: group_list,
             containers: containers, pipettes: pipettes, resources: resources
         });
-    }
+    };
 
     function save() {
         var protocol_string = serialiseDiagram();
