@@ -76,6 +76,7 @@ def edit_protocol(protocol_id):
         flash('Protocol updated.', 'success')
         return redirect('protocols/' + str(protocol_id))
     else:
+        form.description.data = current_protocol.description
         flash_errors(form)
     return render_template('protocols/edit_protocol.html', form=form, current_protocol=current_protocol)
 

@@ -1,5 +1,5 @@
 from flask_wtf import Form
-from wtforms import StringField, IntegerField, BooleanField
+from wtforms import StringField, TextAreaField, IntegerField, BooleanField
 from wtforms.validators import DataRequired, EqualTo, Length
 
 from .models import Protocol
@@ -9,7 +9,7 @@ class ProtocolForm(Form):
     """Form to create new protocol."""
 
     name = StringField('Name', validators=[DataRequired(), Length(min=3, max=25)])
-    description = StringField('Description', validators=[])
+    description = TextAreaField('Description', validators=[])
     public = BooleanField('Public')
 
     def __init__(self, *args, **kwargs):
