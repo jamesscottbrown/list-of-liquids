@@ -5,7 +5,7 @@ class Converter:
     def convert(self, protocol, protocol_name):
         protocol_str = self.get_header(protocol, protocol_name)
 
-        # do a topological sort on the operations graph; then convert each operation to a stamp or pipette
+        # do a topological sort on the operations graph, and process nodes in a consistent order
         operation_nodes = filter(lambda x: x["type"] in ["zip", "cross", "process", "pool", "aliquot", "select"],
                                  protocol["nodes"])
         processed_nodes = filter(lambda x: x["type"] == "resource", protocol["nodes"])
@@ -91,10 +91,8 @@ class Converter:
 
         return locations
 
-    def process_node(self, node, protocol):
 
-        num_duplicates = int(node["data"]["num_duplicates"])
-
+    def get_parent_nodes(self, node, protocol):
         parent_nodes = []
         parent_nodes.extend(filter(lambda x: x["id"] == node["parentIds"][0], protocol["nodes"]))
         if len(node["parentIds"]) > 1:
@@ -113,7 +111,13 @@ class Converter:
 
                 parent_nodes[i]["data"]["container_name"] = resource["data"]["container_name"]
 
-        # skip operation if from somewhere to same place
+        return parent_nodes
+
+    def process_node(self, node, protocol):
+
+        num_duplicates = int(node["data"]["num_duplicates"])
+        parent_nodes = self.get_parent_nodes(node, protocol)
+
         link_one_data = filter(lambda x: x["source_id"] == node["parentIds"][0] and x["target_id"] == node["id"],
                                protocol["links"])[0]["data"]
         volume_one = link_one_data["volumes"][0]
@@ -121,7 +125,7 @@ class Converter:
         pipette_name_one = self.sanitise_name(link_one_data["pipette_name"])
         locations_one = self.get_locations(protocol, parent_nodes[0])
 
-        if len(node["parentIds"]) > 1:
+        if len(parent_nodes) > 1:
             link_two_data = filter(lambda x: x["source_id"] == node["parentIds"][1] and x["target_id"] == node["id"],
                                    protocol["links"])[0]["data"]
             volume_two = link_two_data["volumes"][0]
