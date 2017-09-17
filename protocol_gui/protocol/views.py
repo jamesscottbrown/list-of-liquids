@@ -98,6 +98,23 @@ def delete_protocol(protocol_id):
     return render_template('protocols/delete_protocol.html', current_protocol=current_protocol)
 
 
+@blueprint.route('/<int:protocol_id>/copy', methods=['GET', 'POST'])
+@login_required
+def copy_protocol(protocol_id):
+    """Copy a protocol."""
+    current_protocol = Protocol.query.filter_by(id=protocol_id).first()
+
+    if current_protocol.user != current_user and not current_protocol.public:
+        flash('Not your protocol!', 'danger')
+        return redirect(url_for('protocol.protocol', protocol_id=protocol_id))
+
+    new_protocol = Protocol.create(name=current_protocol.name, description=current_protocol.description,
+                                   user_id=current_user.id, public=current_protocol.public,
+                                   protocol=current_protocol.protocol)
+
+    flash('New protocol created.', 'success')
+    return redirect(url_for('protocol.protocol', protocol_id=new_protocol.id))
+
 @blueprint.route('/add', methods=['GET', 'POST'])
 @login_required
 def new_protocol():

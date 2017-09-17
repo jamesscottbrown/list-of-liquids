@@ -187,9 +187,16 @@
 
 
     <h1>{{ protocol.name }}
-        <small>(<a href="/protocols/{{ protocol.id }}/edit"><i class="fa fa-pencil"></i>Edit</a> or
+
+        {% if protocol.user == current_user %}
+        <small>(<a href="/protocols/{{ protocol.id }}/edit"><i class="fa fa-pencil"></i>Edit</a>,
+            <a href="/protocols/{{ protocol.id }}/copy"><i class="fa fa-clipboard"></i>Copy</a>, or
             <a href="/protocols/{{ protocol.id }}/delete"><i class="fa fa-trash-o"></i>Delete</a>)
         </small>
+        {% else %}
+            <small>(<a href="/protocols/{{ protocol.id }}/copy"><i class="fa fa-clipboard"></i>Copy</a>)</small>
+        {% endif %}
+
     </h1>
 
     <blockquote>{{ protocol.description }}</blockquote>
