@@ -203,6 +203,14 @@ class Converter:
             return protocol_str
 
         elif node["type"] == "select" or node["type"] == "aliquot":
+
+            # extend locations to match length of volumes (if we are crossing a single well with a list of volumes)
+            if len(locations_one) == 1:
+                locations_one = locations_one * len(volumes_one)
+
+            if len(parent_nodes) > 1 and len(locations_two) == 1:
+                locations_two = locations_two * len(volumes_two)
+
             well_index = 0
             source_two = False
             for repeat_number in range(0, num_duplicates):
