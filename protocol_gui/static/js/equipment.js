@@ -44,6 +44,13 @@ function update_container_list() {
                     }
                 }
 
+                // adjust any resources to match the new container name
+                for (var j = 0; j < resources.length; j++) {
+                    if (resources[j].data.container_name == oldName) {
+                        resources[j].data.container_name = newName;
+                    }
+                }
+
                 containers[i] = {
                     name: newName,
                     type: d3.select("#containerType").node().value,
