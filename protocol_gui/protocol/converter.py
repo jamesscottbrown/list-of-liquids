@@ -23,13 +23,8 @@ class Converter:
 
                     # if edge is 'addToThis', we must do any other operations involving the parent first
                     # (since this operation will alter it)
-                    node_id = node["id"]
-                    links_from_parent_to_other_nodes = filter(lambda x: x["source_id"] == pid and not x["target_id"] == node_id, protocol["links"])
-                    links_from_parent_to_node = filter(lambda x: x["source_id"] == pid and x["target_id"] == node_id, protocol["links"])[0]
-                    added_to_this_node = links_from_parent_to_node["data"]["addToThis"]
-                    for link in links_from_parent_to_other_nodes:
-                        if added_to_this_node and (link["target_id"] not in map(lambda x: x["id"], processed_nodes)):
-                            can_process_node = False
+                    if not self.parent_can_be_changed(node, pid, protocol, processed_nodes):
+                        can_process_node = False
 
                 if can_process_node:
                     protocol_str += self.process_node(node, protocol)
@@ -38,6 +33,33 @@ class Converter:
 
         protocol_str += self.get_footer(protocol_name)
         return protocol_str
+
+    @staticmethod
+    def parent_can_be_changed(node, parent_node_id, protocol, processed_nodes):
+        node_id = node["id"]
+
+        # if link is not 'addToThis' we do not need to consider further, as parent will not be changed
+        for link in protocol["links"]:
+            if link["source_id"] == parent_node_id and link["target_id"] == node_id and not link["data"]["addToThis"]:
+                return True
+
+        # construct list containing id of all nodes equivalent to parent
+        if node["type"] == "resource":
+            parent = filter(lambda x: x["id"] == parent_node_id, protocol["nodes"])[0]
+            nodes_equivalent_to_parent = filter(
+                lambda x: x["type"] == "resource" and x["data"]["resource"] == parent["data"]["resource"], protocol["nodes"])
+        else:
+            nodes_equivalent_to_parent = [parent_node_id]
+
+        # if these are the inputs to any un-processed nodes (other than the node being considered), we can't change the parent yet
+        for link in protocol["links"]:
+            if link["source_id"] not in nodes_equivalent_to_parent or link["target_id"] == node_id:
+                continue
+
+            if link["target_id"] not in map(lambda x: x["id"], processed_nodes):
+                return False
+
+        return True
 
     def get_footer(self, protocol_name):
         return ""
