@@ -317,9 +317,18 @@ function drawResourcePanel(selected_node, links, restart, form, deleteNode, seri
                 var node = nodes[i];
                 if (node.type == "resource" && node.label == old_name){
                     node.label = new_name;
+                    node.data.resource = new_name;
                 }
             }
             resource_node.label = new_name;
+
+            // rename corresponding resource object
+            for (var i=0; i<resources.length; i++){
+                if (resources[i].label == old_name){
+                    resources[i].label == new_name;
+                }
+            }
+
             restart();
         });
 
