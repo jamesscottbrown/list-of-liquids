@@ -1029,9 +1029,16 @@ function network_editor() {
 
         var operator = "cross";
 
+        var container;
+        if (mousedown_node.type == "resource"){
+            var resource = resources.filter(function(r){return r.label == mousedown_node.data.resource})[0];
+            container = resource.data.container_name;
+        } else {
+            container = mousedown_node.data.container;
+        }
         var i = nodes.push({
             id: ++lastNodeId, type: operator, x: width * Math.random(), y: height / 2, label: "cross",
-            parents: [mousedown_node, mouseup_node], data: {container_name: '', num_duplicates: 1}
+            parents: [mousedown_node, mouseup_node], data: {container_name: container, num_duplicates: 1}
         });
         i--;
 
