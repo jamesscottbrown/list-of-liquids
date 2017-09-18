@@ -1,0 +1,10 @@
+protocol_gui:
+  ports:
+    - "4003:5000"
+  restart: always
+  environment:
+    FLASK_DEBUG: 0
+    WEDDING_SECRET: 'REPLACE_ME'
+  working_dir: /code/protocol_gui
+  command: gunicorn -w 4 -b 0.0.0.0:5000 --pythonpath '/code,/code/protocol_gui' 'app:create_app()'
+
