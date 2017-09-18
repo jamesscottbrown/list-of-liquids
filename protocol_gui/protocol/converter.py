@@ -255,6 +255,8 @@ class Converter:
             # all volumes must be equal for a multi-well transfer
             if len(set(volumes.values())) > 1:
                 is_valid = False
+            else:
+                volume = volumes.values()[0]
 
             for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
                 source_well = source[column + result_row]
@@ -268,7 +270,7 @@ class Converter:
                     break
 
             if is_valid and not (container_target == container and source_row == result_row) and not link_data["addToThis"]:
-                protocol_str += self.get_transfer_string(pipette_name, volumes[0], container, source_row,
+                protocol_str += self.get_transfer_string(pipette_name, volume, container, source_row,
                                                          container_target, result_row, self.get_options(link_data))
 
                 transfers_made.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
