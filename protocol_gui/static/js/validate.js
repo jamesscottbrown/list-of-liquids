@@ -14,7 +14,7 @@ function validateOpenTrons() {
         url: window.location.href + "checkWellsAssigned",
         dataType: 'json',
         async: false, // this is not an asynchronous request
-        data: JSON.stringify(protocol_string: protocol_string),
+        data: JSON.stringify({protocol_string: protocol_string}),
         beforeSend: function (xhr) {
             xhr.setRequestHeader("X-CSRFToken", csrf_token);
         },
