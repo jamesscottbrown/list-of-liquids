@@ -1031,7 +1031,7 @@ function network_editor() {
             var resource = resources.filter(function(r){return r.label == node.data.resource})[0];
             container = resource.data.container_name;
         } else {
-            container = node.data.container;
+            container = node.data.container_name;
         }
         return container;
     }
