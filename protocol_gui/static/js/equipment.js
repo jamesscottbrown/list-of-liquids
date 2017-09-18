@@ -72,15 +72,15 @@ function update_container_list() {
                 updateDescriptionPanel();
             });
 
-            d3.select("#DeleteContainerButton").on("click", function (d) {
+            d3.select("#DeleteContainerButton").on("click", function () {
 
                 // ensure container is not listed as tip rack or trash container for any pipettes after being deleted
                 for (var i=0; i<pipettes.length; i++){
-                    if (pipettes[i].data.tipracks == d.name){
-                        pipettes[i].data.tipracks = "";
+                    if (pipettes[i].tipracks == d.name){
+                        pipettes[i].tipracks = "";
                     }
-                    if (pipettes[i].data.trash == d.name){
-                        pipettes[i].data.trash = "";
+                    if (pipettes[i].trash == d.name){
+                        pipettes[i].trash = "";
                     }
                 }
 
