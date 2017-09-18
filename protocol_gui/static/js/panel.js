@@ -1059,7 +1059,7 @@ function drawOperationPanel(selected_node, links, restart, form, deleteNode, ser
     // and disable field to prevent it being changed
     for (var i = 0; i < links.length; i++) {
         if (links[i].target.id == selected_node.id && links[i].data.addToThis) {
-            selected_node.data.container_name = links[i].source.data.container_name;
+            selected_node.data.container_name = networkEditor.getNodeContainer(links[i].source);
             containerInput.node().value = selected_node.data.container_name;
             containerInput.attr("disabled", "");
             break;

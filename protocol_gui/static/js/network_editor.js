@@ -1025,20 +1025,25 @@ function network_editor() {
         return menu;
     }
 
+    function getNodeContainer(node){
+       var container;
+        if (node.type == "resource"){
+            var resource = resources.filter(function(r){return r.label == node.data.resource})[0];
+            container = resource.data.container_name;
+        } else {
+            container = node.data.container;
+        }
+        return container;
+    }
+
     function addEdge() {
 
         var operator = "cross";
 
-        var container;
-        if (mousedown_node.type == "resource"){
-            var resource = resources.filter(function(r){return r.label == mousedown_node.data.resource})[0];
-            container = resource.data.container_name;
-        } else {
-            container = mousedown_node.data.container;
-        }
         var i = nodes.push({
             id: ++lastNodeId, type: operator, x: width * Math.random(), y: height / 2, label: "cross",
-            parents: [mousedown_node, mouseup_node], data: {container_name: container, num_duplicates: 1}
+            parents: [mousedown_node, mouseup_node],
+            data: {container_name: getNodeContainer(mousedown_node), num_duplicates: 1}
         });
         i--;
 
@@ -1316,7 +1321,8 @@ function network_editor() {
 
     return {
         addWellNode: addWellNode, clearEverything: clearEverything, save: save,
-        startRepeat: startRepeat, deleteNode: deleteNode, restart: restart
+        startRepeat: startRepeat, deleteNode: deleteNode, restart: restart,
+        getNodeContainer: getNodeContainer
     };
 }
 
