@@ -172,10 +172,14 @@ class Converter:
 
             if len(locations_one) == 1:
                 locations_one = locations_one * len(locations_two)
-                volumes_one = volumes_one * len(locations_two)
 
             if len(locations_two) == 1:
                 locations_two = locations_two * len(locations_one)
+
+            if len(volumes_one) == 1:
+                volumes_one = volumes_one * len(locations_two)
+
+            if len(volumes_two) == 1:
                 volumes_two = volumes_two * len(locations_one)
 
             well_index = 0
