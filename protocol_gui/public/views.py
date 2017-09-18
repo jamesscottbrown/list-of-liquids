@@ -7,6 +7,7 @@ from protocol_gui.extensions import login_manager
 from protocol_gui.public.forms import LoginForm
 from protocol_gui.user.forms import RegisterForm
 from protocol_gui.user.models import User
+from protocol_gui.protocol.models import Protocol
 from protocol_gui.utils import flash_errors
 
 blueprint = Blueprint('public', __name__, static_folder='../static')
@@ -31,7 +32,8 @@ def home():
             return redirect(redirect_url)
         else:
             flash_errors(form)
-    return render_template('public/home.html', form=form)
+
+    return render_template('public/home.html', form=form, other_protocols=Protocol.query.all())
 
 
 @blueprint.route('/logout/')

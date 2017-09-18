@@ -26,5 +26,14 @@
         <div><a href="/protocols/add"><i class="fa fa-plus" aria-hidden="true"></i>Add a new protocol</a></div>
     {% endif %}
 
+    <h2>Public protocols from other users</h2>
+    <div>
+        {% for protocol in other_protocols %}
+            {% if protocol.public and protocol.user != current_user %}
+                <li><a href="/protocols/{{ protocol.id }}">{{ protocol.name }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </div>
+
 {% endblock %}
 
