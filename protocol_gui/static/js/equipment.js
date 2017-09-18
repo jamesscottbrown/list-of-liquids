@@ -201,7 +201,7 @@ function update_pipette_list() {
         .on("click", function (d) {
 
             for (var j=0; j<links.length; j++){
-                if (!links[j].data.pipette_name){
+                if (!links[j].data.pipette_name && !links[j].data.addToThis){
                     links[j].data.pipette_name = d.name;
                 }
             }
