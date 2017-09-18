@@ -532,12 +532,12 @@ function placeWellsRect(placementFunc, row, col, d, node_id) {
 
     var protocol_string = serialiseDiagram();
     $.ajax({
-        type: "GET",
+        type: "POST",
         contentType: "application/json; charset=utf-8",
         url: window.location.href + "contents",
         dataType: 'json',
         async: true,
-        data: {protocol_string: protocol_string, selected_node: parents[0].id},
+        data: JSON.stringify({protocol_string: protocol_string, selected_node: parents[0].id}),
         beforeSend: function (xhr) {
             xhr.setRequestHeader("X-CSRFToken", csrf_token);
         },
@@ -554,12 +554,12 @@ function placeWellsRect(placementFunc, row, col, d, node_id) {
 
 function placeWellsRectInner(contents1, queryNode, protocol_string, row, col, d, node_id, placementFunc) {
     $.ajax({
-        type: "GET",
+        type: "POST",
         contentType: "application/json; charset=utf-8",
         url: window.location.href + "contents",
         dataType: 'json',
         async: true,
-        data: {protocol_string: protocol_string, selected_node: queryNode.id},
+        data: JSON.stringify({protocol_string: protocol_string, selected_node: queryNode.id}),
         beforeSend: function (xhr) {
             xhr.setRequestHeader("X-CSRFToken", csrf_token);
         },

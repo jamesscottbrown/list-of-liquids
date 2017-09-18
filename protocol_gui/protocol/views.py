@@ -228,7 +228,7 @@ def english_protocol(protocol_id):
     return resp
 
 
-@blueprint.route('/<int:protocol_id>/contents', methods=['GET'])
+@blueprint.route('/<int:protocol_id>/contents', methods=['GET', 'POST'])
 def get_contents(protocol_id):
     """Determine what a given node on a protocol diagram represents."""
 
@@ -241,8 +241,13 @@ def get_contents(protocol_id):
         flash('Not your project!', 'danger')
         return redirect('.')
 
-    node_id = int(request.args.get("selected_node"))
-    protocol_obj = json.loads(request.args.get("protocol_string"))
+    if request.method == 'GET':
+        node_id = int(request.args.get("selected_node"))
+        protocol_obj = json.loads(request.args.get("protocol_string"))
+    else:
+        data = json.loads(request.data)
+        node_id = int(data["selected_node"])
+        protocol_obj = json.loads(data["protocol_string"])
 
     result = process_node(protocol_obj, node_id)
     result = collapse_contents(result)
@@ -250,7 +255,7 @@ def get_contents(protocol_id):
     return json.dumps(map(lambda x: map(lambda y: '{0:.2f}'.format(float(y.volume)) + " of " + y.resource, x), result))
 
 
-@blueprint.route('/<int:protocol_id>/checkWellsAssigned', methods=['GET'])
+@blueprint.route('/<int:protocol_id>/checkWellsAssigned', methods=['GET', 'POST'])
 def check_assigned(protocol_id):
     """Check whether all aliquots in a protocol with a container assigned have been assigned to a well."""
 
@@ -263,7 +268,11 @@ def check_assigned(protocol_id):
         flash('Not your project!', 'danger')
         return redirect('.')
 
-    protocol_obj = json.loads(request.args.get("protocol_string"))
+    if request.method == 'GET':
+        protocol_obj = json.loads(request.args.get("protocol_string"))
+    else:
+        data = json.loads(request.data)
+        protocol_obj = json.loads(data["protocol_string"])
 
     unassigned_operations = []
     unassigned_resources = []

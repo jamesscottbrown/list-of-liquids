@@ -9,12 +9,12 @@ function validateOpenTrons() {
     var unassigned_wells;
     var protocol_string = serialiseDiagram();
     $.ajax({
-        type: "GET",
+        type: "POST",
         contentType: "application/json; charset=utf-8",
         url: window.location.href + "checkWellsAssigned",
         dataType: 'json',
         async: false, // this is not an asynchronous request
-        data: {protocol_string: protocol_string},
+        data: JSON.stringify(protocol_string: protocol_string),
         beforeSend: function (xhr) {
             xhr.setRequestHeader("X-CSRFToken", csrf_token);
         },

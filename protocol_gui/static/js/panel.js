@@ -40,12 +40,12 @@ function getContents(serialiseDiagram, queryNode, div, drawFunction) {
     }
 
     $.ajax({
-        type: "GET",
+        type: "POST",
         contentType: "application/json; charset=utf-8",
         url: window.location.href + "contents",
         dataType: 'json',
         async: true,
-        data: {protocol_string: protocol_string, selected_node: queryNode.id},
+        data: JSON.stringify({protocol_string: protocol_string, selected_node: queryNode.id}),
         beforeSend: function (xhr) {
             xhr.setRequestHeader("X-CSRFToken", csrf_token);
         },
@@ -585,12 +585,12 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
             var protocol_string = serialiseDiagram();
                 $.ajax({
-                    type: "GET",
+                    type: "POST",
                     contentType: "application/json; charset=utf-8",
                     url: window.location.href + "contents",
                     dataType: 'json',
                     async: true,
-                    data: {protocol_string: protocol_string, selected_node: selected_link.source.id},
+                    data: JSON.stringify({protocol_string: protocol_string, selected_node: selected_link.source.id}),
                     beforeSend: function (xhr) {
                         xhr.setRequestHeader("X-CSRFToken", csrf_token);
                     },
