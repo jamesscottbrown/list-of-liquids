@@ -51,6 +51,16 @@ function update_container_list() {
                     }
                 }
 
+                // adjust any pipettes
+                for (var j = 0; j < pipettes.length; j++) {
+                    if (pipettes[j].tripracks == oldName) {
+                        pipettes[j].tripracks = newName;
+                    }
+                    if (pipettes[j].trash == oldName) {
+                        pipettes[j].trash = newName;
+                    }
+                }
+
                 containers[i] = {
                     name: newName,
                     type: d3.select("#containerType").node().value,
