@@ -470,28 +470,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
         .attr("name", "container")
         .attr("id", "container")
         .on("change", function () {
-
-            // ensure that no more than one link incident to the same node has addToThis true
-            if (this.value == "Yes") {
-                links.filter(function (x) {
-                        return x.target.id == selected_link.target.id
-                    })
-                    .map(function (x) {
-                        x.data.addToThis = false
-                    });
-            }
-
-            // clear location of aliquots produced by this operation
-            clearOperation(selected_link.target.id);
-
-            // if addToThis is now true, set location of aliquots produced by this operation to same as parents
-            if (this.value == "Yes") {
-                moveDescendents(selected_link.source.id, selected_link.target.id);
-            }
-
-            selected_link.target.data.container_name = selected_link.source.data.container_name;
-
-            selected_link.data.addToThis = (this.value == "Yes");
+            toggleLinkAddtothisStatus(selected_link, this.value == "Yes");
 
             // toggle disabled-ness of volume and number of duplicates controls
             volumeDivs.selectAll('input').attr('disabled', selected_link.data.addToThis ? true : null);

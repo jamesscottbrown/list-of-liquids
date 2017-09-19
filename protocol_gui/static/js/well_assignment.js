@@ -639,11 +639,9 @@ function clearWell(node_id, aliquot_index) {
     }
 }
 
-function setWellContents(container, well_name, node_id, aliquot_index) {
-
-    // Do breadth-first transversal of network to finds all nodes that share locations due to 'addToThis'
-    var nodes_to_examine = [parseInt(node_id)];
+function findColocatedNodes(node_id, downwards_only){
     var indexes = [];
+    var nodes_to_examine = [parseInt(node_id)];
 
     while (nodes_to_examine.length > 0){
 
@@ -660,7 +658,7 @@ function setWellContents(container, well_name, node_id, aliquot_index) {
                     nodes_to_examine.push(target_id);
                 }
 
-                if (target_id == id && nodes_to_examine.indexOf(source_id) == -1 && indexes.indexOf(source_id) == -1) {
+                if (!downwards_only && target_id == id && nodes_to_examine.indexOf(source_id) == -1 && indexes.indexOf(source_id) == -1) {
                     nodes_to_examine.push(source_id);
                 }
             }
@@ -668,7 +666,13 @@ function setWellContents(container, well_name, node_id, aliquot_index) {
 
         indexes.push( nodes_to_examine.shift() )
     }
+    return indexes;
+}
 
+function setWellContents(container, well_name, node_id, aliquot_index) {
+
+    // Do breadth-first transversal of network to finds all nodes that share locations due to 'addToThis'
+    var indexes = findColocatedNodes(node_id);
 
     container.contents[well_name] = indexes.map(function (node_id) {
         return {node_id: node_id, aliquot_index: aliquot_index}
@@ -691,21 +695,76 @@ function clearOperation(node_id) {
     }
 }
 
-function moveDescendents(source_node_id, target_node_id) {
-    // Set location of all aliquots produced by an operation to the locations occupied by another operation
-    for (var i = 0; i < containers.length; i++) {
-        var container = containers[i];
-        for (var well in container.contents) {
-            var contents = container.contents[well];
+    function toggleLinkAddtothisStatus(selected_link, addToThis){
 
-            for (var j = 0; j < contents.length; j++) {
-                if (contents[j].node_id == source_node_id) {
-                    contents.push({node_id: target_node_id, aliquot_index: contents[j].aliquot_index})
+        if (addToThis) {
+
+            // ensure that no more than one link incident to the same node has addToThis true
+            links.filter(function (x) {
+                    return x.target.id == selected_link.target.id
+                })
+                .map(function (x) {
+                    x.data.addToThis = false
+                });
+
+            selected_link.data.addToThis = true;
+
+            // Also need tp ensure that target node, and any of it's descendents linked by a chain of addToThis links
+            // have same container, and consistent well assignment with source node of this link
+
+            var parent_node = nodes.filter(function (d) {
+                return d.id == selected_link.source.id;
+            })[0];
+            var parentContainer = containers.filter(function (d) {
+                return d.name == parent_node.data.container_name
+            })[0];
+
+
+            // find location of each aliquot for parent nodes
+            var assigned_wells = [];
+            for (var well in parentContainer.contents) {
+                var well_contents = parentContainer.contents[well];
+                for (var i = 0; i < well_contents.length; i++) {
+                    if (well_contents[i].node_id == parent_node.id) {
+                        assigned_wells[well_contents[i].aliquot_index] = well;
+                    }
                 }
+            }
+
+            // assign all aliquots of descendent nodes to same location
+            var coLocatedNodeIds = findColocatedNodes(selected_link.target.id, true);
+            coLocatedNodeIds.push(selected_link.target.id);
+
+            for (var i = 0; i < coLocatedNodeIds.length; i++) {
+                // change container
+                var node = nodes.filter(function (d) {
+                    return d.id == coLocatedNodeIds[i];
+                })[0];
+                node.data.container_name = parent_node.data.container_name;// getNodeContainer(node);
+
+                // clear well-assignments
+                clearOperation(coLocatedNodeIds[i]);
+
+                // re-set well-assignments
+                for (var aliquot_index = 0; aliquot_index < assigned_wells.length; aliquot_index++) {
+                    var well_name = assigned_wells[aliquot_index];
+                    if (well_name) {
+                        parentContainer.contents[well_name].push({node_id: node.id, aliquot_index: aliquot_index})
+                    }
+                }
+            }
+
+        } else {
+
+            selected_link.data.addToThis = false;
+
+            // clear the well assignment of all downstream nodes, but leave containers set
+            var coLocatedNodeIds = findColocatedNodes(selected_link.target.id, true);
+            for (var i = 0; i < coLocatedNodeIds.length; i++) {
+                clearOperation(coLocatedNodeIds[i]);
             }
         }
     }
-}
 
 function resetAppearances() {
     // adjusts appearances of wells/aliquots to show whether they are full/have been assigned positions
@@ -843,3 +902,4 @@ function drawWellRect(contents, name) {
             return getColors(d.node_id);
         });
 }
+
