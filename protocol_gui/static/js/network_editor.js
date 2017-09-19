@@ -703,11 +703,12 @@ function network_editor() {
             }
         }
 
-        // if node represents a resource, then adjust container contents to refer to the next node
+        // if node represents a resource that still exists then adjust container contents to refer to the next node
         // corresponding to the same resource; if there is no such node, then do not delete the node
         // if it has, then it should not be deleted
         var allowDeletion = true;
-        if (node.type == "resource") {
+        var resourceStillExists = resources.filter(function(r){return r.label == node.data.resource}).length > 0;
+        if (node.type == "resource" && resourceStillExists) {
 
             var otherNodes = nodes.filter(function (d) {
                 return (d.data.resource == node.data.resource) && (d.id != node.id);
@@ -898,12 +899,14 @@ function network_editor() {
             .style('fill', function (d) {
 
                 var resource = resources.filter(function(r){return r.label == d.data.resource})[0];
+                if (resource) {
+                    // resource may be undefined if we are mid-way through deleting the nodes corresponding to a resource
+                    var container_index = containers.map(function (x) {
+                        return x.name;
+                    }).indexOf(resource.data.container_name);
 
-                var container_index = containers.map(function (x) {
-                    return x.name;
-                }).indexOf(resource.data.container_name);
-
-                return (container_index == -1) ? "#000" : color(container_index);
+                    return (container_index == -1) ? "#000" : color(container_index);
+                }
             });
 
         rectLabels.style('fill', function (d) {

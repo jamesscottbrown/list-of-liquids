@@ -255,15 +255,15 @@ function update_resource_list() {
 
     resource_nodes.append("button")
         .on("click", function (d) {
+            // Delete resource
+            resources.splice(resources.indexOf(d), 1);
+            update_resource_list();
+
             // Delete nodes from diagram
             var nodesToDelete = nodes.filter(function(n){return n.type == "resource" && n.label == d.label});
             for (var i=0; i<nodesToDelete.length; i++){
                 networkEditor.deleteNode(nodesToDelete[i]);
             }
-
-            // Delete resource
-            resources.splice(resources.indexOf(d));
-            update_resource_list();
         })
         .text("Delete ").append("i").classed("fa", true).classed("fa-trash-o", true);
 
