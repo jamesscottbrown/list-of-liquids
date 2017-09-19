@@ -555,7 +555,7 @@ function network_editor() {
                 }
 
                 // add link to graph (update if exists)
-                addEdge();
+                addEdge(shiftDown);
                 restart();
             })
             .on('contextmenu', d3.contextMenu([{
@@ -853,7 +853,7 @@ function network_editor() {
                 }
 
                 // add link to graph (update if exists)
-                addEdge();
+                addEdge(shiftDown);
                 restart();
             })
 
@@ -1039,21 +1039,27 @@ function network_editor() {
         return container;
     }
 
-    function addEdge() {
+    function addEdge(addToThis) {
 
+        var container;
+        if (addToThis){
+            container = getNodeContainer(mousedown_node);
+        } else {
+            container = '';
+        }
         var operator = "cross";
 
         var i = nodes.push({
             id: ++lastNodeId, type: operator, x: width * Math.random(), y: height / 2, label: "cross",
             parents: [mousedown_node, mouseup_node],
-            data: {container_name: getNodeContainer(mousedown_node), num_duplicates: 1}
+            data: {container_name: container, num_duplicates: 1}
         });
         i--;
 
         links.push({
             source: mousedown_node,
             target: nodes[i],
-            data: getDefaultLinkData(true)
+            data: getDefaultLinkData(addToThis)
         });
         links.push({
             source: mouseup_node,
@@ -1314,6 +1320,21 @@ function network_editor() {
             }
             ])
         );
+
+    var shiftDown = false;
+    d3.select("body")
+        .on("keydown", function () {
+            if (d3.event.key == "Shift") {
+                shiftDown = true;
+                console.log("ON")
+            }
+        })
+        .on("keyup", function () {
+            if (d3.event.key == "Shift") {
+                shiftDown = false;
+                console.log("OFF")
+            }
+        });
 
     restart();
 
