@@ -87,6 +87,9 @@ function update_container_list() {
                 containers.splice(containers.indexOf(d), 1);
                 update_container_list();
                 $('#containerModal').modal('toggle');
+
+                // immediately re-color nodes that now have no container set
+                networkEditor.restart();
             })
 
         })
@@ -213,6 +216,9 @@ function update_pipette_list() {
         pipettes.splice(pipettes.indexOf(d), 1);
         update_pipette_list();
         $('#pipetteModal').modal('toggle');
+
+        // immediately re-color edges that now have no pipette associated
+        networkEditor.restart();
     });
 
     pippette_nodes.selectAll("b").style('color', function (d) {
