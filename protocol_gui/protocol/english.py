@@ -58,3 +58,9 @@ class English(Converter):
     def get_distribute_string(self, pipette_name, volume, container, source, container_target, targets_str, options_str):
         return "* Distribute %s from well %s of %s to %s of %s using %s \n" % \
                (volume, source, container, targets_str, container_target, pipette_name)
+
+    def get_consolidate_string(self, pipette_name, volume, container_one, source_str, container_target, target, options_str):
+        return "* Consolidate/pool %s from %s of %s to %s of %s\n" % (volume, source_str, container_one, target, container_target)
+
+    def get_process_string(self, command):
+        return "* Perform operation ``%s``\n" % command

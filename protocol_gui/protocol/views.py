@@ -163,6 +163,9 @@ def opentrons_protocol(protocol_id):
         flash('Not your project!', 'danger')
         return redirect('.')
 
+    if not current_protocol.protocol:
+        return ""
+
     protocol_object = json.loads(current_protocol.protocol)
 
     converter = OpenTrons()
@@ -192,6 +195,9 @@ def autoprotocol_protocol(protocol_id):
         flash('Not your project!', 'danger')
         return redirect('.')
 
+    if not current_protocol.protocol:
+        return ""
+
     protocol_object = json.loads(current_protocol.protocol)
 
     converter = AutoProtocol()
@@ -218,6 +224,9 @@ def english_protocol(protocol_id):
     if current_protocol.user != current_user and not current_protocol.public:
         flash('Not your project!', 'danger')
         return redirect('.')
+
+    if not current_protocol.protocol:
+        return ""
 
     protocol_object = json.loads(current_protocol.protocol)
 
