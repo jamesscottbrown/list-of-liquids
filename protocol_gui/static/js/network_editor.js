@@ -1095,6 +1095,22 @@ function network_editor() {
 
         containers = [];
         pipettes = [];
+        resources = [];
+
+        lastNodeId = 0;
+        d3.select("#info").select("form").remove();
+        force.nodes(nodes).links(links).groups(groups);
+        restart();
+    }
+
+    function clearDiagram(){
+        nodes = [];
+        links = [];
+        groups = [];
+
+        for (var i=0; i<containers.length; i++){
+            containers[i].contents = [];
+        }
 
         lastNodeId = 0;
         d3.select("#info").select("form").remove();
@@ -1346,7 +1362,7 @@ function network_editor() {
     return {
         addWellNode: addWellNode, clearEverything: clearEverything, save: save,
         startRepeat: startRepeat, deleteNode: deleteNode, restart: restart,
-        getNodeContainer: getNodeContainer
+        getNodeContainer: getNodeContainer, clearDiagram: clearDiagram
     };
 }
 
