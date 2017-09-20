@@ -1121,7 +1121,12 @@ function network_editor() {
     function addWellNode() {
 
         var label = prompt('Name:').trim();
-        if (!label){ return; }
+
+        // check name is empty and unique
+        var resourceNames = resources.map(function(r){ return r.label});
+        if (!label || resourceNames.indexOf(label) != -1 ){
+            return;
+        }
 
         nodes.push({
             id: ++lastNodeId, type: "resource", x: width * Math.random(), y: height / 2, label: label,
