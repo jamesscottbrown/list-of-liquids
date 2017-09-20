@@ -1059,12 +1059,12 @@ function network_editor() {
         links.push({
             source: mousedown_node,
             target: nodes[i],
-            data: getDefaultLinkData(addToThis)
+            data: getDefaultLinkData(false)
         });
         links.push({
             source: mouseup_node,
             target: nodes[i],
-            data: getDefaultLinkData(false)
+            data: getDefaultLinkData(addToThis)
         });
 
         selected_link = null;
