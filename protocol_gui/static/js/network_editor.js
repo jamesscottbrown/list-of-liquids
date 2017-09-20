@@ -378,6 +378,9 @@ function network_editor() {
             .attr('class', 'link')
             .attr("id", function(d,i){return "link-" + i;})
             .on('mousedown', function (d) {
+
+                if (selectingGroup){return;}
+
                 // select link
                 mousedown_link = d;
                 if (mousedown_link === selected_link) selected_link = null;
@@ -1264,13 +1267,15 @@ function network_editor() {
         })
     }
 
-    function startRepeat() {
+    function startCopy() {
         selectingGroup = true;
         selectedNodes = [];
 
-        d3.select("#repeatButton")
-            .text("Done")
-            .on("click", endRepeat);
+        d3.select("#repeatCopy")
+            .text("Copy")
+            .on("click", endCopy);
+
+        d3.select("#cancelCopyButton").style("visibility", "visible");
 
         // Un-select all nodes
         selected_node = false;
@@ -1279,20 +1284,67 @@ function network_editor() {
 
     }
 
-    function endRepeat() {
+    function endCopy() {
         selectingGroup = false;
-        d3.select("#repeatButton")
-            .on("click", startRepeat)
+        d3.select("#repeatCopy")
+            .on("click", startCopy)
             .text("Select nodes for repeat");
 
-        if (selectedNodes) {
-            groups.push({"leaves": selectedNodes, data: {repeats: 2}})
+        d3.select("#cancelCopyButton").style("visibility", "hidden");
+
+        // copy selected nodes
+        var newNode = [];
+        for (var i = 0; i < selectedNodes.length; i++) {
+            var oldNode = nodes.filter(function (n){ return n.id == selectedNodes[i]})[0];
+
+            var index = nodes.push({
+                id: ++lastNodeId,
+                type: oldNode.type,
+                label: oldNode.label,
+                data: JSON.parse(JSON.stringify(oldNode.data)) // create new object, rather than reference to data of copied node
+            });
+
+            newNode[oldNode.id] = nodes[index-1];
+        }
+
+        // copy links to a selected node
+        for (var i = 0; i < links.length; i++){
+            var link = links[i];
+
+            // skip link if target is not selected node
+            if (selectedNodes.indexOf(link.target.id) == -1){
+                continue;
+            }
+
+            var sourceNode = link.source;
+            if (selectedNodes.indexOf(link.source.id) != -1){
+                sourceNode = newNode[link.source.id];
+            }
+
+            links.push({
+                source: sourceNode,
+                target: newNode[link.target.id],
+                data: JSON.parse(JSON.stringify(link.data)) // create new object, rather than reference to data of copied link
+            })
         }
 
         force.nodes(nodes).links(links);
-        force.groups(groups);
         restart();
         force.start();
+    }
+
+    function cancelCopy(){
+        selectingGroup = false;
+        d3.select("#repeatCopy")
+            .on("click", startCopy)
+            .text("Select nodes to copy");
+
+        d3.select("#cancelCopyButton").style("visibility", "hidden");
+
+        // Un-select all nodes
+        selected_node = false;
+        selected_link = false;
+        recolorLabels();
     }
 
 
@@ -1359,14 +1411,17 @@ function network_editor() {
 
     restart();
 
-    d3.select("#repeatButton")
-        .on("click", startRepeat)
-        .text("Select nodes for repeat");
+    d3.select("#repeatCopy")
+        .on("click", startCopy)
+        .text("Select nodes to copy");
+    d3.select("#cancelCopyButton")
+        .on("click", cancelCopy)
+        .text("Cancel copy");
 
 
     return {
         addWellNode: addWellNode, clearEverything: clearEverything, save: save,
-        startRepeat: startRepeat, deleteNode: deleteNode, restart: restart,
+        startCopy: startCopy, deleteNode: deleteNode, restart: restart,
         getNodeContainer: getNodeContainer, clearDiagram: clearDiagram
     };
 }
