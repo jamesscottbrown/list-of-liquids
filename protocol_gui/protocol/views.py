@@ -261,7 +261,7 @@ def get_contents(protocol_id):
     result = process_node(protocol_obj, node_id)
     result = collapse_contents(result)
 
-    return json.dumps(map(lambda x: map(lambda y: '{0:.2f}'.format(float(y.volume)) + " of " + y.resource, x), result))
+    return json.dumps(map(format_aliquot_contents, result))
 
 
 @blueprint.route('/<int:protocol_id>/checkWellsAssigned', methods=['GET', 'POST'])

@@ -163,11 +163,18 @@ def process_node(protocol_obj, node_id):
 def get_constituent_aliquots(protocol_obj, link):
     # Return a list, each element of which is the list of Aliquots corresponding to one incident link
     all_aliquots = []
+    to_subtract = [] # each entry records volume (or list of volumes, one per well, taken from )
 
     inputs = process_node(protocol_obj, link["source_id"])
 
     # If an edge has the addToThis attribute set, ignore whatever is set as the transfer volume
     if link["data"]["addToThis"]:
+
+        # subtract volume of any other transfers
+        other_links_from_parent = filter(lambda l: l["source_id"] == link["source_id"] and l["target_id"] != link["target_id"], protocol_obj["links"])
+        for other_link in other_links_from_parent:
+            to_subtract.append( str(other_link["data"]["volumes"][0]).split(',') )
+
         volume = "all"
     else:
         volume = link["data"]["volumes"][0]
@@ -185,12 +192,21 @@ def get_constituent_aliquots(protocol_obj, link):
         for input in inputs:
             input_volume_tuples.append((input, volume))
 
-    # each input corresponds to a link on the diagram
-    for (input, transfered_volume) in input_volume_tuples:
+    #
+    for i in range(len(to_subtract)):
+        if len(to_subtract[i]) == 1:
+            to_subtract[i] = to_subtract[i] * len(input_volume_tuples)
+
+    for i, (input, transfered_volume) in enumerate(input_volume_tuples):
         total_volume = sum(map(lambda x: float(x.volume), input))  # total volume of mixture of aliquots we are drawing from
 
         if transfered_volume == "all":
             transfered_volume = total_volume
+
+            for v in to_subtract:
+                transfered_volume -= float(v[i])
+
+        transfered_volume = max(transfered_volume, 0)
 
         # Loop over all individual resources included on this link
         aliquot_list = []
@@ -226,3 +242,8 @@ def collapse_contents(result):
         collapsed_result.append(well_collapsed_contents)
 
     return collapsed_result
+
+
+def format_aliquot_contents(contents):
+    x = filter(lambda x: x.volume > 0, contents)
+    return map(lambda aliquot: '{0:.2f}'.format(float(aliquot.volume)) + " of " + aliquot.resource, x)
