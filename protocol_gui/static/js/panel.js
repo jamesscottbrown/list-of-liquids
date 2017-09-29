@@ -132,6 +132,23 @@ function listContents(result, parentDiv, queryNode, serialiseDiagram) {
 
 }
 
+function addFieldAndLabel(parentDiv, name, label_text, fieldType){
+
+    var div = parentDiv.append("div").append("div")
+        .classed("form-group", true);
+
+    div.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", name)
+        .text(label_text);
+
+    return div.append(fieldType)
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", name)
+        .attr("id", name);
+}
 
 function selectContents(selected_node) {
     return function (result, div) {
@@ -293,19 +310,8 @@ function drawResourcePanel(selected_node, links, restart, form, deleteNode, seri
         return n.label == selected_node.label
     })[0];
 
-    var div1 = form.append("div").classed("form-group", true);
-    div1.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "name")
-        .text("Name:");
-
-    div1.append("div")
-        .classed("col-sm-5", true)
-        .append("input")
+    addFieldAndLabel(form, "name", "Name:", "input")
         .attr("type", "text")
-        .attr("name", "name")
-        .classed("form-control", true)
         .attr("value", resource_node.label)
         .on("change", function () {
 
@@ -332,44 +338,16 @@ function drawResourcePanel(selected_node, links, restart, form, deleteNode, seri
             restart();
         });
 
-
-    var div2 = form.append("div").classed("form-group", true);
-    div2.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "num-wells")
-        .text("Number of wells:");
-
-    div2.append("div")
-        .classed("col-sm-5", true)
-
-        .append("input")
+    addFieldAndLabel(form, "num-wells", "Number of wells:", "input")
         .attr("type", "text")
-        .attr("id", "num-wells")
-        .attr("name", "num-wells")
-        .classed("form-control", true)
         .attr("value", resource_node.data.num_wells)
         .on("change", function () {
             resource_node.data.num_wells = this.value;
             getContents(serialiseDiagram, resource_node, contentsDiv);
         });
 
-
-    var div2a = form.append("div").classed("form-group", true);
-    div2a.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "volume")
-        .text("Volume per well:");
-
-    div2a.append("div")
-        .classed("col-sm-5", true)
-
-        .append("input")
+    addFieldAndLabel(form, "volume", "Volume per well:", "input")
         .attr("type", "text")
-        .attr("id", "volume")
-        .attr("name", "volume")
-        .classed("form-control", true)
         .attr("value", resource_node.data.volume)
         .on("change", function () {
             resource_node.data.volume = this.value;
@@ -387,19 +365,8 @@ function drawResourcePanel(selected_node, links, restart, form, deleteNode, seri
 function drawAliquotPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram) {
     form.append("h2").style().text("Aliquot");
 
-    var div1 = form.append("div").classed("form-group", true);
-    div1.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "name")
-        .text("Name:");
-
-    div1.append("div")
-        .classed("col-sm-5", true)
-        .append("input")
+    addFieldAndLabel(form, "name", "Name:", "input")
         .attr("type", "text")
-        .attr("name", "name")
-        .classed("form-control", true)
         .attr("value", selected_node.label)
         .on("change", function () {
             selected_node.label = this.value;
@@ -409,20 +376,7 @@ function drawAliquotPanel(selected_node, links, restart, form, deleteNode, seria
 
 
     // Form to set number of duplicates
-    var duplicatesDiv = form.append("div").append("div")
-        .classed("form-group", true);
-
-    duplicatesDiv.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "duplicates")
-        .text("Number of duplicates");
-
-    var duplicatesInput = duplicatesDiv.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "duplicates")
-        .attr("id", "duplicates")
+    var duplicatesInput = addFieldAndLabel(form, "duplicates", "Number of duplicates:", "input")
         .on("change", function () {
             selected_node.data.num_duplicates = this.value;
             getContents(serialiseDiagram, selected_node, contentsDiv);
@@ -455,20 +409,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
 
     // Form to set whether we are adding to this
-    var containerDiv = form.append("div").append("div")
-        .classed("form-group", true);
-
-    containerDiv.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "container")
-        .text("Add to these wells");
-
-    var containerSelect = containerDiv.append("select")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "container")
-        .attr("id", "container")
+    var containerSelect = addFieldAndLabel(form, "container", "Add to these wells:", "select")
         .on("change", function () {
             toggleLinkAddtothisStatus(selected_link, this.value == "Yes");
 
@@ -682,20 +623,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
 
     // Distribute
-    var distributeDiv = form.append("div").append("div")
-        .classed("form-group", true);
-
-    distributeDiv.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "distribute")
-        .text("Aspirate multiple transfers at once:");
-
-    var distributeSelect = distributeDiv.append("select")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "distribute")
-        .attr("id", "distribute")
+    var distributeSelect = addFieldAndLabel(form, "distribute", "Aspirate multiple transfers at once:", "select")
         .on("change", function () {
             selected_link.data.distribute = this.value;
             restart();
@@ -711,20 +639,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
 
     // Tip disposal
-    var disposeTipDiv = form.append("div").append("div")
-        .classed("form-group", true);
-
-    disposeTipDiv.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "dispose-tips")
-        .text("Discarded tips:");
-
-    var disposeTipSelect = disposeTipDiv.append("select")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "dispose-tips")
-        .attr("id", "dispose-tips")
+    var disposeTipSelect = addFieldAndLabel(form, "dispose-tips", "Discarded tips:", "select")
         .on("change", function () {
             selected_link.data.disposeTips = this.value;
             restart();
@@ -735,20 +650,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     disposeTipSelect.node().value = selected_link.data.disposeTips ? selected_link.data.disposeTips : "trash";
 
     // Blow-out
-    var blowoutDiv = form.append("div").append("div")
-        .classed("form-group", true);
-
-    blowoutDiv.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "blowout")
-        .text("Blow-out:");
-
-    var blowoutSelect = blowoutDiv.append("select")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "blowout")
-        .attr("id", "blowout")
+    var blowoutSelect = addFieldAndLabel(form, "blowout", "Blow-out:", "select")
         .on("change", function () {
             selected_link.data.blowout = this.value;
             restart();
@@ -759,20 +661,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     blowoutSelect.node().value = selected_link.data.blowout;
 
     // Touch tip
-    var touchTipDiv = form.append("div").append("div")
-        .classed("form-group", true);
-
-    touchTipDiv.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "touchTip")
-        .text("Touch tip:");
-
-    var touchTipSelect = touchTipDiv.append("select")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "touchTip")
-        .attr("id", "touchTip")
+    var touchTipSelect =  addFieldAndLabel(form, "touchTip", "Touch tip:", "select")
         .on("change", function () {
             selected_link.data.touchTip = this.value;
             restart();
@@ -783,20 +672,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     touchTipSelect.node().value = selected_link.data.touchTip;
 
     // Air gap
-    var airgapDiv = form.append("div").append("div")
-        .classed("form-group", true);
-
-    airgapDiv.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "airgap")
-        .text("Air gap:");
-
-    var airgapInput = airgapDiv.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "airgap")
-        .attr("id", "airgap")
+    var airgapInput = addFieldAndLabel(form, "airgap", "Air gap:", "input")
         .on("change", function () {
             selected_link.data.airgap = this.value;
             restart();
@@ -808,20 +684,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     // Mix-before
     form.append("h4").text("Mix before");
 
-    var mixBeforeDiv_1 = form.append("div").append("div")
-        .classed("form-group", true);
-
-    mixBeforeDiv_1.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "mixBefore-repeats")
-        .text("Repeats");
-
-    mixBeforeDiv_1.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "mixBefore-repeats")
-        .attr("id", "mixBefore-repeats")
+    addFieldAndLabel(form, "mixBefore-repeats", "Repeats:", "input")
         .on("change", function () {
             mixBeforeDiv_2.select("input").attr('disabled', this.value == 0 ? 'true' : null);
             selected_link.data.mixBefore.repeats = this.value;
@@ -830,20 +693,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
         .node().value = selected_link.data.mixBefore.repeats;
 
-    var mixBeforeDiv_2 = form.append("div").append("div")
-        .classed("form-group", true);
-
-    mixBeforeDiv_2.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "mixBefore-volume")
-        .text("Volume");
-
-    mixBeforeDiv_2.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "mixBefore-volume")
-        .attr("id", "mixBefore-volume")
+    addFieldAndLabel(form, "mixBefore-volume", "Volume:", "input")
         .on("change", function () {
             selected_link.data.mixBefore.volume = this.value;
             restart();
@@ -858,47 +708,19 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     // Mix-after
     form.append("h4").text("Mix after");
 
-    var mixAfterDiv_1 = form.append("div").append("div")
-        .classed("form-group", true);
-
-    mixAfterDiv_1.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "mixAfter-repeats")
-        .text("Repeats");
-
-    mixAfterDiv_1.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "mixAfter-repeats")
-        .attr("id", "mixAfter-repeats")
+    addFieldAndLabel(form, "mixAfter-repeats", "Repeats:", "input")
         .on("change", function () {
             mixAfterDiv_2.select("input").attr('disabled', this.value == 0 ? 'true' : null);
             selected_link.data.mixAfter.repeats = this.value;
             restart();
         })
-
         .node().value = selected_link.data.mixAfter.repeats;
 
-    var mixAfterDiv_2 = form.append("div").append("div")
-        .classed("form-group", true);
-
-    mixAfterDiv_2.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "mixAfter-volume")
-        .text("Volume");
-
-    mixAfterDiv_2.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "mixAfter-volume")
-        .attr("id", "mixAfter-volume")
+    addFieldAndLabel(form, "mixAfter-volume", "Volume:", "input")
         .on("change", function () {
             selected_link.data.mixAfter.volume = this.value;
             restart();
         })
-
         .node().value = selected_link.data.mixAfter.volume;
 
     if (selected_link.data.mixAfter.repeats == 0) {
@@ -997,25 +819,11 @@ function drawSelectPanel(selected_node, links, restart, form, deleteNode, serial
     addContainerSelect(selected_node, links, restart, form, deleteNode, serialiseDiagram);
 
     // Form to set number of duplicates
-    var duplicatesDiv = form.append("div").append("div")
-        .classed("form-group", true);
-
-    duplicatesDiv.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "duplicates")
-        .text("Number of duplicates");
-
-    var duplicatesInput = duplicatesDiv.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "duplicates")
-        .attr("id", "duplicates")
+    addFieldAndLabel(form, "duplicates", "Number of duplicates:", "input")
         .on("change", function () {
             selected_node.data.num_duplicates = this.value;
-        });
-
-    duplicatesInput.node().value = selected_node.data.num_duplicates;
+        })
+        .node().value = selected_node.data.num_duplicates;
 
 
     // Note that the user selects from the contents of the parent node, not the contents of the selected node
@@ -1046,26 +854,12 @@ function drawOperationPanel(selected_node, links, restart, form, deleteNode, ser
     }
 
     // Form to set number of duplicates
-    var duplicatesDiv = form.append("div").append("div")
-        .classed("form-group", true);
-
-    duplicatesDiv.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "duplicates")
-        .text("Number of duplicates");
-
-    var duplicatesInput = duplicatesDiv.append("input")
-        .classed("control-input", true)
-        .classed("col-sm-5", true)
-        .attr("name", "duplicates")
-        .attr("id", "duplicates")
+    addFieldAndLabel(form, "duplicates", "Number of duplicates:", "input")
         .on("change", function () {
             selected_node.data.num_duplicates = this.value;
             getContents(serialiseDiagram, selected_node, contentsDiv);
-        });
-
-    duplicatesInput.node().value = selected_node.data.num_duplicates;
+        })
+        .node().value = selected_node.data.num_duplicates;
 
 
     var contentsDiv = form.append("div").attr("id", "contents-div");
@@ -1081,21 +875,9 @@ function drawOperationPanel(selected_node, links, restart, form, deleteNode, ser
 function drawRepeatPanel(selected_group, form) {
     form.append("h2").style().text("Repeat");
 
-    var div1 = form.append("div").classed("form-group", true);
-    div1.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "repeats")
-        .text("Repeats:");
-
-    var repeatInput = div1.append("div")
-        .classed("col-sm-5", true)
-        .append("input")
-        .attr("type", "text")
-        .attr("name", "repeats")
+    addFieldAndLabel(form, "repeats", "Repeats:", "input")
         .attr("value", selected_group.data.repeats)
         .on("change", function () {
             selected_node.selected_group.repeats = this.value;
         });
-
 }
