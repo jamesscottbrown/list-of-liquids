@@ -25,8 +25,6 @@ function updateDescriptionPanel(selected_node, selected_link, selected_group, li
         drawSelectPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
     } else if (selected_node) {
         drawOperationPanel(selected_node, links, restart, form, deleteNode, serialiseDiagram);
-    } else if (selected_group) {
-        drawRepeatPanel(selected_group, form)
     } else if (selected_link) {
         drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form);
     }
@@ -730,42 +728,355 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
 }
 
+
 function drawProcessPanel(selected_node, restart, form, deleteNode) {
+    form.node().innerHTML = "";
     form.append("h2").style().text("Processing step");
 
-    var div1 = form.append("div").classed("form-group", true);
-    div1.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "name")
-        .text("Name:");
 
-    div1.append("div")
-        .classed("col-sm-5", true)
+    var process_types = [
+        {label: "Wait", value: "wait", acts_on: "container"},
+        {label: "Turn magdeck on", value: "magdeck_on", acts_on: "container"},  // no extra options
+        {label: "Turn magdeck off", value: "magdeck_off", acts_on: "container"}, // no extra options
 
-        .append("input")
+        {label: "Centrifuge", value: "spin", acts_on: "container"},
+
+        {label: "Cover", value: "cover", acts_on: "container"},
+        {label: "Uncover", value: "uncover", acts_on: "container"}, // no extra options
+        {label: "Seal", value: "seal", acts_on: "container"}, // no extra options
+        {label: "Unseal", value: "unseal", acts_on: "container"}, // no extra options
+        {label: "Incubate", value: "incubate", acts_on: "container"},
+        // {label: "Spread", value: "spread"}, // this is a to/from liquid transfer
+        // {label: "Autopick", value: "autopick"}, // this is also really a kind of transfer
+        {label: "Thermocycle", value: "thermocycle", acts_on: "container"},
+
+        {label: "Flourescence", value: "flourescence", acts_on: "well"}, // https://developers.transcriptic.com/docs/spectrophotometry
+        {label: "Absorbance", value: "absorbance", acts_on: "well"}, // https://developers.transcriptic.com/docs/spectrophotometry
+        {label: "Luminescence", value: "luminescence", acts_on: "well"}, // https://developers.transcriptic.com/docs/spectrophotometry
+        {label: "Gel separate", value: "gel_separate", acts_on: "well"}
+        ];
+
+    // select object storing options for this operation
+    var process_type = selected_node.data.process_type;
+    var process_type_obj = process_types.filter(function(d){return d.value == process_type})[0];
+
+    var data;
+    if (process_type_obj.acts_on == "container"){
+        var group = groups.filter(function(g){ return g.leaves.indexOf(selected_node) != -1 })[0];
+        data = group.data;
+    } else {
+        data = selected_node.data.options;
+    }
+
+
+    // Add select box to change operation type
+    addFieldAndLabel(form, "name", "Name:", "input")
         .attr("type", "text")
-        .attr("name", "name")
         .attr("value", selected_node.label)
         .on("change", function () {
             selected_node.label = this.value;
             restart();
         });
 
-    var div2 = form.append("div").classed("form-group", true);
-    div2.append("label")
-        .classed("control-label", true)
-        .classed("col-sm-5", true)
-        .attr("for", "options")
-        .text("Commands:");
+    var type_select = addFieldAndLabel(form, "type", "Operation type:", "select")
+        .attr("type", "text")
+        .on("change", function () {
 
-    div2.append("div")
-        .classed("col-sm-8", true)
-        .append("textarea")
+            var oldOperationActsOn = process_types.filter(function(d){return d.value == selected_node.data.process_type})[0].acts_on;
+
+            var newOperationType = this.value;
+            var newOperationActsOn = process_types.filter(function(d){return d.value == newOperationType})[0].acts_on;
+
+            if (oldOperationActsOn == "container" && newOperationActsOn == "well"){
+                // - remove from group; delete group if necessary
+                var group = groups.filter(function(g){ return g.leaves.indexOf(selected_node) != -1 })[0];
+                group.leaves = group.leaves.filter( function(d){ return d.id != selected_node.id } );
+
+                // delete group if it is now empty
+                groups = groups.filter( function(g){ return g.leaves.length > 0; } );
+
+                // update data reference
+                data = selected_node.data.options;
+
+                // update drawing to reflect change to groups
+                restart();
+
+            } else if (oldOperationActsOn == "well" && newOperationActsOn == "container"){
+                // delete data from node
+                data.options = {};
+
+                // create new group, and add node to it
+                groups.push({leaves: [selected_node], data: {}});
+
+                // update data reference
+                data = groups[groups.length - 1].data;
+
+                // update drawing to reflect change to groups
+                restart();
+
+            } else {
+               data.options = {};
+
+            }
+
+            selected_node.data.process_type = this.value;
+
+            // redraw panel
+            drawProcessPanel(selected_node, restart, form, deleteNode);
+        });
+
+
+    type_select.selectAll("option").data(process_types)
+        .enter()
+        .append("option")
+        .attr("value", function(d){ return d.value; })
+        .text(function(d){ return d.label; });
+    type_select.node().value = selected_node.data.process_type;
+
+
+    if (process_type === "wait"){
+
+        addFieldAndLabel(form, "duration", "Duration:", "input")
+            .attr("type", "text")
+            .on("change", function () {
+                data.duration = this.value;
+                restart();
+            })
+            .node().value = data.duration;
+
+    } else if (process_type === "spin"){
+
+        addFieldAndLabel(form, "duration", "Duration:", "input")
+            .attr("type", "text")
+            .on("change", function () {
+                data.duration = this.value;
+                restart();
+            })
+            .node().value = data.duration;
+
+        addFieldAndLabel(form, "acceleration", "Acceleration:", "input")
+            .attr("type", "text")
+            .on("change", function () {
+                data.acceleration = this.value;
+                restart();
+            })
+            .node().value = data.acceleration;
+
+    } else if (process_type === "cover") {
+        var lid_types = [
+            {label: "standard", value: "standard"},
+            {label: "universal", value: "universal"},
+            {label: "low_evaporation", value: "low_evaporation"}];
+
+        var lid_select = addFieldAndLabel(form, "lid-type", "Lid type:", "select")
+            .attr("type", "text")
+            .on("change", function () {
+                data.lid_type = this.value
+            });
+
+        lid_select.selectAll("option").data(lid_types)
+            .enter()
+            .append("option")
+            .attr("value", function(d){ return d.value; })
+            .text(function(d){ return d.label; });
+
+        lid_select.node().value = selected_node.data.lid_type;
+
+    } else if (process_type === "incubate") {
+        // where, duration, shaking
+
+        var where_options = ["ambient", "warm_37", "cold_4", "cold_20", "cold_80"];
+
+        var where_select = addFieldAndLabel(form, "where", "Where:", "select")
+            .attr("type", "text")
+            .on("change", function () {
+                data.where = this.value
+            });
+
+        where_select.selectAll("option").data(where_options)
+            .enter()
+            .append("option")
+            .attr("value", function (d) {
+                return d;
+            })
+            .text(function (d) {
+                return d;
+            });
+
+        where_select.node().value = selected_node.data.where;
+
+        addFieldAndLabel(form, "duration", "Duration:", "input")
+            .attr("type", "text")
+            .on("change", function () {
+                data.duration = this.value;
+                restart();
+            })
+            .node().value = data.duration;
+
+
+        var shaking_options = [
+            {label: "Yes", value: true},
+            {label: "No", value: false}];
+
+        var shaking_select = addFieldAndLabel(form, "shaking_options", "Shaking:", "input")
+            .on("change", function () {
+                data.shaking = this.value
+            });
+
+        shaking_select.selectAll("option").data(shaking_options)
+            .enter()
+            .append("option")
+            .attr("value", function (d) {
+                return d;
+            })
+            .text(function (d) {
+                return d;
+            });
+
+        shaking_select.node().value = data.shaking;
+
+    } else if (process_type === "thermocycle") {
+
+        addFieldAndLabel(form, "volume", "Volume:", "input")
+            .on("change", function () {
+                data.volume = this.value
+            })
+            .node().value = data.volume;
+
+        addFieldAndLabel(form, "schedule", "Schedule:", "input")
+            .on("change", function () {
+                data.volume = this.value
+            })
+            .node().value = data.volume;
+
+        form.append("p")
+            .text("Example: 3 times (12C for 5 min, 13C for 5 min), 6 times (20C for 2 min, 8C for 6 min)");
+
+        // groups
+        form.append("h2").text("Groups");
+
+        // append group
+        addFieldAndLabel(form, "repeats", "Repeats:", "input")
+            .on("change", function () {
+                data.repeats = this.value
+            })
+            .node().value = data.repeats;
+
+        addFieldAndLabel(form, "repeats", "Repeats:", "input")
+            .on("change", function () {
+                data.repeats = this.value
+            })
+            .node().value = data.repeats;
+
+        // 3 times (12C for 5 min, 13C for 5 min), 6 times
+
+        // dyes
+
+        // melting
+
+    } else if (process_type === "absorbance") {
+
+        // excitation, emission, num_flashes,
+
+        addFieldAndLabel(form, "wavelength", "Wavelength (nm):", "input")
+            .on("change", function () {
+                data.wavelength = this.value
+            })
+            .node().value = data.wavelength;
+
+        addFieldAndLabel(form, "num_flashes", "Number of flashes:", "input")
+            .on("change", function () {
+                data.num_flashes = this.value
+            })
+            .node().value = data.num_flashes;
+
+        addFieldAndLabel(form, "dataref", "Dataref:", "input")
+            .on("change", function () {
+                data.dataref = this.value
+            })
+            .node().value = data.dataref;
+
+    } else if (process_type === "flourescence") {
+
+        // excitation, emission, num_flashes,
+
+        addFieldAndLabel(form, "excitation", "Excitation wavelength (nm):", "input")
+            .on("change", function () {
+                data.excitation = this.value
+            })
+            .node().value = data.excitation;
+
+        addFieldAndLabel(form, "emission", "Emission wavelength (nm):", "input")
+            .on("change", function () {
+                data.emission = this.value
+            })
+            .node().value = data.emission;
+
+        addFieldAndLabel(form, "num_flashes", "Number of flashes:", "input")
+            .on("change", function () {
+                data.num_flashes = this.value
+            })
+            .node().value = data.num_flashes;
+
+        addFieldAndLabel(form, "dataref", "Dataref:", "input")
+            .on("change", function () {
+                data.dataref = this.value
+            })
+            .node().value = data.dataref;
+
+        addFieldAndLabel(form, "temperature", "Temperature:", "input")
+            .on("change", function () {
+                data.temperature = this.value
+            })
+            .node().value = data.temperature;
+
+    } else if (process_type === "luminescence") {
+
+        addFieldAndLabel(form, "dataref", "Dataref:", "input")
+            .on("change", function () {
+                data.dataref = this.value
+            })
+            .node().value = data.dataref;
+
+    } else if (process_type === "gel_separate") {
+
+            addFieldAndLabel(form, "volume", "Volume:", "input")
+            .on("change", function () {
+                data.volume = this.value
+            })
+            .node().value = data.volume;
+
+            addFieldAndLabel(form, "matrix", "Matrix:", "input")
+            .on("change", function () {
+                data.matrix = this.value
+            })
+            .node().value = data.matrix;
+
+            addFieldAndLabel(form, "ladder", "Ladder:", "input")
+            .on("change", function () {
+                data.ladder = this.value
+            })
+            .node().value = data.ladder;
+
+            addFieldAndLabel(form, "duration", "Duration:", "input")
+            .on("change", function () {
+                data.duration = this.value
+            })
+            .node().value = data.duration;
+
+            addFieldAndLabel(form, "dataref", "Dataref:", "input")
+            .on("change", function () {
+                data.dataref = this.value
+            })
+            .node().value = data.dataref;
+
+    }
+
+
+    addFieldAndLabel(form, "options", "Commands:", "textarea")
         .attr("cols", "80")
         .attr("rows", "20")
-        .attr("name", "options")
-        .style("max-width", (div1.node().offsetWidth - 60) + "px")
+        .style("max-width", (form.node().offsetWidth - 60) + "px")
         .text(selected_node.data.command)
         .on("change", function () {
             selected_node.data.command = this.value;
@@ -870,14 +1181,4 @@ function drawOperationPanel(selected_node, links, restart, form, deleteNode, ser
     // TODO: display of resulting aliquots
 
 
-}
-
-function drawRepeatPanel(selected_group, form) {
-    form.append("h2").style().text("Repeat");
-
-    addFieldAndLabel(form, "repeats", "Repeats:", "input")
-        .attr("value", selected_group.data.repeats)
-        .on("change", function () {
-            selected_node.selected_group.repeats = this.value;
-        });
 }

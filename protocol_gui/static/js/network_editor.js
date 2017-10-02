@@ -298,6 +298,8 @@ function network_editor() {
 
     // update graph (called when needed)
     function restart() {
+        force.groups(groups);
+
         // create an array mapping from node id to index in the nodes array
         var nodePosition = [];
         for (var i = 0; i < nodes.length; i++) {
@@ -334,7 +336,46 @@ function network_editor() {
                     "right": nodePosition[link.source.id], "gap": 50
                 });
             }
+
+            // arrange process nodes within group
+            for (var j = 0; j < groups.length; j++) {
+
+                var offsets = groups[j].leaves.map(function (d) {
+
+                    if (typeof d == "object"){
+                       d = nodePosition[d.id];
+                    }
+                    return {"node": d, "offset": "0"}
+                });
+
+                // arrange in horizontal line
+                if (offsets.length > 1) {
+                    constraints.push({
+                        "type": "alignment",
+                        "axis": "y",
+                        "offsets": offsets
+                    })
+
+                }
+
+                // impose minimum horizontal separation (TODO: why is avoidOverlap not sufficient?)
+                for (var k=0; k<groups[j].leaves.length - 1; k++){
+
+                    var node0 = groups[j].leaves[k];
+                    if (typeof node0 == "object"){
+                       node0 = nodePosition[node0.id];
+                    }
+
+                    var node1 = groups[j].leaves[k+1];
+                    if (typeof node1 == "object"){
+                       node1 = nodePosition[node1.id];
+                    }
+
+                    constraints.push({"axis": "x", "left": node0, "right": node1, "gap": 150 });
+                }
+            }
         }
+
         force.constraints(constraints);
 
         redrawGroups(); // draw groups before nodes so that they are in the background
@@ -629,17 +670,45 @@ function network_editor() {
         group.enter().append("rect")
             .attr("rx", 8).attr("ry", 8)
             .attr("class", "group")
-            .style("fill", function (d, i) {
+            .style("fill", "none")
+            .style("stroke", function (d, i) {
                 return color(i);
             })
-            .on("click", function (d) {
-                selected_node = false;
-                selected_link = false;
-                selected_group = d;
+             .on('mouseup', function (d) {
+                    if (!mousedown_node) return;
 
-                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+                    // needed by FF
+                    drag_line
+                        .classed('hidden', true)
+                        .style('marker-end', '');
 
-            });
+                    // check for drag-to-self
+                    mouseup_node = d;
+                    if (mouseup_node === mousedown_node) {
+                        resetMouseVars();
+                        return;
+                    }
+
+                    if (mousedown_node.type == "process"){
+
+                        var mousedown_node_index = nodes.indexOf(mousedown_node);
+
+                        // remove node from any other groups
+                        for (var i=0; i<groups.length; i++){
+                            groups[i].leaves = groups[i].leaves.filter( function(d){ return d.id != mousedown_node.id } );
+                        }
+
+                        // remove any now empty groups
+                        groups = groups.filter(function(d){ return (d.leaves.length > 0);} );
+
+                        // add node to this group
+                        groups[groups.indexOf(d)].leaves.push(mousedown_node_index);
+                        force.nodes(nodes).links(links).groups(groups);
+                        restart();
+                    }
+
+
+                });
 
         // remove old groups
         group.exit().remove();
@@ -734,6 +803,13 @@ function network_editor() {
             var index = nodes.indexOf(node);
             nodes.splice(index, 1);
         }
+
+        // remove from groups
+        for (var i=0; i < groups.length; i++){
+            groups[i].leaves = groups[i].leaves.filter(function(d){ return d != node; })
+        }
+        // remove any now-empty groups
+        groups = groups.filter(function(d){ return (d.leaves.length > 0);} );
 
         // delete incoming links
         var inLinks = links.filter(function (l) {
@@ -1167,9 +1243,14 @@ function network_editor() {
         });
 
         selected_node = nodes[nodes.length - 1];
-        updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+
+        // add group
+        groups.push({leaves: [nodes.length - 1], data: {}});
+        force.nodes(nodes).links(links).groups(groups);
 
         restart();
+
+       updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
     }
 
     function addProcessNode(sourceNode, kind) {
@@ -1186,7 +1267,8 @@ function network_editor() {
 
         var i = nodes.push({
             id: ++lastNodeId, type: type, x: width * Math.random(), y: height / 2, label: operation,
-            data: {operation: operation, selection: [], num_duplicates: 1, container_name: ""}, parents: [sourceNode]
+            data: {operation: operation, options: {}, selection: [], num_duplicates: 1, container_name: "", process_type: "wait"},
+            parents: [sourceNode]
         });
         i--;
         selected_node = nodes[i];
@@ -1305,7 +1387,15 @@ function network_editor() {
             });
 
             newNode[oldNode.id] = nodes[index-1];
+
+            // TODO: copy group membership
+            for (var j=0; j<groups.length; j++){
+                if (groups[j].leaves.indexOf(oldNode) != -1){
+                   groups[j].leaves.push(newNode[oldNode.id]);
+                }
+            }
         }
+
 
         // copy links to a selected node
         for (var i = 0; i < links.length; i++){
