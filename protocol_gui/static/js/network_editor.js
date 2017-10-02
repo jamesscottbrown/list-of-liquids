@@ -181,7 +181,6 @@ function network_editor() {
     // mouse event vars
     var selected_node = null,
         selected_link = null,
-        selected_group = null,
         mousedown_link = null,
         mousedown_node = null,
         mouseup_node = null;
@@ -427,7 +426,7 @@ function network_editor() {
                 if (mousedown_link === selected_link) selected_link = null;
                 else selected_link = mousedown_link;
                 selected_node = null;
-                updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+                updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
                 restart();
             });
 
@@ -572,7 +571,7 @@ function network_editor() {
                     else selected_node = mousedown_node;
                     selected_link = null;
 
-                    updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+                    updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
 
                     // reposition drag line
                     drag_line
@@ -718,7 +717,7 @@ function network_editor() {
 
         if (selected_node == d){
             selected_node = false;
-            updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+            updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
         }
 
         // delete arrows to this node
@@ -903,7 +902,7 @@ function network_editor() {
                     else selected_node = mousedown_node;
                     selected_link = null;
 
-                    updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+                    updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
 
                     // reposition drag line
                     drag_line
@@ -1037,7 +1036,7 @@ function network_editor() {
                         return n.id == d.id
                     })[0].label = operationLabels[operation];
                     restart();
-                    updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+                    updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
                 }
             }
 
@@ -1218,9 +1217,8 @@ function network_editor() {
 
         update_resource_list();
         selected_link = false;
-        selected_group = false;
         selected_node = nodes[nodes.length - 1];
-        updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+        updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
 
         restart();
     }
@@ -1250,7 +1248,7 @@ function network_editor() {
 
         restart();
 
-       updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+       updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
     }
 
     function addProcessNode(sourceNode, kind) {
@@ -1453,7 +1451,7 @@ function network_editor() {
 
         selected_link = null;
         selected_node = nodes[i];
-        updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+        updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
 
         // clear line
         drag_line

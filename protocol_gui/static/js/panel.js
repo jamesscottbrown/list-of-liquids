@@ -1,10 +1,10 @@
-function updateDescriptionPanel(selected_node, selected_link, selected_group, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram) {
+function updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram) {
 
     // TODO: rather than calling restart(), redraw single label
     var info = d3.select("#info");
     info.select("form").remove();
 
-    if (!selected_node && !selected_link && !selected_group) {
+    if (!selected_node && !selected_link) {
         return;
     }
 
@@ -286,7 +286,7 @@ function addContainerSelect(selected_node, links, restart, form, deleteNode, ser
 
 
     var updateDescriptionPanelCallback = function () {
-        updateDescriptionPanel(selected_node, null, null, links, restart, null, deleteNode, serialiseDiagram);
+        updateDescriptionPanel(selected_node, null, links, restart, null, deleteNode, serialiseDiagram);
     };
 
     div3.append("b").classed("fa", true).classed("fa-plus", true)
@@ -581,7 +581,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
     // Create new pipette if plus sign is clicked
     var updateDescriptionPanelCallback = function () {
-        updateDescriptionPanel(selected_node, selected_link, null, links, restart, redrawLinkLabels, null, null)
+        updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, null, null)
     };
     pipetteDiv.append("b")
         .classed("fa", true).classed("fa-plus", true)
