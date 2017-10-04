@@ -102,27 +102,6 @@ function network_editor() {
     }
 
 
-    function getDefaultLinkData(addToThis) {
-        var default_link_data = {
-            volumes: [1],
-            addToThis: true,
-            addFirst: false,
-            changeTips: false,
-            changeTips: "between-sources",
-            distribute: false,
-            disposeTips: "trash",
-            blowout: false,
-            touchTip: false,
-            airgap: 0,
-            mixBefore: {repeats: 0, volume: 0},
-            mixAfter: {repeats: 0, volume: 0},
-            pipette_name: ''
-        };
-
-        default_link_data.addToThis = addToThis;
-        return default_link_data;
-    }
-
     var force = cola.d3adaptor()
         .linkDistance(50)
         .size([width, height])
@@ -184,12 +163,6 @@ function network_editor() {
         mousedown_link = null,
         mousedown_node = null,
         mouseup_node = null;
-
-    function resetMouseVars() {
-        mousedown_node = null;
-        mouseup_node = null;
-        mousedown_link = null;
-    }
 
     // update force layout (called automatically each iteration)
     function tick() {
@@ -269,31 +242,6 @@ function network_editor() {
             });
     }
 
-    function getBounds(group) {
-        // For some reason, Cola doe snot automatically calculate .bounds for each group,
-        // just each individual leaf of the group
-
-        var bounds = {x: Infinity, X: 0, y: Infinity, Y: 0};
-
-        for (var i = 0; i < group.leaves.length; i++) {
-            bounds.x = Math.min(bounds.x, group.leaves[i].bounds.x);
-            bounds.y = Math.min(bounds.y, group.leaves[i].bounds.y);
-
-            bounds.X = Math.max(bounds.X, group.leaves[i].bounds.X);
-            bounds.Y = Math.max(bounds.Y, group.leaves[i].bounds.Y);
-        }
-
-        var padding = 10;
-        bounds.x -= padding;
-        bounds.X += padding;
-        bounds.y -= padding;
-        bounds.Y += padding;
-
-        bounds.width = bounds.X - bounds.x;
-        bounds.height = bounds.Y - bounds.y;
-
-        return bounds;
-    }
 
     // update graph (called when needed)
     function restart() {
@@ -400,6 +348,125 @@ function network_editor() {
         recolorLabels();
     }
 
+        function redrawNodes(process_nodes) {
+
+        // Add new 'process' nodes
+        rect = rect.data(process_nodes, function (d) {
+            return d.id;
+        });
+
+        // add new nodes
+        var g2 = rect.enter().append('svg:g');
+
+        g2.append('svg:rect')
+            .attr('class', 'node')
+            .classed('resource', function (d) {
+                return d.type == "resource"
+            })
+            .classed('volume', function (d) {
+                return d.type == "volume"
+            })
+            .classed('cross', function (d) {
+                return d.type == "cross"
+            })
+            .classed('zip', function (d) {
+                return d.type == "zip"
+            })
+            .classed('aliquot', function (d) {
+                return d.type == "aliquot"
+            })
+
+            .attr('width', 24)
+            .attr('height', 24)
+
+            .style('opacity', '0.5')
+            .on('mousedown', function (d) {
+
+                if (linkToChangeParent) {
+                    changeParent(d);
+                    return;
+                }
+
+                // ignore right click
+                if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
+                    || ("button" in d3.event && d3.event.button == 2))  // IE
+                    return;
+
+                if (selectingGroup) {
+
+                    var pos = selectedNodes.indexOf(d.id);
+                    if (pos == -1) {
+                        selectedNodes.push(d.id);
+                    } else {
+                        selectedNodes.splice(pos, 1);
+                    }
+                    recolorLabels();
+
+                } else {
+
+                    // select node
+                    mousedown_node = d;
+                    if (mousedown_node === selected_node) selected_node = null;
+                    else selected_node = mousedown_node;
+                    selected_link = null;
+
+                    updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+
+                    // reposition drag line
+                    drag_line
+                        .classed('hidden', false)
+                        .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
+
+                    restart();
+                }
+            })
+            .on('mouseup', function (d) {
+                // nb. no mousedown event registered, so no need to check for drag-to-self
+                if (!mousedown_node) {
+                    return;
+                }
+
+                // needed by FF
+                drag_line
+                    .classed('hidden', true)
+                    .style('marker-end', '');
+
+                // check for drag-to-self
+                mouseup_node = d;
+                if (mouseup_node === mousedown_node) {
+                    resetMouseVars();
+                    return;
+                }
+
+                // add link to graph (update if exists)
+                addEdge(shiftDown);
+                restart();
+            })
+
+            .on('contextmenu', d3.contextMenu(createOptionsMenu));
+
+        // show node IDs
+        g2.append('svg:text')
+            .attr('x', 12)
+            .attr('y', 4 + 12)
+            .attr("id", function(d){ return "label-" + d.id; })
+            .attr('class', 'node-label');
+
+        rectLabels = rect.selectAll('text');
+
+        rectLabels.text(function (d) {
+                if (parseInt(d.data.num_duplicates) > 1 ){
+                 return d.label + " (×" + d.data.num_duplicates + ")";
+                } else {
+                  return d.label;
+                }
+            });
+
+        // remove old nodes
+        rect.exit().remove();
+    }
+
+
     function redrawLinks() {
         // path (link) group
         path = path.data(links);
@@ -466,23 +533,6 @@ function network_editor() {
         }))
     }
 
-    function changeParent(newParent){
-
-        // update link
-        linkToChangeParent.source = newParent;
-
-        // update list of parent stored in child node
-        if (linkToChangeParent.target.parents[0] == linkToChangeParent.source){
-            linkToChangeParent.target.parents[0] = newParent;
-        } else {
-           linkToChangeParent.target.parents[1] = newParent;
-        }
-
-        // redraw
-        linkToChangeParent = false;
-        restart();
-    }
-
     function redrawLinkLabels() {
         // volume labels
         path_labels = path_labels.data(links);
@@ -499,6 +549,59 @@ function network_editor() {
             });
 
         path_labels.exit().remove();
+
+    }
+
+    function recolorLabels() {
+
+        // update text color based on container
+        rectLabels.style('fill', function (d) {
+            var container_index = containers.map(function (x) {
+                return x.name;
+
+            }).indexOf(d.data.container_name);
+
+            return (container_index == -1) ? "#000" : color(container_index);
+        });
+
+        // Color nodes of type ''resource'' based on data in resource object with same name, not node object
+        rectLabels.filter(function (d) {
+            return d.type == "resource"
+        })
+            .style('fill', function (d) {
+
+                var resource = resources.filter(function(r){return r.label == d.data.resource})[0];
+                if (resource) {
+                    // resource may be undefined if we are mid-way through deleting the nodes corresponding to a resource
+                    var container_index = containers.map(function (x) {
+                        return x.name;
+                    }).indexOf(resource.data.container_name);
+
+                    return (container_index == -1) ? "#000" : color(container_index);
+                }
+            });
+
+        // color single selected node red
+        if (selected_node) {
+            d3.selectAll('text').filter(function (d) {
+                return d == selected_node
+            }).style('fill', 'red');
+        }
+
+        //color set of selected nodes red
+        if (selectingGroup && selectedNodes) {
+            d3.selectAll('text').filter(function (d) {
+                return selectedNodes.indexOf(d.id) != -1
+            }).style('fill', 'red');
+        }
+
+        d3.select("#resources").selectAll("li").style("color", function (d) {
+            var container_index = containers.map(function (x) {
+                return x.name;
+            }).indexOf(d.data.container_name);
+
+            return (container_index == -1) ? "#000" : color(container_index);
+        });
 
     }
 
@@ -550,6 +653,282 @@ function network_editor() {
 
         // remove old groups
         group.exit().remove();
+    }
+
+    /* Helper functions */
+    function getBounds(group) {
+        // For some reason, Cola doe snot automatically calculate .bounds for each group,
+        // just each individual leaf of the group
+
+        var bounds = {x: Infinity, X: 0, y: Infinity, Y: 0};
+
+        for (var i = 0; i < group.leaves.length; i++) {
+            bounds.x = Math.min(bounds.x, group.leaves[i].bounds.x);
+            bounds.y = Math.min(bounds.y, group.leaves[i].bounds.y);
+
+            bounds.X = Math.max(bounds.X, group.leaves[i].bounds.X);
+            bounds.Y = Math.max(bounds.Y, group.leaves[i].bounds.Y);
+        }
+
+        var padding = 10;
+        bounds.x -= padding;
+        bounds.X += padding;
+        bounds.y -= padding;
+        bounds.Y += padding;
+
+        bounds.width = bounds.X - bounds.x;
+        bounds.height = bounds.Y - bounds.y;
+
+        return bounds;
+    }
+
+    function getDefaultLinkData(addToThis) {
+        var default_link_data = {
+            volumes: [1],
+            addToThis: true,
+            addFirst: false,
+            changeTips: false,
+            changeTips: "between-sources",
+            distribute: false,
+            disposeTips: "trash",
+            blowout: false,
+            touchTip: false,
+            airgap: 0,
+            mixBefore: {repeats: 0, volume: 0},
+            mixAfter: {repeats: 0, volume: 0},
+            pipette_name: ''
+        };
+
+        default_link_data.addToThis = addToThis;
+        return default_link_data;
+    }
+
+    function getNodeContainer(node){
+       var container;
+        if (node.type == "resource"){
+            var resource = resources.filter(function(r){return r.label == node.data.resource})[0];
+            container = resource.data.container_name;
+        } else {
+            container = node.data.container_name;
+        }
+        return container;
+    }
+
+
+    function createOptionsMenu(d) {
+        var menu = [];
+
+        var operations = ['zip', 'cross'];
+        if (d.type != "process") {
+
+            function changeOperation(operation) {
+                return function (elm, d) {
+                    nodes.filter(function (n) {
+                        return n.id == d.id
+                    })[0].type = operation;
+                    nodes.filter(function (n) {
+                        return n.id == d.id
+                    })[0].label = operationLabels[operation];
+                    restart();
+                    updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+                }
+            }
+
+            for (var i = 0; i < operations.length; i++) {
+                var operation = operations[i];
+
+                menu.push({
+                    title: operation,
+                    disabled: (operation == d.type),
+                    action: changeOperation(operation)
+                })
+            }
+
+            menu.push({
+                divider: true
+            });
+        }
+
+        menu.push({
+            title: 'Process',
+            action: function (elm, d) {
+                var node = nodes.filter(function (n) {
+                    return n.id == d.id
+                })[0];
+                addProcessNodeToNode(node, 'process');
+            }
+        });
+        menu.push({
+            title: 'Pool',
+            action: function (elm, d) {
+                var node = nodes.filter(function (n) {
+                    return n.id == d.id
+                })[0];
+                addProcessNodeToNode(node, 'pool');
+            }
+        });
+        menu.push({
+            title: 'Select',
+            action: function (elm, d) {
+                var node = nodes.filter(function (n) {
+                    return n.id == d.id
+                })[0];
+                addProcessNodeToNode(node, 'select');
+            }
+        });
+        menu.push({
+            title: 'Take aliquot',
+            action: function (elm, d) {
+                var node = nodes.filter(function (n) {
+                    return n.id == d.id
+                })[0];
+                takeAliquot(node);
+            }
+        });
+
+
+        menu.push({
+            divider: true
+        });
+
+        menu.push({
+            title: 'Delete',
+            action: function (elm, d) {
+                deleteNode(d);
+            }
+        });
+        return menu;
+    }
+
+    /* Handling the mouse */
+    function resetMouseVars() {
+        mousedown_node = null;
+        mouseup_node = null;
+        mousedown_link = null;
+    }
+
+    function mousemove() {
+        if (!mousedown_node) return;
+        drag_line.attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + d3.mouse(this)[0] + ',' + d3.mouse(this)[1]);
+        restart();
+    }
+
+    function mouseup() {
+        if (mousedown_node) {
+            drag_line
+                .classed('hidden', true)
+                .style('marker-end', '');
+        }
+        svg.classed('active', false);
+        resetMouseVars();
+    }
+
+    /* Copying */
+    function startCopy() {
+        selectingGroup = true;
+        selectedNodes = [];
+
+        d3.select("#repeatCopy")
+            .text("Copy")
+            .on("click", endCopy);
+
+        d3.select("#cancelCopyButton").style("visibility", "visible");
+
+        // Un-select all nodes
+        selected_node = false;
+        selected_link = false;
+        recolorLabels();
+
+    }
+
+    function endCopy() {
+        selectingGroup = false;
+        d3.select("#repeatCopy")
+            .on("click", startCopy)
+            .text("Select nodes for repeat");
+
+        d3.select("#cancelCopyButton").style("visibility", "hidden");
+
+        // copy selected nodes
+        var newNode = [];
+        for (var i = 0; i < selectedNodes.length; i++) {
+            var oldNode = nodes.filter(function (n){ return n.id == selectedNodes[i]})[0];
+
+            var index = nodes.push({
+                id: ++lastNodeId,
+                type: oldNode.type,
+                label: oldNode.label,
+                data: JSON.parse(JSON.stringify(oldNode.data)) // create new object, rather than reference to data of copied node
+            });
+
+            newNode[oldNode.id] = nodes[index-1];
+
+            // TODO: copy group membership
+            for (var j=0; j<groups.length; j++){
+                if (groups[j].leaves.indexOf(oldNode) != -1){
+                   groups[j].leaves.push(newNode[oldNode.id]);
+                }
+            }
+        }
+
+
+        // copy links to a selected node
+        for (var i = 0; i < links.length; i++){
+            var link = links[i];
+
+            // skip link if target is not selected node
+            if (selectedNodes.indexOf(link.target.id) == -1){
+                continue;
+            }
+
+            var sourceNode = link.source;
+            if (selectedNodes.indexOf(link.source.id) != -1){
+                sourceNode = newNode[link.source.id];
+            }
+
+            links.push({
+                source: sourceNode,
+                target: newNode[link.target.id],
+                data: JSON.parse(JSON.stringify(link.data)) // create new object, rather than reference to data of copied link
+            })
+        }
+
+        force.nodes(nodes).links(links);
+        restart();
+        force.start();
+    }
+
+    function cancelCopy(){
+        selectingGroup = false;
+        d3.select("#repeatCopy")
+            .on("click", startCopy)
+            .text("Select nodes to copy");
+
+        d3.select("#cancelCopyButton").style("visibility", "hidden");
+
+        // Un-select all nodes
+        selected_node = false;
+        selected_link = false;
+        recolorLabels();
+    }
+
+
+    /* Functions that edit the graph structure */
+    function changeParent(newParent){
+
+        // update link
+        linkToChangeParent.source = newParent;
+
+        // update list of parent stored in child node
+        if (linkToChangeParent.target.parents[0] == linkToChangeParent.source){
+            linkToChangeParent.target.parents[0] = newParent;
+        } else {
+           linkToChangeParent.target.parents[1] = newParent;
+        }
+
+        // redraw
+        linkToChangeParent = false;
+        restart();
     }
 
     function deleteNode(d) {
@@ -677,273 +1056,6 @@ function network_editor() {
     }
 
 
-    function redrawNodes(process_nodes) {
-        
-        // Add new 'process' nodes
-        rect = rect.data(process_nodes, function (d) {
-            return d.id;
-        });
-
-        // add new nodes
-        var g2 = rect.enter().append('svg:g');
-
-        g2.append('svg:rect')
-            .attr('class', 'node')
-            .classed('resource', function (d) {
-                return d.type == "resource"
-            })
-            .classed('volume', function (d) {
-                return d.type == "volume"
-            })
-            .classed('cross', function (d) {
-                return d.type == "cross"
-            })
-            .classed('zip', function (d) {
-                return d.type == "zip"
-            })
-            .classed('aliquot', function (d) {
-                return d.type == "aliquot"
-            })
-
-            .attr('width', 24)
-            .attr('height', 24)
-
-            .style('opacity', '0.5')
-            .on('mousedown', function (d) {
-
-                if (linkToChangeParent) {
-                    changeParent(d);
-                    return;
-                }
-
-                // ignore right click
-                if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
-                    || ("button" in d3.event && d3.event.button == 2))  // IE
-                    return;
-
-                if (selectingGroup) {
-
-                    var pos = selectedNodes.indexOf(d.id);
-                    if (pos == -1) {
-                        selectedNodes.push(d.id);
-                    } else {
-                        selectedNodes.splice(pos, 1);
-                    }
-                    recolorLabels();
-
-                } else {
-
-                    // select node
-                    mousedown_node = d;
-                    if (mousedown_node === selected_node) selected_node = null;
-                    else selected_node = mousedown_node;
-                    selected_link = null;
-
-                    updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
-
-                    // reposition drag line
-                    drag_line
-                        .classed('hidden', false)
-                        .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
-
-                    restart();
-                }
-            })
-            .on('mouseup', function (d) {
-                // nb. no mousedown event registered, so no need to check for drag-to-self
-                if (!mousedown_node) {
-                    return;
-                }
-
-                // needed by FF
-                drag_line
-                    .classed('hidden', true)
-                    .style('marker-end', '');
-
-                // check for drag-to-self
-                mouseup_node = d;
-                if (mouseup_node === mousedown_node) {
-                    resetMouseVars();
-                    return;
-                }
-
-                // add link to graph (update if exists)
-                addEdge(shiftDown);
-                restart();
-            })
-
-            .on('contextmenu', d3.contextMenu(createOptionsMenu));
-
-        // show node IDs
-        g2.append('svg:text')
-            .attr('x', 12)
-            .attr('y', 4 + 12)
-            .attr("id", function(d){ return "label-" + d.id; })
-            .attr('class', 'node-label');
-
-        rectLabels = rect.selectAll('text');
-
-        rectLabels.text(function (d) {
-                if (parseInt(d.data.num_duplicates) > 1 ){
-                 return d.label + " (×" + d.data.num_duplicates + ")";
-                } else {
-                  return d.label;
-                }
-            });
-
-        // remove old nodes
-        rect.exit().remove();
-    }
-
-    function recolorLabels() {
-
-        // update text color based on container
-        rectLabels.style('fill', function (d) {
-            var container_index = containers.map(function (x) {
-                return x.name;
-
-            }).indexOf(d.data.container_name);
-
-            return (container_index == -1) ? "#000" : color(container_index);
-        });
-
-        // Color nodes of type ''resource'' based on data in resource object with same name, not node object
-        rectLabels.filter(function (d) {
-            return d.type == "resource"
-        })
-            .style('fill', function (d) {
-
-                var resource = resources.filter(function(r){return r.label == d.data.resource})[0];
-                if (resource) {
-                    // resource may be undefined if we are mid-way through deleting the nodes corresponding to a resource
-                    var container_index = containers.map(function (x) {
-                        return x.name;
-                    }).indexOf(resource.data.container_name);
-
-                    return (container_index == -1) ? "#000" : color(container_index);
-                }
-            });
-
-        // color single selected node red
-        if (selected_node) {
-            d3.selectAll('text').filter(function (d) {
-                return d == selected_node
-            }).style('fill', 'red');
-        }
-
-        //color set of selected nodes red
-        if (selectingGroup && selectedNodes) {
-            d3.selectAll('text').filter(function (d) {
-                return selectedNodes.indexOf(d.id) != -1
-            }).style('fill', 'red');
-        }
-
-        d3.select("#resources").selectAll("li").style("color", function (d) {
-            var container_index = containers.map(function (x) {
-                return x.name;
-            }).indexOf(d.data.container_name);
-
-            return (container_index == -1) ? "#000" : color(container_index);
-        });
-
-    }
-
-    function createOptionsMenu(d) {
-        var menu = [];
-
-        var operations = ['zip', 'cross'];
-        if (d.type != "process") {
-
-            function changeOperation(operation) {
-                return function (elm, d) {
-                    nodes.filter(function (n) {
-                        return n.id == d.id
-                    })[0].type = operation;
-                    nodes.filter(function (n) {
-                        return n.id == d.id
-                    })[0].label = operationLabels[operation];
-                    restart();
-                    updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
-                }
-            }
-
-            for (var i = 0; i < operations.length; i++) {
-                var operation = operations[i];
-
-                menu.push({
-                    title: operation,
-                    disabled: (operation == d.type),
-                    action: changeOperation(operation)
-                })
-            }
-
-            menu.push({
-                divider: true
-            });
-        }
-
-        menu.push({
-            title: 'Process',
-            action: function (elm, d) {
-                var node = nodes.filter(function (n) {
-                    return n.id == d.id
-                })[0];
-                addProcessNodeToNode(node, 'process');
-            }
-        });
-        menu.push({
-            title: 'Pool',
-            action: function (elm, d) {
-                var node = nodes.filter(function (n) {
-                    return n.id == d.id
-                })[0];
-                addProcessNodeToNode(node, 'pool');
-            }
-        });
-        menu.push({
-            title: 'Select',
-            action: function (elm, d) {
-                var node = nodes.filter(function (n) {
-                    return n.id == d.id
-                })[0];
-                addProcessNodeToNode(node, 'select');
-            }
-        });
-        menu.push({
-            title: 'Take aliquot',
-            action: function (elm, d) {
-                var node = nodes.filter(function (n) {
-                    return n.id == d.id
-                })[0];
-                takeAliquot(node);
-            }
-        });
-
-
-        menu.push({
-            divider: true
-        });
-
-        menu.push({
-            title: 'Delete',
-            action: function (elm, d) {
-                deleteNode(d);
-            }
-        });
-        return menu;
-    }
-
-    function getNodeContainer(node){
-       var container;
-        if (node.type == "resource"){
-            var resource = resources.filter(function(r){return r.label == node.data.resource})[0];
-            container = resource.data.container_name;
-        } else {
-            container = node.data.container_name;
-        }
-        return container;
-    }
-
     function addEdge(addToThis) {
 
         var container;
@@ -976,22 +1088,6 @@ function network_editor() {
         selected_node = nodes[i];
     }
 
-
-    function mousemove() {
-        if (!mousedown_node) return;
-        drag_line.attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + d3.mouse(this)[0] + ',' + d3.mouse(this)[1]);
-        restart();
-    }
-
-    function mouseup() {
-        if (mousedown_node) {
-            drag_line
-                .classed('hidden', true)
-                .style('marker-end', '');
-        }
-        svg.classed('active', false);
-        resetMouseVars();
-    }
 
     function clearEverything() {
         nodes = [];
@@ -1101,6 +1197,34 @@ function network_editor() {
         return i;
     }
 
+    function takeAliquot(node) {
+        var i = nodes.push({
+            id: ++lastNodeId, type: "aliquot", x: width * Math.random(), y: height / 2, label: "aliquot",
+            parents: [node], data: {container_name: '', num_duplicates: 1}
+        });
+        i--;
+
+        links.push({
+            source: node,
+            target: nodes[i],
+            data: getDefaultLinkData(false)
+        });
+
+        selected_link = null;
+        selected_node = nodes[i];
+        updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
+
+        // clear line
+        drag_line
+            .classed('hidden', true)
+            .style('marker-end', '');
+
+        resetMouseVars();
+
+        restart();
+    }
+
+    /* Serialising and saving */
     serialiseDiagram = function () {
         // note that we cannot serialise {nodes: nodes, links: links} because of cyclic references
         var node_list = [];
@@ -1174,122 +1298,7 @@ function network_editor() {
         })
     }
 
-    function startCopy() {
-        selectingGroup = true;
-        selectedNodes = [];
-
-        d3.select("#repeatCopy")
-            .text("Copy")
-            .on("click", endCopy);
-
-        d3.select("#cancelCopyButton").style("visibility", "visible");
-
-        // Un-select all nodes
-        selected_node = false;
-        selected_link = false;
-        recolorLabels();
-
-    }
-
-    function endCopy() {
-        selectingGroup = false;
-        d3.select("#repeatCopy")
-            .on("click", startCopy)
-            .text("Select nodes for repeat");
-
-        d3.select("#cancelCopyButton").style("visibility", "hidden");
-
-        // copy selected nodes
-        var newNode = [];
-        for (var i = 0; i < selectedNodes.length; i++) {
-            var oldNode = nodes.filter(function (n){ return n.id == selectedNodes[i]})[0];
-
-            var index = nodes.push({
-                id: ++lastNodeId,
-                type: oldNode.type,
-                label: oldNode.label,
-                data: JSON.parse(JSON.stringify(oldNode.data)) // create new object, rather than reference to data of copied node
-            });
-
-            newNode[oldNode.id] = nodes[index-1];
-
-            // TODO: copy group membership
-            for (var j=0; j<groups.length; j++){
-                if (groups[j].leaves.indexOf(oldNode) != -1){
-                   groups[j].leaves.push(newNode[oldNode.id]);
-                }
-            }
-        }
-
-
-        // copy links to a selected node
-        for (var i = 0; i < links.length; i++){
-            var link = links[i];
-
-            // skip link if target is not selected node
-            if (selectedNodes.indexOf(link.target.id) == -1){
-                continue;
-            }
-
-            var sourceNode = link.source;
-            if (selectedNodes.indexOf(link.source.id) != -1){
-                sourceNode = newNode[link.source.id];
-            }
-
-            links.push({
-                source: sourceNode,
-                target: newNode[link.target.id],
-                data: JSON.parse(JSON.stringify(link.data)) // create new object, rather than reference to data of copied link
-            })
-        }
-
-        force.nodes(nodes).links(links);
-        restart();
-        force.start();
-    }
-
-    function cancelCopy(){
-        selectingGroup = false;
-        d3.select("#repeatCopy")
-            .on("click", startCopy)
-            .text("Select nodes to copy");
-
-        d3.select("#cancelCopyButton").style("visibility", "hidden");
-
-        // Un-select all nodes
-        selected_node = false;
-        selected_link = false;
-        recolorLabels();
-    }
-
-
-    function takeAliquot(node) {
-        var i = nodes.push({
-            id: ++lastNodeId, type: "aliquot", x: width * Math.random(), y: height / 2, label: "aliquot",
-            parents: [node], data: {container_name: '', num_duplicates: 1}
-        });
-        i--;
-
-        links.push({
-            source: node,
-            target: nodes[i],
-            data: getDefaultLinkData(false)
-        });
-
-        selected_link = null;
-        selected_node = nodes[i];
-        updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
-
-        // clear line
-        drag_line
-            .classed('hidden', true)
-            .style('marker-end', '');
-
-        resetMouseVars();
-
-        restart();
-    }
-
+    
     // app starts here
     svg.on('mousemove', mousemove)
         .on('mouseup', mouseup)
