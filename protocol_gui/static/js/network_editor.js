@@ -381,16 +381,7 @@ function network_editor() {
         redrawLinks();
         redrawLinkLabels();
 
-        // circle (node) group
-        var circular_nodes = nodes.filter(function (d) {
-            return process_node_types.indexOf(d.type) == -1
-        });
-        var process_nodes = nodes.filter(function (d) {
-            return process_node_types.indexOf(d.type) != -1
-        });
-
-        redrawCircularNodes(circular_nodes);
-        redrawRectangularNodes(process_nodes);
+        redrawNodes(nodes);
 
 
         // update node boundary boxes
@@ -508,158 +499,6 @@ function network_editor() {
             });
 
         path_labels.exit().remove();
-
-    }
-
-    function redrawCircularNodes(circular_nodes) {
-
-        // NB: the function arg is crucial here! nodes are known by id, not by index!
-        circle = circle.data(circular_nodes, function (d) {
-            return d.id;
-        });
-
-        // update existing nodes (selected visual state)
-        circle.selectAll('circle')
-            .style('opacity', function (d) {
-                return (d === selected_node) ? '1' : '0.5';
-            });
-
-        // add new nodes
-        var g = circle.enter().append('svg:g').attr("id", "group-circle-node");
-
-        g.append('svg:circle')
-            .attr('class', 'node')
-            .classed('resource', function (d) {
-                return d.type == "resource"
-            })
-            .classed('volume', function (d) {
-                return d.type == "volume"
-            })
-            .classed('aliquot', function (d) {
-                return d.type == "aliquot"
-            })
-            .attr('r', 12)
-            .style('opacity', function (d) {
-                return (d === selected_node) ? '1' : '0.5';
-            })
-            .on('mousedown', function (d) {
-
-                if (linkToChangeParent){
-                    changeParent(d);
-                    return;
-                }
-
-                // ignore right click
-                if (("which" in d3.event && d3.event.which == 3) // Firefox, WebKit
-                    || ("button" in d3.event && d3.event.button == 2))  // IE
-                    return;
-
-                if (selectingGroup) {
-
-                    var pos = selectedNodes.indexOf(d.id);
-                    if (pos == -1) {
-                        selectedNodes.push(d.id);
-                    } else {
-                        selectedNodes.splice(pos, 1);
-                    }
-                    recolorLabels();
-
-                } else {
-                    // select node
-                    mousedown_node = d;
-                    if (mousedown_node === selected_node) selected_node = null;
-                    else selected_node = mousedown_node;
-                    selected_link = null;
-
-                    updateDescriptionPanel(selected_node, selected_link, links, restart, redrawLinkLabels, deleteNode, serialiseDiagram);
-
-                    // reposition drag line
-                    drag_line
-                        .classed('hidden', false)
-                        .attr('d', 'M' + mousedown_node.x + ',' + mousedown_node.y + 'L' + mousedown_node.x + ',' + mousedown_node.y);
-
-                    restart();
-                }
-
-            })
-            .on('mouseup', function (d) {
-                if (!mousedown_node) return;
-
-                // needed by FF
-                drag_line
-                    .classed('hidden', true)
-                    .style('marker-end', '');
-
-                // check for drag-to-self
-                mouseup_node = d;
-                if (mouseup_node === mousedown_node) {
-                    resetMouseVars();
-                    return;
-                }
-
-                // add link to graph (update if exists)
-                addEdge(shiftDown);
-                restart();
-            })
-            .on('contextmenu', d3.contextMenu([{
-                    title: 'Process',
-                    action: function (elm, d) {
-                        var node = nodes.filter(function (n) {
-                            return n.id == d.id
-                        })[0];
-                        addProcessNodeToNode(node, 'process');
-                    }
-                }, {
-                    title: 'Pool',
-                    action: function (elm, d) {
-                        var node = nodes.filter(function (n) {
-                            return n.id == d.id
-                        })[0];
-                        addProcessNodeToNode(node, 'pool');
-                    }
-                }, {
-                    title: 'Select',
-                    action: function (elm, d) {
-                        var node = nodes.filter(function (n) {
-                            return n.id == d.id
-                        })[0];
-                        addProcessNodeToNode(node, 'select');
-                    }
-                }, {
-                    title: 'Take aliquot',
-                    action: function (elm, d) {
-                        var node = nodes.filter(function (n) {
-                            return n.id == d.id
-                        })[0];
-                        takeAliquot(node);
-                    }
-                }, {
-                    title: 'Delete',
-                    action: function (elm, d) {
-                        deleteNode(d);
-                    }
-                }])
-            );
-
-        // remove old nodes
-        circle.exit().remove();
-
-        // show node IDs
-        g.append('svg:text')
-            .attr('x', 0)
-            .attr('y', 4)
-            .attr('class', 'node-label')
-            .attr("id", function(d){ return "label-" + d.id; });
-
-        circleLabels = circle.selectAll('text');
-
-        circleLabels.text(function (d) {
-            if (parseInt(d.data.num_duplicates) > 1) {
-                return d.label + " (×" + d.data.num_duplicates + ")";
-            } else {
-                return d.label;
-            }
-        });
 
     }
 
@@ -838,11 +677,9 @@ function network_editor() {
     }
 
 
-    function redrawRectangularNodes(process_nodes) {
+    function redrawNodes(process_nodes) {
         
         // Add new 'process' nodes
-        // different shape; no ability to drag line from node; context menu
-
         rect = rect.data(process_nodes, function (d) {
             return d.id;
         });
@@ -959,19 +796,19 @@ function network_editor() {
     }
 
     function recolorLabels() {
+
         // update text color based on container
-        circleLabels
-            .style('fill', function (d) {
-                var container_index = containers.map(function (x) {
-                    return x.name;
-                }).indexOf(d.data.container_name);
+        rectLabels.style('fill', function (d) {
+            var container_index = containers.map(function (x) {
+                return x.name;
 
-                return (container_index == -1) ? "#000" : color(container_index);
-            });
+            }).indexOf(d.data.container_name);
 
+            return (container_index == -1) ? "#000" : color(container_index);
+        });
 
         // Color nodes of type ''resource'' based on data in resource object with same name, not node object
-        circleLabels.filter(function (d) {
+        rectLabels.filter(function (d) {
             return d.type == "resource"
         })
             .style('fill', function (d) {
@@ -986,16 +823,6 @@ function network_editor() {
                     return (container_index == -1) ? "#000" : color(container_index);
                 }
             });
-
-        rectLabels.style('fill', function (d) {
-            var container_index = containers.map(function (x) {
-                return x.name;
-
-            }).indexOf(d.data.container_name);
-
-            return (container_index == -1) ? "#000" : color(container_index);
-        });
-
 
         // color single selected node red
         if (selected_node) {
