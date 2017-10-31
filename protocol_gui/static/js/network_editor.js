@@ -308,17 +308,15 @@ function network_editor() {
                 // impose minimum horizontal separation (TODO: why is avoidOverlap not sufficient?)
                 for (var k=0; k<groups[j].leaves.length - 1; k++){
 
-                    var node0 = groups[j].leaves[k];
-                    if (typeof node0 == "object"){
-                       node0 = nodePosition[node0.id];
-                    }
+          // alignment constraints for nodes representing same operation
+            var constraint_links = [];
 
-                    var node1 = groups[j].leaves[k+1];
-                    if (typeof node1 == "object"){
-                       node1 = nodePosition[node1.id];
-                    }
+            for (var i=0; i<groups.length; i++){
+                var offsets = groups[i].leaves.map(function(d){ return {node: nodes.indexOf(d), offset: 0}; });
+                constraints.push({type: "alignment", axis: "y", offsets: offsets});
 
-                    constraints.push({"axis": "x", "left": node0, "right": node1, "gap": 150 });
+                for (var j=0; j<groups[i].leaves.length -1; j++){
+                    constraint_links.push({source: nodes.indexOf(groups[i].leaves[j]), target: nodes.indexOf(groups[i].leaves[j+1])})
                 }
             }
 
@@ -339,8 +337,7 @@ function network_editor() {
 
 
         force.nodes(nodes.concat([topLeft, bottomRight]));
-
-
+        force.links(links.concat(constraint_links));
         force.constraints(constraints);
 
         redrawGroups(); // draw groups before nodes so that they are in the background
