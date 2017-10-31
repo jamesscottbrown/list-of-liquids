@@ -254,6 +254,16 @@ function network_editor() {
 
     // update graph (called when needed)
     function restart() {
+
+        force.stop();
+
+        force = cola.d3adaptor()
+        .linkDistance(50)
+        .size([width, height])
+        .avoidOverlaps(true)
+        .on('tick', tick);
+
+
         // create an array mapping from node id to index in the nodes array
         var nodePosition = [];
         for (var i = 0; i < nodes.length; i++) {
