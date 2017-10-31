@@ -72,7 +72,17 @@ function network_editor() {
             });
         }
 
-        groups = obj.groups;
+        groups = [];
+        for (i=0; i<obj.groups.length; i++){
+            var leaves = [];
+            var group = obj.groups[i];
+            for (var j=0; j<group.leaves.length; j++){
+                var node = nodes.filter(function(d){ return d.id == group.leaves[j].id })[0];
+                leaves.push(node);
+            }
+            groups.push({data: group.data, leaves: leaves});
+        }
+
         containers = obj.containers;
         pipettes = obj.pipettes;
         resources = obj.resources;
@@ -107,7 +117,6 @@ function network_editor() {
         .size([width, height])
         .nodes(nodes)
         .links(links)
-        .groups(groups)
         .avoidOverlaps(true)
         .on('tick', tick);
 
@@ -245,8 +254,6 @@ function network_editor() {
 
     // update graph (called when needed)
     function restart() {
-        force.groups(groups);
-
         // create an array mapping from node id to index in the nodes array
         var nodePosition = [];
         for (var i = 0; i < nodes.length; i++) {
@@ -447,9 +454,14 @@ function network_editor() {
                     return;
                 }
 
-                // add link to graph (update if exists)
-                addEdge(shiftDown);
-                restart();
+                 if (mousedown_node.type == "process" && mouseup_node.type == "process"){
+                        var g = groups.filter(function(g){return g.leaves.indexOf(mouseup_node) != -1; })[0];
+                        moveToGroup(mousedown_node, g);
+                 } else {
+                     // add link to graph (update if exists)
+                     addEdge(shiftDown);
+                     restart();
+                 }
             })
 
             .on('contextmenu', d3.contextMenu(createOptionsMenu));
@@ -475,6 +487,22 @@ function network_editor() {
         rect.exit().remove();
     }
 
+    function moveToGroup(node, group) {
+
+        // remove node from any other groups
+        for (var i=0; i<groups.length; i++){
+            groups[i].leaves = groups[i].leaves.filter( function(d){ return d.id != node.id } );
+        }
+
+        // add node to this group
+        groups[groups.indexOf(group)].leaves.push( node );
+
+        // remove any now empty groups
+        groups = groups.filter(function(d){ return (d.leaves.length > 0);} );
+
+        force.nodes(nodes).links(links);
+        restart();
+    }
 
     function redrawLinks() {
         // path (link) group
@@ -623,42 +651,7 @@ function network_editor() {
             .style("fill", "none")
             .style("stroke", function (d, i) {
                 return color(i);
-            })
-             .on('mouseup', function (d) {
-                    if (!mousedown_node) return;
-
-                    // needed by FF
-                    drag_line
-                        .classed('hidden', true)
-                        .style('marker-end', '');
-
-                    // check for drag-to-self
-                    mouseup_node = d;
-                    if (mouseup_node === mousedown_node) {
-                        resetMouseVars();
-                        return;
-                    }
-
-                    if (mousedown_node.type == "process"){
-
-                        var mousedown_node_index = nodes.indexOf(mousedown_node);
-
-                        // remove node from any other groups
-                        for (var i=0; i<groups.length; i++){
-                            groups[i].leaves = groups[i].leaves.filter( function(d){ return d.id != mousedown_node.id } );
-                        }
-
-                        // remove any now empty groups
-                        groups = groups.filter(function(d){ return (d.leaves.length > 0);} );
-
-                        // add node to this group
-                        groups[groups.indexOf(d)].leaves.push(mousedown_node_index);
-                        force.nodes(nodes).links(links).groups(groups);
-                        restart();
-                    }
-
-
-                });
+            });
 
         // remove old groups
         group.exit().remove();
@@ -795,6 +788,23 @@ function network_editor() {
             }
         });
 
+        if (d.type == "process"){
+
+            menu.push({
+                divider: true
+            });
+
+            menu.push({
+                title: 'Make separate process',
+                action: function (elm, d) {
+                    var data = groups.filter(function(g){ return g.leaves.indexOf(d) != -1 })[0].data;
+                    groups.push({data: data, leaves: []});
+                    var group = groups[groups.length - 1];
+                    moveToGroup(d, group);
+                }
+            });
+
+        }
 
         menu.push({
             divider: true
@@ -969,7 +979,7 @@ function network_editor() {
             nodes[i].index = i;
         }
 
-        force.nodes(nodes).links(links).groups(groups);
+        force.nodes(nodes).links(links);
         restart();
     }
 
@@ -1109,7 +1119,7 @@ function network_editor() {
 
         lastNodeId = 0;
         d3.select("#info").select("form").remove();
-        force.nodes(nodes).links(links).groups(groups);
+        force.nodes(nodes).links(links);
         restart();
     }
 
@@ -1124,7 +1134,7 @@ function network_editor() {
 
         lastNodeId = 0;
         d3.select("#info").select("form").remove();
-        force.nodes(nodes).links(links).groups(groups);
+        force.nodes(nodes).links(links);
         restart();
     }
 
@@ -1175,8 +1185,8 @@ function network_editor() {
         selected_node = nodes[nodes.length - 1];
 
         // add group
-        groups.push({leaves: [nodes.length - 1], data: {}});
-        force.nodes(nodes).links(links).groups(groups);
+        groups.push({data: selected_node.data, leaves: [selected_node]});
+        force.nodes(nodes).links(links);
 
         restart();
 
@@ -1307,7 +1317,7 @@ function network_editor() {
         })
     }
 
-    
+
     // app starts here
     svg.on('mousemove', mousemove)
         .on('mouseup', mouseup)
