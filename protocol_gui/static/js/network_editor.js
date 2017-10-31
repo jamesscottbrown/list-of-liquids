@@ -264,7 +264,9 @@ function network_editor() {
             });
 
             // try to direct the solid edges right
-            if (link.data.addToThis || link.data.addFirst) {
+            var isSolid = (link.data.addToThis || link.data.addFirst);
+
+            if ( isSolid && link.target.type != "process") {
                 constraints.push({
                     "axis": "x", "left": nodePosition[link.source.id],
                     "right": nodePosition[link.target.id], "gap": 50
@@ -272,41 +274,33 @@ function network_editor() {
             }
 
             // try to direct the dashed edges left - but only if there is a solid arrow too
-            var otherLinks = links.filter(function (d) {
+            var otherSolidLinks = links.filter(function (d) {
                 return d.target.id == link.target.id && d.source.id != link.source.id
                                        && (d.data.addFirst || d.data.addToThis);
             });
 
-            if (otherLinks.length > 0) {
+            if (otherSolidLinks.length > 0 && !isSolid) {
                 constraints.push({
                     "axis": "x", "left": nodePosition[link.target.id],
                     "right": nodePosition[link.source.id], "gap": 50
                 });
             }
 
-            // arrange process nodes within group
-            for (var j = 0; j < groups.length; j++) {
+            // if two dashed inputs, and one is a resource, kick the resource left
+            var otherResourceLinks = links.filter(function (d) {
+                return d.target.id == link.target.id && d.source.id != link.source.id && d.source.type == "resource";
+            });
 
-                var offsets = groups[j].leaves.map(function (d) {
-
-                    if (typeof d == "object"){
-                       d = nodePosition[d.id];
-                    }
-                    return {"node": d, "offset": "0"}
-                });
-
-                // arrange in horizontal line
-                if (offsets.length > 1) {
+            if (otherSolidLinks.length == 0 && !isSolid) {
+                if (link.source.type == "resource" && otherResourceLinks.length == 0) {
                     constraints.push({
-                        "type": "alignment",
-                        "axis": "y",
-                        "offsets": offsets
-                    })
-
+                        "axis": "x", "left": nodePosition[link.source.id],
+                        "right": nodePosition[link.target.id], "gap": 50
+                    });
                 }
+            }
 
-                // impose minimum horizontal separation (TODO: why is avoidOverlap not sufficient?)
-                for (var k=0; k<groups[j].leaves.length - 1; k++){
+        }
 
           // alignment constraints for nodes representing same operation
             var constraint_links = [];
