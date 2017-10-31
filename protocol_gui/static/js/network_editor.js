@@ -321,7 +321,25 @@ function network_editor() {
                     constraints.push({"axis": "x", "left": node0, "right": node1, "gap": 150 });
                 }
             }
+
+
+        // Add fixed nodes on the upper-left and bottom right corner, with constraints to keep nodes within the SVG
+        var topLeft = { x: 0, y: height-100, fixed: true },
+        tlIndex = nodes.length,
+        bottomRight = { x: (width-100), y: 0, fixed: true },
+        brIndex = nodes.length + 1;
+
+        var gap=24;
+        for (var i=0; i<nodes.length; i++){
+            constraints.push({ axis: 'x', type: 'separation', left: tlIndex, right: i, gap: gap });
+            constraints.push({ axis: 'y', type: 'separation', left: tlIndex, right: i, gap: gap });
+            constraints.push({ axis: 'x', type: 'separation', left: i, right: brIndex, gap: gap });
+            constraints.push({ axis: 'y', type: 'separation', left: i, right: brIndex, gap: gap });
         }
+
+
+        force.nodes(nodes.concat([topLeft, bottomRight]));
+
 
         force.constraints(constraints);
 
