@@ -69,7 +69,7 @@ function update_container_list() {
                 };
                 $('#containerModal').modal('toggle');
                 update_container_list();
-                updateDescriptionPanel();
+                updateDescriptionPanel(); // TODO: fixme
             });
 
             d3.select("#DeleteContainerButton").on("click", function () {
