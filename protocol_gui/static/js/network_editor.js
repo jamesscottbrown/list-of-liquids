@@ -1,5 +1,5 @@
 // set up initial nodes and links
-var nodes, lastNodeId, lastResourceId, links, groups, serialiseDiagram;
+var nodes, lastNodeId, lastResourceId, links, operations, serialiseDiagram;
 var color = d3.scale.category10();
 
 
@@ -72,15 +72,15 @@ function network_editor() {
             });
         }
 
-        groups = [];
-        for (i=0; i<obj.groups.length; i++){
+        operations = [];
+        for (i=0; i<obj.operations.length; i++){
             var leaves = [];
-            var group = obj.groups[i];
+            var group = obj.operations[i];
             for (var j=0; j<group.leaves.length; j++){
                 var node = nodes.filter(function(d){ return d.id == group.leaves[j].id })[0];
                 leaves.push(node);
             }
-            groups.push({data: group.data, leaves: leaves});
+            operations.push({data: group.data, leaves: leaves});
         }
 
         containers = obj.containers;
@@ -90,11 +90,11 @@ function network_editor() {
     } else {
         nodes = [];
         links = [];
-        groups = [];
 
         containers = [];
         pipettes = [];
         resources = [];
+        operations = [];
     }
 
     lastNodeId = 0;
@@ -150,9 +150,8 @@ function network_editor() {
         .attr('class', 'link dragline hidden')
         .attr('d', 'M0,0L0,0');
 
-    // handles to link and node element groups
-    var group_group = svg.append('svg:g');
-    var group = group_group.selectAll(".group");
+    var operationRectangle_group = svg.append('svg:g');
+    var operationRectangles = operationRectangle_group.selectAll(".group");
 
     var path_group = svg.append('svg:g');
     var path = path_group.selectAll('path');
@@ -322,12 +321,12 @@ function network_editor() {
           // alignment constraints for nodes representing same operation
             var constraint_links = [];
 
-            for (var i=0; i<groups.length; i++){
-                var offsets = groups[i].leaves.map(function(d){ return {node: nodes.indexOf(d), offset: 0}; });
+            for (var i=0; i<operations.length; i++){
+                var offsets = operations[i].leaves.map(function(d){ return {node: nodes.indexOf(d), offset: 0}; });
                 constraints.push({type: "alignment", axis: "y", offsets: offsets});
 
-                for (var j=0; j<groups[i].leaves.length -1; j++){
-                    constraint_links.push({source: nodes.indexOf(groups[i].leaves[j]), target: nodes.indexOf(groups[i].leaves[j+1])})
+                for (var j=0; j<operations[i].leaves.length -1; j++){
+                    constraint_links.push({source: nodes.indexOf(operations[i].leaves[j]), target: nodes.indexOf(operations[i].leaves[j+1])})
                 }
             }
 
@@ -351,7 +350,7 @@ function network_editor() {
         force.links(links.concat(constraint_links));
         force.constraints(constraints);
 
-        redrawGroups(); // draw groups before nodes so that they are in the background
+        redrawOperationRectangles(); // draw groups before nodes so that they are in the background
         redrawLinks();
         redrawLinkLabels();
 
@@ -465,8 +464,8 @@ function network_editor() {
                 }
 
                  if (mousedown_node.type == "process" && mouseup_node.type == "process"){
-                        var g = groups.filter(function(g){return g.leaves.indexOf(mouseup_node) != -1; })[0];
-                        moveToGroup(mousedown_node, g);
+                        var g = operations.filter(function(g){return g.leaves.indexOf(mouseup_node) != -1; })[0];
+                        moveToOperation(mousedown_node, g);
                  } else {
                      // add link to graph (update if exists)
                      addEdge(shiftDown);
@@ -497,18 +496,18 @@ function network_editor() {
         rect.exit().remove();
     }
 
-    function moveToGroup(node, group) {
+    function moveToOperation(node, group) {
 
-        // remove node from any other groups
-        for (var i=0; i<groups.length; i++){
-            groups[i].leaves = groups[i].leaves.filter( function(d){ return d.id != node.id } );
+        // remove node from any other operatins
+        for (var i=0; i<operations.length; i++){
+            operations[i].leaves = operations[i].leaves.filter( function(d){ return d.id != node.id } );
         }
 
-        // add node to this group
-        groups[groups.indexOf(group)].leaves.push( node );
+        // add node to this operation
+        operations[operations.indexOf(group)].leaves.push( node );
 
-        // remove any now empty groups
-        groups = groups.filter(function(d){ return (d.leaves.length > 0);} );
+        // remove any now empty operations
+        operations = operations.filter(function(d){ return (d.leaves.length > 0);} );
 
         force.nodes(nodes).links(links);
         restart();
@@ -652,10 +651,10 @@ function network_editor() {
 
     }
 
-    function redrawGroups() {
-        group = group.data(groups);
+    function redrawOperationRectangles() {
+        operationRectangles = operationRectangles.data(operations);
 
-        group.enter().append("rect")
+        operationRectangles.enter().append("rect")
             .attr("rx", 8).attr("ry", 8)
             .attr("class", "group")
             .style("fill", "none")
@@ -663,8 +662,8 @@ function network_editor() {
                 return color(i);
             });
 
-        // remove old groups
-        group.exit().remove();
+        // remove old operation rectangles
+        operationRectangles.exit().remove();
     }
 
     /* Helper functions */
@@ -730,7 +729,7 @@ function network_editor() {
     function createOptionsMenu(d) {
         var menu = [];
 
-        var operations = ['zip', 'cross'];
+        var combinationTypes = ['zip', 'cross'];
         if (d.type != "process") {
 
             function changeOperation(operation) {
@@ -746,8 +745,8 @@ function network_editor() {
                 }
             }
 
-            for (var i = 0; i < operations.length; i++) {
-                var operation = operations[i];
+            for (var i = 0; i < combinationTypes.length; i++) {
+                var operation = combinationTypes[i];
 
                 menu.push({
                     title: operation,
@@ -807,10 +806,10 @@ function network_editor() {
             menu.push({
                 title: 'Make separate process',
                 action: function (elm, d) {
-                    var data = groups.filter(function(g){ return g.leaves.indexOf(d) != -1 })[0].data;
-                    groups.push({data: data, leaves: []});
-                    var group = groups[groups.length - 1];
-                    moveToGroup(d, group);
+                    var data = operations.filter(function(g){ return g.leaves.indexOf(d) != -1 })[0].data;
+                    operations.push({data: data, leaves: []});
+                    var group = operations[operations.length - 1];
+                    moveToOperation(d, group);
                 }
             });
 
@@ -892,10 +891,10 @@ function network_editor() {
 
             newNode[oldNode.id] = nodes[index-1];
 
-            // TODO: copy group membership
-            for (var j=0; j<groups.length; j++){
-                if (groups[j].leaves.indexOf(oldNode) != -1){
-                   groups[j].leaves.push(newNode[oldNode.id]);
+            // TODO: copy operation membership
+            for (var j=0; j<operations.length; j++){
+                if (operations[j].leaves.indexOf(oldNode) != -1){
+                   operations[j].leaves.push(newNode[oldNode.id]);
                 }
             }
         }
@@ -1050,12 +1049,12 @@ function network_editor() {
             nodes.splice(index, 1);
         }
 
-        // remove from groups
-        for (var i=0; i < groups.length; i++){
-            groups[i].leaves = groups[i].leaves.filter(function(d){ return d != node; })
+        // remove from operations
+        for (var i=0; i < operations.length; i++){
+            operations[i].leaves = operations[i].leaves.filter(function(d){ return d != node; })
         }
-        // remove any now-empty groups
-        groups = groups.filter(function(d){ return (d.leaves.length > 0);} );
+        // remove any now-empty operations
+        operations = operations.filter(function(d){ return (d.leaves.length > 0);} );
 
         // delete incoming links
         var inLinks = links.filter(function (l) {
@@ -1121,7 +1120,7 @@ function network_editor() {
     function clearEverything() {
         nodes = [];
         links = [];
-        groups = [];
+        operations = [];
 
         containers = [];
         pipettes = [];
@@ -1136,7 +1135,7 @@ function network_editor() {
     function clearDiagram(){
         nodes = [];
         links = [];
-        groups = [];
+        operations = [];
 
         for (var i=0; i<containers.length; i++){
             containers[i].contents = [];
@@ -1195,7 +1194,7 @@ function network_editor() {
         selected_node = nodes[nodes.length - 1];
 
         // add group
-        groups.push({data: selected_node.data, leaves: [selected_node]});
+        operations.push({data: selected_node.data, leaves: [selected_node]});
         force.nodes(nodes).links(links);
 
         restart();
@@ -1282,25 +1281,25 @@ function network_editor() {
             link_list.push({source_id: link.source.id, target_id: link.target.id, data: link.data});
         }
 
-        var group_list = [];
-        for (i = 0; i < groups.length; i++) {
+        var operation_list = [];
+        for (i = 0; i < operations.length; i++) {
 
             var leaves = [];
 
-            for (var j = 0; j < groups[i].leaves.length; j++) {
+            for (var j = 0; j < operations[i].leaves.length; j++) {
                 leaves.push({
-                    data: groups[i].leaves[j].data,
-                    id: groups[i].leaves[j].id,
-                    bounds: groups[i].leaves[j].bounds
+                    data: operations[i].leaves[j].data,
+                    id: operations[i].leaves[j].id,
+                    bounds: operations[i].leaves[j].bounds
                 })
             }
 
-            group_list.push({leaves: leaves});
+            operation_list.push({leaves: leaves});
         }
 
 
         return JSON.stringify({
-            nodes: node_list, links: link_list, groups: group_list,
+            nodes: node_list, links: link_list, operations: operation_list,
             containers: containers, pipettes: pipettes, resources: resources
         });
     };

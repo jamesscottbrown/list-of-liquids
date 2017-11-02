@@ -762,8 +762,8 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
 
     var data;
     if (process_type_obj.acts_on == "container"){
-        var group = groups.filter(function(g){ return g.leaves.indexOf(selected_node) != -1 })[0];
-        data = group.data;
+        var operation = operations.filter(function(g){ return g.leaves.indexOf(selected_node) != -1 })[0];
+        data = operation.data;
     } else {
         data = selected_node.data.options;
     }
@@ -788,30 +788,30 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
             var newOperationActsOn = process_types.filter(function(d){return d.value == newOperationType})[0].acts_on;
 
             if (oldOperationActsOn == "container" && newOperationActsOn == "well"){
-                // - remove from group; delete group if necessary
-                var group = groups.filter(function(g){ return g.leaves.indexOf(selected_node) != -1 })[0];
-                group.leaves = group.leaves.filter( function(d){ return d.id != selected_node.id } );
+                // - remove from operation; delete operation if necessary
+                var operation = operations.filter(function(g){ return g.leaves.indexOf(selected_node) != -1 })[0];
+                operation.leaves = operation.leaves.filter( function(d){ return d.id != selected_node.id } );
 
-                // delete group if it is now empty
-                groups = groups.filter( function(g){ return g.leaves.length > 0; } );
+                // delete operation if it is now empty
+                operations = operations.filter( function(g){ return g.leaves.length > 0; } );
 
                 // update data reference
                 data = selected_node.data.options;
 
-                // update drawing to reflect change to groups
+                // update drawing to reflect change to operations
                 restart();
 
             } else if (oldOperationActsOn == "well" && newOperationActsOn == "container"){
                 // delete data from node
                 data.options = {};
 
-                // create new group, and add node to it
-                groups.push({leaves: [selected_node], data: {}});
+                // create new operation, and add node to it
+                operations.push({leaves: [selected_node], data: {}});
 
                 // update data reference
-                data = groups[groups.length - 1].data;
+                data = operations[operations.length - 1].data;
 
-                // update drawing to reflect change to groups
+                // update drawing to reflect change to operations
                 restart();
 
             } else {
