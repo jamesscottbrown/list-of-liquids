@@ -1038,18 +1038,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
             .node().value = data.dataref;
 
     }
-
-
-    addFieldAndLabel(form, "options", "Commands:", "textarea")
-        .attr("cols", "80")
-        .attr("rows", "20")
-        .style("max-width", (form.node().offsetWidth - 60) + "px")
-        .text(selected_node.data.command)
-        .on("change", function () {
-            selected_node.data.command = this.value;
-            restart();
-        });
-
+    
     addDeleteButton(form, selected_node, deleteNode);
 }
 
