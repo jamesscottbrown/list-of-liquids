@@ -504,7 +504,7 @@ function network_editor() {
 
     function moveToOperation(node, group) {
 
-        // remove node from any other operatins
+        // remove node from any other operations
         for (var i=0; i<operations.length; i++){
             operations[i].leaves = operations[i].leaves.filter( function(d){ return d.id != node.id } );
         }
