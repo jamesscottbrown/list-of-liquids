@@ -306,7 +306,7 @@ def check_assigned(protocol_id):
             if node_has_unassigned_aliquots(num_aliquots, node["id"], container_name, protocol_obj):
                 unassigned_resources.append(node["id"])
 
-        else:
+        elif node["type"] != "process":
             if "container_name" not in node["data"].keys() or not node["data"]["container_name"]:
                 continue
             container_name = node["data"]["container_name"]
