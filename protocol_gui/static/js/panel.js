@@ -945,9 +945,9 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
 
         addFieldAndLabel(form, "schedule", "Schedule:", "input")
             .on("change", function () {
-                data.volume = this.value
+                data.schedule = this.value
             })
-            .node().value = data.volume;
+            .node().value = data.schedule;
 
         form.append("p")
             .text("Example: 3 times (12C for 5 min, 13C for 5 min), 6 times (20C for 2 min, 8C for 6 min)");
