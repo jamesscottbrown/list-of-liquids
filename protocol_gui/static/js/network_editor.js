@@ -463,7 +463,13 @@ function network_editor() {
                     return;
                 }
 
-                 if (mousedown_node.type == "process" && mouseup_node.type == "process"){
+                 if (mousedown_node.type == "process" && mouseup_node.type == "process" &&
+                     mousedown_node.data.container_name == mouseup_node.data.container_name){
+
+                        // if different operation type, cannot combine into one operation
+                        // also cannot combine results, as they exist at different times
+                        if (mousedown_node.data.process_type != mouseup_node.data.process_type){ return; }
+
                         var g = operations.filter(function(g){return g.leaves.indexOf(mouseup_node) != -1; })[0];
                         moveToOperation(mousedown_node, g);
                  } else {
