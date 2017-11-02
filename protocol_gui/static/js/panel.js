@@ -758,15 +758,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
 
     // select object storing options for this operation
     var process_type = selected_node.data.process_type;
-    var process_type_obj = process_types.filter(function(d){return d.value == process_type})[0];
-
-    var data;
-    if (process_type_obj.acts_on == "container"){
-        var operation = operations.filter(function(g){ return g.leaves.indexOf(selected_node) != -1 })[0];
-        data = operation.data;
-    } else {
-        data = selected_node.data.options;
-    }
+    var data = operations.filter(function(g){ return g.leaves.indexOf(selected_node) != -1 })[0].data;
 
 
     // Add select box to change operation type
@@ -781,45 +773,14 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
     var type_select = addFieldAndLabel(form, "type", "Operation type:", "select")
         .attr("type", "text")
         .on("change", function () {
+            // delete data from node
+            data.options = {};
 
-            var oldOperationActsOn = process_types.filter(function(d){return d.value == selected_node.data.process_type})[0].acts_on;
-
-            var newOperationType = this.value;
-            var newOperationActsOn = process_types.filter(function(d){return d.value == newOperationType})[0].acts_on;
-
-            if (oldOperationActsOn == "container" && newOperationActsOn == "well"){
-                // - remove from operation; delete operation if necessary
-                var operation = operations.filter(function(g){ return g.leaves.indexOf(selected_node) != -1 })[0];
-                operation.leaves = operation.leaves.filter( function(d){ return d.id != selected_node.id } );
-
-                // delete operation if it is now empty
-                operations = operations.filter( function(g){ return g.leaves.length > 0; } );
-
-                // update data reference
-                data = selected_node.data.options;
-
-                // update drawing to reflect change to operations
-                restart();
-
-            } else if (oldOperationActsOn == "well" && newOperationActsOn == "container"){
-                // delete data from node
-                data.options = {};
-
-                // create new operation, and add node to it
-                operations.push({leaves: [selected_node], data: {}});
-
-                // update data reference
-                data = operations[operations.length - 1].data;
-
-                // update drawing to reflect change to operations
-                restart();
-
-            } else {
-               data.options = {};
-
-            }
+            // update drawing to reflect change to operations (really only need to redraGroups)
+            restart();
 
             selected_node.data.process_type = this.value;
+            selected_node.data.acts_on = process_types.filter(function(d){return d.value == this.value})[0];
 
             // redraw panel
             drawProcessPanel(selected_node, restart, form, deleteNode);

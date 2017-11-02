@@ -806,8 +806,9 @@ function network_editor() {
             menu.push({
                 title: 'Make separate process',
                 action: function (elm, d) {
+
                     var data = operations.filter(function(g){ return g.leaves.indexOf(d) != -1 })[0].data;
-                    operations.push({data: data, leaves: []});
+                    operations.push({data: JSON.parse(JSON.stringify(data)) , leaves: []});
                     var group = operations[operations.length - 1];
                     moveToOperation(d, group);
                 }
@@ -1194,7 +1195,7 @@ function network_editor() {
         selected_node = nodes[nodes.length - 1];
 
         // add group
-        operations.push({data: selected_node.data, leaves: [selected_node]});
+        operations.push({data: {}, leaves: [selected_node]});
         force.nodes(nodes).links(links);
 
         restart();
@@ -1216,7 +1217,8 @@ function network_editor() {
 
         var i = nodes.push({
             id: ++lastNodeId, type: type, x: width * Math.random(), y: height / 2, label: operation,
-            data: {operation: operation, options: {}, selection: [], num_duplicates: 1, container_name: "", process_type: "wait"},
+            data: {operation: operation, options: {}, selection: [], num_duplicates: 1, container_name: "",
+                   process_type: "wait", acts_on: "container"},
             parents: [sourceNode]
         });
         i--;
@@ -1288,13 +1290,13 @@ function network_editor() {
 
             for (var j = 0; j < operations[i].leaves.length; j++) {
                 leaves.push({
-                    data: operations[i].leaves[j].data,
-                    id: operations[i].leaves[j].id,
-                    bounds: operations[i].leaves[j].bounds
+                    //data: operations[i].leaves[j].data,
+                    id: operations[i].leaves[j].id//,
+                    //bounds: operations[i].leaves[j].bounds
                 })
             }
 
-            operation_list.push({leaves: leaves});
+            operation_list.push({leaves: leaves, data: operations[i].data});
         }
 
 

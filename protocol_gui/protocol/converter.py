@@ -6,9 +6,24 @@ class Converter:
         protocol_str = self.get_header(protocol, protocol_name)
 
         # do a topological sort on the operations graph, and process nodes in a consistent order
-        operation_nodes = filter(lambda x: x["type"] in ["zip", "cross", "process", "pool", "aliquot", "select"],
-                                 protocol["nodes"])
+        operation_nodes = filter(lambda x: x["type"] in ["zip", "cross", "pool", "aliquot", "select"], protocol["nodes"])
         processed_nodes = filter(lambda x: x["type"] == "resource", protocol["nodes"])
+
+        # handle process nodes separately
+        if "operations" in protocol.keys():
+            for operation in protocol["operations"]:
+                parents = set()
+
+                # aggregate parents across all nodes instantiating this process
+                for leaf in operation["leaves"]:
+                    node = filter(lambda x: x["id"] == leaf["id"], protocol["nodes"])[0]
+                    parents = parents.union(node["parentIds"])
+
+                operation_nodes.append({"parentIds": list(parents), "id": node["id"], "data": node["data"],
+                                        "type": "process", "operation": operation})
+
+                print "Added operation", {"parentIds": list(parents), "id": node["id"], "data": node["data"]}
+
 
         while len(operation_nodes) > 0:
             for node in operation_nodes:
@@ -173,7 +188,7 @@ class Converter:
         t_volume_two = {}
 
         if node["type"] == "process":
-            return self.get_process_string(node["data"]["command"])
+            return self.get_process_string(node["data"], node["operation"]["data"])
 
         elif node["type"] == "pool":
             protocol_str = ""
