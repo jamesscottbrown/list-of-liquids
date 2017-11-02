@@ -668,6 +668,10 @@ function network_editor() {
                 return color(i);
             });
 
+        operationRectangles.style("stroke-width", function(d){
+                return d.data.acts_on == "container" ? "1px" : "0px";
+            });
+
         // remove old operation rectangles
         operationRectangles.exit().remove();
     }

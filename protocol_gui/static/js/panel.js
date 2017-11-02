@@ -776,17 +776,19 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
             // delete data from node
             data.options = {};
 
+            var process_type = this.value;
+
             // update other nodes in same group
             var operation = operations.filter(function(o){return o.leaves.indexOf(selected_node) != -1; })[0];
             for (var i=0; i<operation.leaves.length; i++){
-                operation.leaves[i].data.process_type = this.value;
+                operation.leaves[i].data.process_type = process_type;
             }
+
+            selected_node.data.process_type = process_type;
+            operation.data.acts_on = process_types.filter(function(d){return d.value == process_type})[0].acts_on;
 
             // update drawing to reflect change to operations (really only need to redrawGroups)
             restart();
-
-            selected_node.data.process_type = this.value;
-            selected_node.data.acts_on = process_types.filter(function(d){return d.value == this.value})[0];
 
             // redraw panel
             drawProcessPanel(selected_node, restart, form, deleteNode);
