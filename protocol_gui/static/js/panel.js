@@ -750,7 +750,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
         // {label: "Autopick", value: "autopick"}, // this is also really a kind of transfer
         {label: "Thermocycle", value: "thermocycle", acts_on: "container"},
 
-        {label: "Flourescence", value: "flourescence", acts_on: "well"}, // https://developers.transcriptic.com/docs/spectrophotometry
+        {label: "Fluorescence", value: "fluorescence", acts_on: "well"}, // https://developers.transcriptic.com/docs/spectrophotometry
         {label: "Absorbance", value: "absorbance", acts_on: "well"}, // https://developers.transcriptic.com/docs/spectrophotometry
         {label: "Luminescence", value: "luminescence", acts_on: "well"}, // https://developers.transcriptic.com/docs/spectrophotometry
         {label: "Gel separate", value: "gel_separate", acts_on: "well"}
@@ -996,7 +996,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
             })
             .node().value = data.dataref;
 
-    } else if (process_type === "flourescence") {
+    } else if (process_type === "fluorescence") {
 
         // excitation, emission, num_flashes,
 
