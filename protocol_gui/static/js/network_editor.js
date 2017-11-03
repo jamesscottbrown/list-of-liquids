@@ -571,7 +571,7 @@ function network_editor() {
         if (selected_link) {
             path_group.selectAll('.link').filter(function (d) {
                 return d == selected_link
-            }).style('stroke', 'red');
+            }).style('stroke', '#ffc200');
         }
 
         // context-menu
@@ -614,7 +614,8 @@ function network_editor() {
             }).indexOf(d.data.container_name);
 
             return (container_index == -1) ? "#000" : color(container_index);
-        });
+        })
+        .style('text-decoration', '');
 
         // Color nodes of type ''resource'' based on data in resource object with same name, not node object
         rectLabels.filter(function (d) {
@@ -633,18 +634,18 @@ function network_editor() {
                 }
             });
 
-        // color single selected node red
+        // color single selected node yellow
         if (selected_node) {
             d3.selectAll('text').filter(function (d) {
                 return d == selected_node
-            }).style('fill', 'red');
+            }).style('fill', '#ffc200').style('text-decoration', 'underline wavy');
         }
 
-        //color set of selected nodes red
+        //color set of selected nodes yellow
         if (selectingGroup && selectedNodes) {
             d3.selectAll('text').filter(function (d) {
                 return selectedNodes.indexOf(d.id) != -1
-            }).style('fill', 'red');
+            }).style('fill', '#ffc200').style('text-decoration', 'underline wavy');;
         }
 
         d3.select("#resources").selectAll("li").style("color", function (d) {
