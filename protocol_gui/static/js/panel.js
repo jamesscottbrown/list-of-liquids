@@ -912,7 +912,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
             })
             .node().value = data.volume;
 
-        addFieldAndLabel(form, "schedule", "Schedule:", "input")
+        addFieldAndLabel(form, "schedule", "Schedule:", "textarea")
             .on("change", function () {
                 data.schedule = this.value
             })
