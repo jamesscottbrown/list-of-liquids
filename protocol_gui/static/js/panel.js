@@ -921,27 +921,8 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
         form.append("p")
             .text("Example: 3 times (12C for 5 min, 13C for 5 min), 6 times (20C for 2 min, 8C for 6 min)");
 
-        // groups
-        form.append("h2").text("Groups");
-
-        // append group
-        addFieldAndLabel(form, "repeats", "Repeats:", "input")
-            .on("change", function () {
-                data.repeats = this.value
-            })
-            .node().value = data.repeats;
-
-        addFieldAndLabel(form, "repeats", "Repeats:", "input")
-            .on("change", function () {
-                data.repeats = this.value
-            })
-            .node().value = data.repeats;
-
-        // 3 times (12C for 5 min, 13C for 5 min), 6 times
-
-        // dyes
-
-        // melting
+        form.append("p")
+            .text("Time may be in units 'min', 's', or 'h'");
 
     } else if (process_type === "absorbance") {
 
