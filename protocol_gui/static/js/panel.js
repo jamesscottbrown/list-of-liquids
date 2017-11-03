@@ -684,7 +684,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
     addFieldAndLabel(form, "mixBefore-repeats", "Repeats:", "input")
         .on("change", function () {
-            mixBeforeDiv_2.select("input").attr('disabled', this.value == 0 ? 'true' : null);
+            form.select("#mixBefore-volume").attr('disabled', this.value == 0 ? 'true' : null);
             selected_link.data.mixBefore.repeats = this.value;
             restart();
         })
@@ -700,7 +700,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
         .node().value = selected_link.data.mixBefore.volume;
 
     if (selected_link.data.mixBefore.repeats == 0) {
-        mixBeforeDiv_2.select("input").attr('disabled', true);
+        form.select("#mixBefore-volume").attr('disabled', true);
     }
 
     // Mix-after
@@ -708,7 +708,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
 
     addFieldAndLabel(form, "mixAfter-repeats", "Repeats:", "input")
         .on("change", function () {
-            mixAfterDiv_2.select("input").attr('disabled', this.value == 0 ? 'true' : null);
+            form.select("#mixAfter-volume").attr('disabled', this.value == 0 ? 'true' : null);
             selected_link.data.mixAfter.repeats = this.value;
             restart();
         })
@@ -722,7 +722,7 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
         .node().value = selected_link.data.mixAfter.volume;
 
     if (selected_link.data.mixAfter.repeats == 0) {
-        mixAfterDiv_2.select("input").attr('disabled', true);
+        form.select("#mixAfter-volume").attr('disabled', true);
     }
 
 
