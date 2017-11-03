@@ -49,11 +49,10 @@ function getContents(serialiseDiagram, queryNode, div, drawFunction) {
         },
         success: function (res) {
             result = res;
-            console.log(result);
             drawFunction(result, div, queryNode, serialiseDiagram);
         },
         error: function (result, textStatus) {
-            console.log(result);
+            console.log("Failed to get contents: " + result);
             console.log(textStatus);
         }
     });
@@ -369,7 +368,6 @@ function drawAliquotPanel(selected_node, links, restart, form, deleteNode, seria
         .on("change", function () {
             selected_node.label = this.value;
             restart();
-            console.log(nodes)
         });
 
 
@@ -527,11 +525,10 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
                         volumeInputs[0][0].value = new_volumes[0]; // update input box
                         redrawLinkLabels(); // update diagram
 
-                        console.log(result);
                         //placeWellsRectInner(result, parents[1], protocol_string, row, col, d, operation_index, placementFunc);
                     },
                     error: function (result, textStatus) {
-                        console.log(result);
+                        console.log("Failed to get contents: " + result);
                         console.log(textStatus);
                     }
                 });

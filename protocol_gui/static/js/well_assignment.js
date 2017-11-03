@@ -546,7 +546,7 @@ function placeWellsRect(placementFunc, row, col, d, node_id) {
             placeWellsRectInner(result, parents[1], protocol_string, row, col, d, node_id, placementFunc);
         },
         error: function (result, textStatus) {
-            console.log(result);
+            console.log("Failed to get contents: " + result);
             console.log(textStatus);
         }
     });
@@ -568,7 +568,7 @@ function placeWellsRectInner(contents1, queryNode, protocol_string, row, col, d,
             placementFunc(contents1, result, row, col, d, node_id);
         },
         error: function (result, textStatus) {
-            console.log(result);
+            console.log("Failed to get contents: " + result);
             console.log(textStatus);
         }
     });
@@ -616,9 +616,7 @@ function placeWellsRect2(contents1, contents2, row, col, d, node_id) {
 
         for (var j = 0; j < contents2.length; j++) {
             location = current_col + row;
-
-            console.log(location);
-
+            
             delete selected_container.contents[location];
             setWellContents(d.container, location, node_id, aliquot_index);
             aliquot_index += 1;

@@ -38,8 +38,6 @@ function network_editor() {
     var linkToChangeParent = false;
 
     if (protocol_string) {
-
-        console.log(protocol_string);
         var obj = JSON.parse(protocol_string);
 
         nodes = obj.nodes;
@@ -1330,10 +1328,10 @@ function network_editor() {
                 xhr.setRequestHeader("X-CSRFToken", csrf_token);
             },
             success: function () {
-                console.log("SUCCESS")
+                console.log("Saved")
             },
             error: function (result, textStatus) {
-                console.log(result);
+                console.log("Error saving: " + result);
                 console.log(textStatus);
             }
         })
@@ -1364,13 +1362,11 @@ function network_editor() {
         .on("keydown", function () {
             if (d3.event.key == "Shift") {
                 shiftDown = true;
-                console.log("ON")
             }
         })
         .on("keyup", function () {
             if (d3.event.key == "Shift") {
                 shiftDown = false;
-                console.log("OFF")
             }
         });
 

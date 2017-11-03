@@ -20,10 +20,9 @@ function validateOpenTrons() {
         },
         success: function (res) {
             unassigned_wells = res;
-            console.log(res);
         },
         error: function (result, textStatus) {
-            console.log(result);
+            console.log("Failed to check wells assigned: " + result);
             console.log(textStatus);
             errorsFound = true;
         }
