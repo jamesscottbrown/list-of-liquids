@@ -1,5 +1,5 @@
 from protocol_gui.protocol.converter import Converter
-
+import re
 
 class AutoProtocol(Converter):
 
@@ -69,3 +69,82 @@ if __name__ == '__main__':
 
     def get_distribute_string(self, pipette_name, volume, container, source, container_target, targets_str, options_str):
         return "    protocol.distribute(%s.well('%s'), %s.wells(%s), '%s:microliter'%s)\n" % (container, source, container_target, targets_str, volume, options_str)
+
+    def get_process_string(self, node_data, options, well_locations):
+        operation_type = node_data["process_type"]
+        container = node_data["container_name"]
+
+        wells = "%s.wells(%s)" % (container, well_locations)
+
+        if operation_type == "spin":
+            return "    protocol.spin(%s, %s, %s, flow_direction=None, spin_direction=None)\n" % (container, options["acceleration"], options["duration"])
+
+        elif operation_type == "cover":
+            return "    protocol.cover(%s, lid=%s)\n" % (container, options["lid_type"])
+
+        elif operation_type == "seal":
+            return "    protocol.seal(%s, type=None)\n" % (container)
+
+        elif operation_type == "unseal":
+            return "    protocol.unseal(%s)\n" % (container)
+
+        elif operation_type == "incubate":
+            return "    protocol.incubate(%s, %s, %s, shaking=False, co2=0, uncovered=False)" % (container, options["where"], options["duration"])
+
+        elif operation_type == "thermocycle":
+            # TODO: FIXME
+            groups = convert_schedule(options["schedule"])
+            return "    protocol.thermocycle(%s, %s, volume=%s, dataref=None, dyes=None, melting_start=None, melting_end=None, melting_increment=None, melting_rate=None)\n" % (container, groups, options["volume"])
+
+        elif operation_type == "absorbance":
+            return "    protocol.absorbance(%s, %s, %s, %s, flashes=%s, incubate_before=None, temperature=None)" % \
+                   (container, wells, options["wavelength"], options["dataref"], options["num_flashes"])
+
+        elif operation_type == "luminescence":
+            return "    protocol.luminescence(%s, %s, incubate_before=None, temperature=None)" % \
+                   (container, wells, options["dataref"])
+
+        elif operation_type == "gel_separate":
+            return "    protocol.gel_separate(%s, %s, %s, %s, %s, dataref)" % \
+                   (wells, options["volume"], options["matrix"], options["ladder"], options["duration"], options["dataref"])
+            # WHY no container reference?
+
+        elif operation_type == "fluorescence":
+            return "    protocol.fluorescence(%s, %s, %s, %s, %s, flashes=%s, temperature=%s, gain=None, incubate_before=None)" % \
+                   (container, options["wells"], options["excitation"], options["emission"], options["dataref"], options["num_flashes"], options["temperature"])
+
+        else:
+            return "    # FIXME: operation '" + operation_type + "' not implemented for AutoProtocol"
+
+
+def convert_schedule(schedule_string):
+
+    # Convert a schedule like " 3 times (12C for 5 min, 13C for 5 min), 6 times (20C for 2 min, 8C for 6 min)"
+    # Into an object like:
+    #[{ "cycles": 3,
+    #   "steps": [{"duration": "5:minute", "temperature": "12:celcius"}, {"duration": "5:minute", "temperature": "13:celcius"}]
+    #  },{
+    #    "cycles": 6,
+    #    "steps": [{"duration": "2:minute", "temperature": "20:celcius"}, { "duration": "6:minute)", "temperature": "8:celcius"}]
+    #}]
+
+    groups = []
+
+    for group_string in schedule_string.split("),"): # can't split on just '',' as this appears within parens
+        m = re.search('(\d.+?).+?\((.+)\)?', group_string.strip())
+
+        num_repeats = int(m.group(0)[0])
+
+        steps = []
+        print "m.groups is ", m.groups()
+        for step_string in m.groups(0)[1].split(","):
+            print "step_string is", step_string
+            (temperature, duration) = step_string.split(" for ")
+            temperature = temperature.strip()[0:-1] + ":celcius"
+
+            duration = duration.strip().replace(' ', ':').lower()
+            duration = duration.replace('s', 'second').replace('min', 'minute').replace('h', 'hour')
+            steps.append({"temperature": temperature, "duration": duration})
+
+        groups.append({"cycles": num_repeats, "steps": steps})
+    return groups

@@ -10,6 +10,8 @@ from protocol_gui.protocol.converter import Converter
 class OpenTrons(Converter):
 
     def get_header(self, protocol, protocol_name):
+
+        self.pipette_name = protocol["pipettes"][0]["name"]
         opentrons_protocol = ""
 
         opentrons_protocol += "from opentrons import containers, instruments\n\n"
@@ -86,5 +88,14 @@ class OpenTrons(Converter):
     def get_distribute_string(self, pipette_name, volume, container, source, container_target, targets_str, options_str):
         return "%s.distribute(%s, %s.well('%s'), %s.wells(%s)%s)\n" % (pipette_name, volume, container, source, container_target, targets_str, options_str)
 
-    def get_process_string(self, command_string):
-        return command_string.rstrip() + "\n"
+    def get_process_string(self, node_data, options, well_locations):
+        operation_type = node_data["process_type"]
+
+        if operation_type == "wait":
+            return self.pipette_name + ".delay(seconds=" + options["duration"] + ")\n"
+        elif operation_type == "magdeck_on":
+            return "mag_deck.engage()\n"
+        elif operation_type == "magdeck_off":
+            return "mag_deck.disengage()\n"
+        else:
+            return "# FIXME: operation '" + operation_type + "' not implemented for OpenTrons"

@@ -188,7 +188,18 @@ class Converter:
         t_volume_two = {}
 
         if node["type"] == "process":
-            return self.get_process_string(node["data"], node["operation"]["data"])
+            # find parent node's well assignments
+            container_name = parent_nodes[0]["data"]["container_name"]
+            container_contents = filter(lambda x: x["name"] == container_name, protocol["containers"])[0]["contents"]
+
+            well_locations = []
+            for well_address in container_contents:
+                for contents in container_contents[well_address]:
+                    if int(contents["node_id"]) == int(parent_nodes[0]["id"]):
+                        well_locations.append(well_address)
+
+
+            return self.get_process_string(node["data"], node["operation"]["data"], well_locations)
 
         elif node["type"] == "pool":
             protocol_str = ""
