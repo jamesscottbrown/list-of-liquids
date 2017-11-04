@@ -890,14 +890,28 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
 
             var process_type = this.value;
 
-            // update other nodes in same group
+            var new_acts_on = process_types.filter(function(d){return d.value == process_type})[0].acts_on;
             var operation = operations.filter(function(o){return o.leaves.indexOf(selected_node) != -1; })[0];
-            for (var i=0; i<operation.leaves.length; i++){
-                operation.leaves[i].data.process_type = process_type;
+
+            if (operation.data.acts_on == "container" && new_acts_on == "well"){
+                // move all other nodes in operation into individual operations
+
+                for (var i=0; i<operation.leaves.length; i++){
+                    if (operation.leaves[i] != selected_node){
+                        operation.leaves[i].data.process_type = process_type;
+                        operations.push({data: {acts_on: new_acts_on}, leaves: [operation.leaves[i]]});
+                    }
+                }
+                operation.leaves = [selected_node];
+            } else {
+                // update other nodes in same group
+                for (var i=0; i<operation.leaves.length; i++){
+                    operation.leaves[i].data.process_type = process_type;
+                }
             }
 
             selected_node.data.process_type = process_type;
-            operation.data.acts_on = process_types.filter(function(d){return d.value == process_type})[0].acts_on;
+            operation.data.acts_on = new_acts_on;
 
             // update drawing to reflect change to operations (really only need to redrawGroups)
             restart();

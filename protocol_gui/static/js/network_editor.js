@@ -469,6 +469,10 @@ function network_editor() {
                         if (mousedown_node.data.process_type != mouseup_node.data.process_type){ return; }
 
                         var g = operations.filter(function(g){return g.leaves.indexOf(mouseup_node) != -1; })[0];
+
+                        // do not merge operations if they acts on wells rather than containers
+                        if (g.data.acts_on == "well"){ return; }
+
                         moveToOperation(mousedown_node, g);
                  } else {
                      // add link to graph (update if exists)
