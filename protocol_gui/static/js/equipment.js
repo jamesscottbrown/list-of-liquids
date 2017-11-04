@@ -1,6 +1,9 @@
 var containers, pipettes, resources;
 
 function update_container_list() {
+
+    containers = containers.sort(function(a,b){ return a.type < b.type; });
+
     d3.select("#containers").selectAll("li").remove();
 
     var c = d3.select("#containers").select("ul").selectAll("li")
