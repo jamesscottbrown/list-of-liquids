@@ -1208,7 +1208,7 @@ function network_editor() {
         selected_node = nodes[nodes.length - 1];
 
         // add group
-        operations.push({data: {}, leaves: [selected_node]});
+        operations.push({data: {options:{duration: "120"}}, leaves: [selected_node]});
         force.nodes(nodes).links(links);
 
         restart();

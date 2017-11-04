@@ -847,25 +847,23 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
 
 
     var process_types = [
-        {label: "Wait", value: "wait", acts_on: "container"},
-        {label: "Turn magdeck on", value: "magdeck_on", acts_on: "container"},  // no extra options
-        {label: "Turn magdeck off", value: "magdeck_off", acts_on: "container"}, // no extra options
+        {label: "Wait", value: "wait", acts_on: "container", default:{duration: 120}},
+        {label: "Turn magdeck on", value: "magdeck_on", acts_on: "container", default:{}},
+        {label: "Turn magdeck off", value: "magdeck_off", acts_on: "container", default:{}},
 
-        {label: "Centrifuge", value: "spin", acts_on: "container"},
+        {label: "Centrifuge", value: "spin", acts_on: "container", default:{acceleration:"1000:g", duration:"20:minute"}},
 
-        {label: "Cover", value: "cover", acts_on: "container"},
-        {label: "Uncover", value: "uncover", acts_on: "container"}, // no extra options
-        {label: "Seal", value: "seal", acts_on: "container"}, // no extra options
-        {label: "Unseal", value: "unseal", acts_on: "container"}, // no extra options
-        {label: "Incubate", value: "incubate", acts_on: "container"},
-        // {label: "Spread", value: "spread"}, // this is a to/from liquid transfer
-        // {label: "Autopick", value: "autopick"}, // this is also really a kind of transfer
-        {label: "Thermocycle", value: "thermocycle", acts_on: "container"},
+        {label: "Cover", value: "cover", acts_on: "container", default: {lid_type: "standard"}},
+        {label: "Uncover", value: "uncover", acts_on: "container", default:{}},
+        {label: "Seal", value: "seal", acts_on: "container", default:{}},
+        {label: "Unseal", value: "unseal", acts_on: "container", default:{}},
+        {label: "Incubate", value: "incubate", acts_on: "container", default:{where: "warm_37", duration:"1:hour", shaking: false}},
+        {label: "Thermocycle", value: "thermocycle", acts_on: "container", default:{volume: "50:microliter", schedule:""}},
 
-        {label: "Fluorescence", value: "fluorescence", acts_on: "well"}, // https://developers.transcriptic.com/docs/spectrophotometry
-        {label: "Absorbance", value: "absorbance", acts_on: "well"}, // https://developers.transcriptic.com/docs/spectrophotometry
-        {label: "Luminescence", value: "luminescence", acts_on: "well"}, // https://developers.transcriptic.com/docs/spectrophotometry
-        {label: "Gel separate", value: "gel_separate", acts_on: "well"}
+        {label: "Fluorescence", value: "fluorescence", acts_on: "well", default:{excitation:"587:nanometer", emission:"610:nanometer", num_flashes:25, dataref:"", temperature:"18:celsius"}},
+        {label: "Absorbance", value: "absorbance", acts_on: "well", default:{wavelength:"600:nanometer", num_flashes: "25", dataref:""}},
+        {label: "Luminescence", value: "luminescence", acts_on: "well", default:{dataref:""}},
+        {label: "Gel separate", value: "gel_separate", acts_on: "well", default:{volume:"10:microliter", matrix:"agarose(8,0.8%)", ladder:"ladder1", duration:"11:minute", dataref:""}}
         ];
 
     // select object storing options for this operation
@@ -890,7 +888,8 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
 
             var process_type = this.value;
 
-            var new_acts_on = process_types.filter(function(d){return d.value == process_type})[0].acts_on;
+            var new_process = process_types.filter(function(d){return d.value == process_type})[0];
+            var new_acts_on = new_process.acts_on;
             var operation = operations.filter(function(o){return o.leaves.indexOf(selected_node) != -1; })[0];
 
             if (operation.data.acts_on == "container" && new_acts_on == "well"){
@@ -911,7 +910,8 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
             }
 
             selected_node.data.process_type = process_type;
-            operation.data.acts_on = new_acts_on;
+            data.acts_on = new_acts_on;
+            data.options = new_process.default;
 
             // update drawing to reflect change to operations (really only need to redrawGroups)
             restart();
@@ -928,34 +928,34 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
         .text(function(d){ return d.label; });
     type_select.node().value = selected_node.data.process_type;
 
-
+    var opts = data.options;
     if (process_type === "wait"){
 
-        addFieldAndLabel(form, "duration", "Duration:", "input")
+        addFieldAndLabel(form, "duration", "Duration/s:", "input")
             .attr("type", "text")
             .on("change", function () {
-                data.duration = this.value;
+                opts.duration = this.value;
                 restart();
             })
-            .node().value = data.duration;
+            .node().value = opts.duration;
 
     } else if (process_type === "spin"){
 
         addFieldAndLabel(form, "duration", "Duration:", "input")
             .attr("type", "text")
             .on("change", function () {
-                data.duration = this.value;
+                opts.duration = this.value;
                 restart();
             })
-            .node().value = data.duration;
+            .node().value = opts.duration;
 
         addFieldAndLabel(form, "acceleration", "Acceleration:", "input")
             .attr("type", "text")
             .on("change", function () {
-                data.acceleration = this.value;
+                opts.acceleration = this.value;
                 restart();
             })
-            .node().value = data.acceleration;
+            .node().value = opts.acceleration;
 
     } else if (process_type === "cover") {
         var lid_types = [
@@ -966,7 +966,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
         var lid_select = addFieldAndLabel(form, "lid-type", "Lid type:", "select")
             .attr("type", "text")
             .on("change", function () {
-                data.lid_type = this.value
+                opts.lid_type = this.value
             });
 
         lid_select.selectAll("option").data(lid_types)
@@ -975,7 +975,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
             .attr("value", function(d){ return d.value; })
             .text(function(d){ return d.label; });
 
-        lid_select.node().value = selected_node.data.lid_type;
+        lid_select.node().value = opts.lid_type;
 
     } else if (process_type === "incubate") {
         // where, duration, shaking
@@ -985,7 +985,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
         var where_select = addFieldAndLabel(form, "where", "Where:", "select")
             .attr("type", "text")
             .on("change", function () {
-                data.where = this.value
+                opts.where = this.value
             });
 
         where_select.selectAll("option").data(where_options)
@@ -998,15 +998,15 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
                 return d;
             });
 
-        where_select.node().value = selected_node.data.where;
+        where_select.node().value = opts.where;
 
         addFieldAndLabel(form, "duration", "Duration:", "input")
             .attr("type", "text")
             .on("change", function () {
-                data.duration = this.value;
+                opts.duration = this.value;
                 restart();
             })
-            .node().value = data.duration;
+            .node().value = opts.duration;
 
 
         var shaking_options = [
@@ -1015,7 +1015,7 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
 
         var shaking_select = addFieldAndLabel(form, "shaking_options", "Shaking:", "input")
             .on("change", function () {
-                data.shaking = this.value
+                opts.shaking = this.value
             });
 
         shaking_select.selectAll("option").data(shaking_options)
@@ -1028,21 +1028,21 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
                 return d;
             });
 
-        shaking_select.node().value = data.shaking;
+        shaking_select.node().value = opts.shaking;
 
     } else if (process_type === "thermocycle") {
 
         addFieldAndLabel(form, "volume", "Volume:", "input")
             .on("change", function () {
-                data.volume = this.value
+                opts.volume = this.value
             })
-            .node().value = data.volume;
+            .node().value = opts.volume;
 
         addFieldAndLabel(form, "schedule", "Schedule:", "textarea")
             .on("change", function () {
-                data.schedule = this.value
+                opts.schedule = this.value
             })
-            .node().value = data.schedule;
+            .node().value = opts.schedule;
 
         form.append("p")
             .text("Example: 3 times (12C for 5 min, 13C for 5 min), 6 times (20C for 2 min, 8C for 6 min)");
@@ -1056,21 +1056,21 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
 
         addFieldAndLabel(form, "wavelength", "Wavelength (nm):", "input")
             .on("change", function () {
-                data.wavelength = this.value
+                opts.wavelength = this.value
             })
-            .node().value = data.wavelength;
+            .node().value = opts.wavelength;
 
         addFieldAndLabel(form, "num_flashes", "Number of flashes:", "input")
             .on("change", function () {
-                data.num_flashes = this.value
+                opts.num_flashes = this.value
             })
-            .node().value = data.num_flashes;
+            .node().value = opts.num_flashes;
 
         addFieldAndLabel(form, "dataref", "Dataref:", "input")
             .on("change", function () {
-                data.dataref = this.value
+                opts.dataref = this.value
             })
-            .node().value = data.dataref;
+            .node().value = opts.dataref;
 
     } else if (process_type === "fluorescence") {
 
@@ -1078,73 +1078,73 @@ function drawProcessPanel(selected_node, restart, form, deleteNode) {
 
         addFieldAndLabel(form, "excitation", "Excitation wavelength (nm):", "input")
             .on("change", function () {
-                data.excitation = this.value
+                opts.excitation = this.value
             })
-            .node().value = data.excitation;
+            .node().value = opts.excitation;
 
         addFieldAndLabel(form, "emission", "Emission wavelength (nm):", "input")
             .on("change", function () {
-                data.emission = this.value
+                opts.emission = this.value
             })
-            .node().value = data.emission;
+            .node().value = opts.emission;
 
         addFieldAndLabel(form, "num_flashes", "Number of flashes:", "input")
             .on("change", function () {
-                data.num_flashes = this.value
+                opts.num_flashes = this.value
             })
-            .node().value = data.num_flashes;
+            .node().value = opts.num_flashes;
 
         addFieldAndLabel(form, "dataref", "Dataref:", "input")
             .on("change", function () {
-                data.dataref = this.value
+                opts.dataref = this.value
             })
-            .node().value = data.dataref;
+            .node().value = opts.dataref;
 
         addFieldAndLabel(form, "temperature", "Temperature:", "input")
             .on("change", function () {
-                data.temperature = this.value
+                opts.temperature = this.value
             })
-            .node().value = data.temperature;
+            .node().value = opts.temperature;
 
     } else if (process_type === "luminescence") {
 
         addFieldAndLabel(form, "dataref", "Dataref:", "input")
             .on("change", function () {
-                data.dataref = this.value
+                opts.dataref = this.value
             })
-            .node().value = data.dataref;
+            .node().value = opts.dataref;
 
     } else if (process_type === "gel_separate") {
 
             addFieldAndLabel(form, "volume", "Volume:", "input")
             .on("change", function () {
-                data.volume = this.value
+                opts.volume = this.value
             })
-            .node().value = data.volume;
+            .node().value = opts.volume;
 
             addFieldAndLabel(form, "matrix", "Matrix:", "input")
             .on("change", function () {
-                data.matrix = this.value
+                opts.matrix = this.value
             })
-            .node().value = data.matrix;
+            .node().value = opts.matrix;
 
             addFieldAndLabel(form, "ladder", "Ladder:", "input")
             .on("change", function () {
-                data.ladder = this.value
+                opts.ladder = this.value
             })
-            .node().value = data.ladder;
+            .node().value = opts.ladder;
 
             addFieldAndLabel(form, "duration", "Duration:", "input")
             .on("change", function () {
-                data.duration = this.value
+                opts.duration = this.value
             })
-            .node().value = data.duration;
+            .node().value = opts.duration;
 
             addFieldAndLabel(form, "dataref", "Dataref:", "input")
             .on("change", function () {
-                data.dataref = this.value
+                opts.dataref = this.value
             })
-            .node().value = data.dataref;
+            .node().value = opts.dataref;
 
     }
     

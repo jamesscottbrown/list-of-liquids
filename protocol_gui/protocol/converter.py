@@ -199,7 +199,7 @@ class Converter:
                         well_locations.append(well_address)
 
 
-            return self.get_process_string(node["data"], node["operation"]["data"], well_locations)
+            return self.get_process_string(node["data"], node["operation"]["data"]["options"], well_locations)
 
         elif node["type"] == "pool":
             protocol_str = ""
