@@ -390,9 +390,7 @@ function drawAliquotPanel(selected_node, links, restart, form, deleteNode, seria
 }
 
 function drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form) {
-
-    form.selectAll("div").remove();
-    form.selectAll("h2").remove();
+    form.node().innerHTML = "";
 
     var title;
     if (selected_link.source.type == "resource") {
@@ -404,6 +402,121 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     form.append("h2").style().text(title);
 
 
+    // Choice between pipette/pick/spread
+    var transferTypeSelect = addFieldAndLabel(form, "transfer_kind", "Type of transfer:", "select")
+        .attr("type", "text")
+        .on("change", function () {
+            selected_link.data.transfer_type = this.value;
+            drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form);
+        });
+
+    var transfer_types = [{label: "Pipette", value: "pipette", drawFunc: drawPipetteTransferPanel },
+        {label: "Pick colonies", value: "pick", drawFunc: drawTransferPickPanel},
+        {label: "Spread onto agar", value: "spread", drawFunc: drawTransferSpreadPanel}];
+
+    transferTypeSelect.selectAll("option").data(transfer_types)
+        .enter()
+        .append("option")
+        .attr("value", function (d) {
+            return d.value;
+        })
+        .text(function (d) {
+            return d.label;
+        });
+    transferTypeSelect.node().value = selected_link.data.transfer_type;
+
+    var transfer_type = transfer_types.filter(function(t){ return t.value == selected_link.data.transfer_type})[0];
+    transfer_type.drawFunc(selected_node, selected_link, links, restart, redrawLinkLabels, form);
+}
+
+function drawTransferPickPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form) {
+
+       addFieldAndLabel(form, "min_colonies", "Minimum colonies to pick:", "input")
+        .attr("type", "text")
+        .on("change", function () {
+            selected_link.data.min_colonies = this.value;
+        })
+        .attr("value", selected_link.data.min_colonies);
+}
+
+
+function drawTransferSpreadPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form){
+    
+    // Form to adjust volumes
+    var volumes = selected_link.data.volumes;
+
+    var div2 = form.append("div");
+
+    var volumeDivs = div2.selectAll("div")
+        .data(volumes)
+        .enter()
+        .append("div")
+        .classed("form-group", true);
+
+    var label = volumeDivs.append("label")
+        .classed("control-label", true)
+        .classed("col-sm-5", true)
+        .attr("for", "volume");
+
+    label.append("b").text("Volume:");
+
+    volumeDivs.append("input")
+        .classed("control-input", true)
+        .classed("col-sm-5", true)
+        .attr("name", "value")
+        .attr("value", function (d) {
+            return d;
+        })
+        .on("change", function () {
+            var new_volumes = [];
+            var volumeInputs = volumeDivs.selectAll("input");
+            for (var i = 0; i < volumeInputs.length; i++) {
+                new_volumes.push(volumeInputs[i][0].value)
+            }
+
+
+            var protocol_string = serialiseDiagram();
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: window.location.href + "contents",
+                    dataType: 'json',
+                    async: true,
+                    data: JSON.stringify({protocol_string: protocol_string, selected_node: selected_link.source.id}),
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                    },
+                    success: function (res) {
+                        result = res;
+
+                        // volumes is an array that contains one element
+                        // if node at source of arrow contains only one thing, don't cast to float, allowing multiple volumes as a comma-separated string like ["10,20"]
+                        if (res[0].length > 1){
+                            new_volumes[0] = parseFloat(new_volumes[0]);
+                            selected_link.data.volumes = new_volumes;
+                        } else {
+                            selected_link.data.volumes = new_volumes;
+                        }
+
+                        volumeInputs[0][0].value = new_volumes[0]; // update input box
+                        redrawLinkLabels(); // update diagram
+
+                        //placeWellsRectInner(result, parents[1], protocol_string, row, col, d, operation_index, placementFunc);
+                    },
+                    error: function (result, textStatus) {
+                        console.log("Failed to get contents: " + result);
+                        console.log(textStatus);
+                    }
+                });
+
+
+            redrawLinkLabels();
+        });
+
+}
+
+
+function drawPipetteTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form) {
     // Form to set whether we are adding to this
     var containerSelect = addFieldAndLabel(form, "container", "Add to these wells:", "select")
         .on("change", function () {
@@ -721,7 +834,6 @@ function drawTransferPanel(selected_node, selected_link, links, restart, redrawL
     if (selected_link.data.mixAfter.repeats == 0) {
         form.select("#mixAfter-volume").attr('disabled', true);
     }
-
 
 }
 
