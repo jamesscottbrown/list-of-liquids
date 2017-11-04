@@ -390,6 +390,9 @@ function drawAliquotPanel(selected_node, links, restart, form, deleteNode, seria
 }
 
 function drawTransferPanel(selected_node, selected_link, links, restart, redrawLinkLabels, form) {
+
+    if (selected_link.target.type == "process"){ return; }
+
     form.node().innerHTML = "";
 
     var title;
