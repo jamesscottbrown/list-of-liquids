@@ -62,5 +62,52 @@ class English(Converter):
     def get_consolidate_string(self, pipette_name, volume, container_one, source_str, container_target, target, options_str):
         return "* Consolidate/pool %s from %s of %s to %s of %s\n" % (volume, source_str, container_one, target, container_target)
 
-    def get_process_string(self, command):
-        return "* Perform operation ``%s``\n" % command
+    def get_process_string(self, node_data, options, well_locations):
+        operation_type = node_data["process_type"]
+        container = node_data["container_name"]
+
+        wells = "%s.wells(%s)" % (container, well_locations)
+
+        if operation_type == "spin":
+            return "* Spin container %s at a speed of %s for %s\n" % (container, options["acceleration"], options["duration"])
+
+        elif operation_type == "cover":
+            return "* Cover container %s with a lid of type '%s'\n" % (container, options["lid_type"])
+
+        elif operation_type == "seal":
+            return "* Seal container %s\n" % (container)
+
+        elif operation_type == "unseal":
+            return "* Un-seal container %s\n" % (container)
+
+        elif operation_type == "incubate":
+            return "* Incubate container %s at a temeprature of %s for %s \n" % (container, options["where"], options["duration"])
+
+        elif operation_type == "thermocycle":
+            return "* Thermocycle container %s (%s), using volume %s\n" % (container, options["schedule"], options["volume"])
+
+        elif operation_type == "absorbance":
+            return "* Measure absorbance of wells %s from container %s at wavelength %s using %s flashes, recording the result as %s \n" % \
+                   (wells, container, options["wavelength"], options["num_flashes"] , options["dataref"])
+
+        elif operation_type == "luminescence":
+            return "* Measure luminescence of wells %s from container %s, recording result as %s \n" % \
+                   (wells, container, options["dataref"])
+
+        elif operation_type == "gel_separate":
+            return "* Perform gel-separation of %s of sample taken from wells %s of container %s (matrix %s, ladder %s, duration %s), recording results as %s \n" % \
+                   (options["volume"], wells, options["matrix"], options["ladder"], options["duration"], options["dataref"])
+
+        elif operation_type == "fluorescence":
+            return "* Measure absorbance of wells %s from container %s at wavelength %s when stimulated using %s flashes at %s, with terature %s, recording the result as %s \n" % \
+                   (options["wells"], container, options["emission"], options["num_flashes"],  options["excitation"], options["temperature"], options["dataref"])
+
+        else:
+            return "    * **FIXME: operation '" + operation_type + "' not implemented for English-language protocol export** \n"
+
+    def get_pick_string(self, container, source_wells, container_target, target_wells, min_colonies):
+        return "* Autopick a minimum of %s colonies from well %s of %s to wells %s of %s \n" % (min_colonies, source_wells, container, target_wells, container_target)
+
+    def get_spread_string(self, container, source_wells, container_target, target_wells, volume):
+        return "* Spread %s from well %s of %s to wells %s of %s \n" % (volume, source_wells, container, target_wells, container_target)
+
