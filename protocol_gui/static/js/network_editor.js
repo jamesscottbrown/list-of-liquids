@@ -806,9 +806,29 @@ function network_editor() {
                 var node = nodes.filter(function (n) {
                     return n.id == d.id
                 })[0];
-                takeAliquot(node);
+                addTransferNode(node, 'aliquot');
             }
         });
+        menu.push({
+            title: 'Spread',
+            action: function (elm, d) {
+                var node = nodes.filter(function (n) {
+                    return n.id == d.id
+                })[0];
+                addTransferNode(node, 'spread');
+            }
+        });
+        menu.push({
+            title: 'Pick colonies',
+            action: function (elm, d) {
+                var node = nodes.filter(function (n) {
+                    return n.id == d.id
+                })[0];
+                addTransferNode(node, 'pick');
+            }
+        });
+
+
 
         if (d.type == "process"){
 
@@ -1240,17 +1260,22 @@ function network_editor() {
         return i;
     }
 
-    function takeAliquot(node) {
+    function addTransferNode(node, tranferType) {
         var i = nodes.push({
-            id: ++lastNodeId, type: "aliquot", x: width * Math.random(), y: height / 2, label: "aliquot",
+            id: ++lastNodeId, type: tranferType, x: width * Math.random(), y: height / 2, label: tranferType,
             parents: [node], data: {container_name: '', num_duplicates: 1}
         });
         i--;
 
+        var link_data = getDefaultLinkData(false);
+        if (tranferType == "pick"){
+            link_data.volumes=[];
+        }
+
         links.push({
             source: node,
             target: nodes[i],
-            data: getDefaultLinkData(false)
+            data: link_data
         });
 
         selected_link = null;
