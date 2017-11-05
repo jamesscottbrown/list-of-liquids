@@ -121,7 +121,7 @@ def process_node(protocol_obj, node_id):
         components2 = get_constituent_aliquots(protocol_obj, incident_links[1])
         return cross(components1, components2) * int(node["data"]["num_duplicates"])
 
-    elif node["type"] == "aliquot":
+    elif node["type"] in ["aliquot", "spread", "pick"]:
 
         # aliquot has only one input
         components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
@@ -177,7 +177,11 @@ def get_constituent_aliquots(protocol_obj, link):
 
         volume = "all"
     else:
-        volume = link["data"]["volumes"][0]
+
+        if len(link["data"]["volumes"]) > 0:
+            volume = link["data"]["volumes"][0]
+        else:
+            volume = 0.1 # nominal volume, needed e.g. for picked colony
 
     input_volume_tuples = []
     if "," in str(volume):
