@@ -70,6 +70,12 @@ if __name__ == '__main__':
     def get_distribute_string(self, pipette_name, volume, container, source, container_target, targets_str, options_str):
         return "    protocol.distribute(%s.well('%s'), %s.wells(%s), '%s:microliter'%s)\n" % (container, source, container_target, targets_str, volume, options_str)
 
+    def get_pick_string(self, container, source_wells, container_target, target_wells, min_colonies):
+        return "    protocol.autopick(%s.wells(%s), %s.wells(%s), min_abort=%s)\n" % (container, source_wells, container_target, target_wells, min_colonies)
+
+    def get_spread_string(self, container, source_wells, container_target, target_wells, volume):
+        return "    protocol.spread(%s.wells(%s), %s.wells(%s), %s)\n" % (container, source_wells, container_target, target_wells, volume)
+
     def get_process_string(self, node_data, options, well_locations):
         operation_type = node_data["process_type"]
         container = node_data["container_name"]
@@ -105,8 +111,8 @@ if __name__ == '__main__':
                    (container, wells, options["dataref"])
 
         elif operation_type == "gel_separate":
-            return "    protocol.gel_separate(%s, %s, %s, %s, %s, dataref)" % \
-                   (wells, options["volume"], options["matrix"], options["ladder"], options["duration"], options["dataref"])
+            return "    protocol.gel_separate(%s.wells(%s), %s, %s, %s, %s, dataref)" % \
+                   (container, wells, options["volume"], options["matrix"], options["ladder"], options["duration"], options["dataref"])
             # WHY no container reference?
 
         elif operation_type == "fluorescence":
@@ -115,7 +121,6 @@ if __name__ == '__main__':
 
         else:
             return "    # FIXME: operation '" + operation_type + "' not implemented for AutoProtocol"
-
 
 def convert_schedule(schedule_string):
 

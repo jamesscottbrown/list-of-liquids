@@ -99,3 +99,9 @@ class OpenTrons(Converter):
             return "mag_deck.disengage()\n"
         else:
             return "# FIXME: operation '" + operation_type + "' not implemented for OpenTrons"
+
+    def get_pick_string(self, container, source_wells, container_target, target_wells, min_colonies):
+        return "# Colony picking operations are not supported in OpenTrons \n"
+
+    def get_spread_string(self, container, source_wells, container_target, target_wells, volume):
+        return "# Spreading operations are not supported in OpenTrons \n"

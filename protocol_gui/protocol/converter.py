@@ -6,7 +6,7 @@ class Converter:
         protocol_str = self.get_header(protocol, protocol_name)
 
         # do a topological sort on the operations graph, and process nodes in a consistent order
-        operation_nodes = filter(lambda x: x["type"] in ["zip", "cross", "pool", "aliquot", "select"], protocol["nodes"])
+        operation_nodes = filter(lambda x: x["type"] in ["zip", "cross", "pool", "aliquot", "select", "pick", "spread"], protocol["nodes"])
         processed_nodes = filter(lambda x: x["type"] == "resource", protocol["nodes"])
 
         # handle process nodes separately
@@ -157,7 +157,12 @@ class Converter:
 
         link_one_data = filter(lambda x: x["source_id"] == node["parentIds"][0] and x["target_id"] == node["id"],
                                protocol["links"])[0]["data"]
-        volumes_one = str(link_one_data["volumes"][0]).split(",")
+
+        if len(link_one_data["volumes"]) > 0:
+            volumes_one = str(link_one_data["volumes"][0]).split(",")
+        else:
+            volumes_one = [0.1] # for pick operation, no volume is set
+
         container_one = self.sanitise_name(parent_nodes[0]["data"]["container_name"])
         pipette_name_one = self.sanitise_name(link_one_data["pipette_name"])
         locations_one = self.get_locations(protocol, parent_nodes[0])
@@ -266,6 +271,34 @@ class Converter:
             return self.do_transfer(source_one, container_one, t_volume_one, pipette_name_one, link_one_data,
                                           source_two, container_two, t_volume_two, pipette_name_two, link_two_data,
                                           locations_result, container_target)
+
+        elif node["type"] == "pick":
+
+            pick_string = ""
+            well_index = 0
+            for repeat_number in range(0, num_duplicates):
+                for i in range(0, len(locations_one)):
+                    pick_string += self.get_pick_string(container_one, locations_one[i], container_target, locations_result[well_index], node["data"]["min_colonies"])
+                    well_index += 1
+            return pick_string
+
+        elif node["type"] == "spread":
+            # extend locations to match length of volumes (if we are crossing a single well with a list of volumes)
+            if len(locations_one) == 1:
+                locations_one = locations_one * len(volumes_one)
+            elif len(volumes_one) == 1:
+                volumes_one = volumes_one * len(locations_one)
+
+            well_index = 0
+            spread_string = ""
+            for repeat_number in range(0, num_duplicates):
+
+                for i in range(0, len(locations_one)):
+                    spread_string += self.get_spread_string(container_one, locations_one[i], container_target,
+                                                            locations_result[well_index], volumes_one[i])
+                    well_index += 1
+
+            return spread_string
 
         elif node["type"] == "select" or node["type"] == "aliquot":
 
