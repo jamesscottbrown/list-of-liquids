@@ -1270,6 +1270,7 @@ function network_editor() {
         var link_data = getDefaultLinkData(false);
         if (tranferType == "pick"){
             link_data.volumes=[];
+            nodes[i].data.min_colonies = 1;
         }
 
         links.push({
