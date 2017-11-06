@@ -107,6 +107,11 @@ class Converter:
     @staticmethod
     def get_locations(protocol, node):
 
+        if node["type"] == "process":
+            parent_node_id = node["parentIds"][0]
+            parent = filter(lambda x: x["id"] == parent_node_id, protocol["nodes"])[0]
+            return Converter.get_locations(protocol, parent)
+
         # process nodes have no container
         if "container_name" not in node["data"].keys() or not node["data"]["container_name"]:
             return []
