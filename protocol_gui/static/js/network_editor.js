@@ -978,15 +978,15 @@ function network_editor() {
     /* Functions that edit the graph structure */
     function changeParent(newParent){
 
-        // update link
-        linkToChangeParent.source = newParent;
-
         // update list of parent stored in child node
         if (linkToChangeParent.target.parents[0] == linkToChangeParent.source){
             linkToChangeParent.target.parents[0] = newParent;
         } else {
            linkToChangeParent.target.parents[1] = newParent;
         }
+
+        // update link
+        linkToChangeParent.source = newParent;
 
         // redraw
         linkToChangeParent = false;
