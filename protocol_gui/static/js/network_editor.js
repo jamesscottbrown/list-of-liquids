@@ -834,24 +834,25 @@ function network_editor() {
         });
 
 
+        if (d.type == "process") {
 
-        if (d.type == "process"){
+            var operation = operations.filter(function (g) { return g.leaves.indexOf(d) != -1 })[0];
+            if (operation.leaves.length > 1) {
+                menu.push({
+                    divider: true
+                });
 
-            menu.push({
-                divider: true
-            });
+                menu.push({
+                    title: 'Make separate process',
+                    action: function (elm, d) {
 
-            menu.push({
-                title: 'Make separate process',
-                action: function (elm, d) {
-
-                    var data = operations.filter(function(g){ return g.leaves.indexOf(d) != -1 })[0].data;
-                    operations.push({data: JSON.parse(JSON.stringify(data)) , leaves: []});
-                    var group = operations[operations.length - 1];
-                    moveToOperation(d, group);
-                }
-            });
-
+                        var data = operation.data;
+                        operations.push({data: JSON.parse(JSON.stringify(data)), leaves: []});
+                        var group = operations[operations.length - 1];
+                        moveToOperation(d, group);
+                    }
+                });
+            }
         }
 
         menu.push({
