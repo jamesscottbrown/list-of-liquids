@@ -45,6 +45,9 @@ function network_editor() {
         var nodePosition = [];
         for (var i = 0; i < nodes.length; i++) {
             nodePosition[nodes[i].id] = i;
+
+           delete nodes[i].x; delete nodes[i].y;
+
         }
 
         for (i = 0; i < nodes.length; i++) {
@@ -71,14 +74,16 @@ function network_editor() {
         }
 
         operations = [];
-        for (i=0; i<obj.operations.length; i++){
-            var leaves = [];
-            var group = obj.operations[i];
-            for (var j=0; j<group.leaves.length; j++){
-                var node = nodes.filter(function(d){ return d.id == group.leaves[j].id })[0];
-                leaves.push(node);
+            if (obj.operations){
+                for (i=0; i<obj.operations.length; i++){
+                    var leaves = [];
+                    var group = obj.operations[i];
+                    for (var j=0; j<group.leaves.length; j++){
+                        var node = nodes.filter(function(d){ return d.id == group.leaves[j].id })[0];
+                        leaves.push(node);
+                    }
+                operations.push({data: group.data, leaves: leaves});
             }
-            operations.push({data: group.data, leaves: leaves});
         }
 
         containers = obj.containers;
@@ -113,8 +118,8 @@ function network_editor() {
     var force = cola.d3adaptor()
         .linkDistance(50)
         .size([width, height])
-        .nodes(nodes)
-        .links(links)
+        //.nodes(nodes)
+        //.links(links)
         .avoidOverlaps(true)
         .on('tick', tick);
 
@@ -1228,7 +1233,7 @@ function network_editor() {
         selected_node = nodes[nodes.length - 1];
 
         // add group
-        operations.push({data: {options:{duration: "120"}}, leaves: [selected_node]});
+        operations.push({data: {options:{duration: "120"}, acts_on: "container"}, leaves: [selected_node]});
         force.nodes(nodes).links(links);
 
         restart();

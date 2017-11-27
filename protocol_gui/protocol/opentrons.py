@@ -92,7 +92,7 @@ class OpenTrons(Converter):
         operation_type = node_data["process_type"]
 
         if operation_type == "wait":
-            return self.pipette_name + ".delay(seconds=" + options["duration"] + ")\n"
+            return self.pipette_name + ".delay(seconds=" + str(options["duration"]) + ")\n"
         elif operation_type == "magdeck_on":
             return "mag_deck.engage()\n"
         elif operation_type == "magdeck_off":
