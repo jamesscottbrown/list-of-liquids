@@ -1379,11 +1379,6 @@ function network_editor() {
         .on('mouseup', mouseup)
         .on('contextmenu',
             d3.contextMenu([{
-                title: 'Add Well',
-                action: addWellNode
-            }, {
-                divider: true
-            }, {
                 title: 'Clear',
                 action: clearEverything
             }, {
