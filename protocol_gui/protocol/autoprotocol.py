@@ -3,9 +3,12 @@ import re
 
 class AutoProtocol(Converter):
 
-    def get_header(self, protocol, protocol_name):
+    def get_header(self, protocol, protocol_name, protocol_description):
 
-        protocol_str = "from autoprotocol.util import make_dottable_dict\n\n"
+        protocol_str = "# This protocol was exported from List of Liquids\n"
+        protocol_str += "# " + protocol_description.replace("\n", "\n#") + "\n\n"
+
+        protocol_str += "from autoprotocol.util import make_dottable_dict\n\n"
         protocol_str += "def %s(protocol, params):\n\n" % self.sanitise_protocol_name(protocol_name)
 
         for container in protocol["containers"]:

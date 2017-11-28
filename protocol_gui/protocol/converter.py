@@ -5,9 +5,9 @@ class Converter:
         self.protocol = ""
         pass
 
-    def convert(self, protocol, protocol_name):
+    def convert(self, protocol, protocol_name, protocol_description):
         self.protocol = protocol
-        protocol_str = self.get_header(protocol, protocol_name)
+        protocol_str = self.get_header(protocol, protocol_name, protocol_description)
 
         # do a topological sort on the operations graph, and process nodes in a consistent order
         operation_nodes = filter(lambda x: x["type"] in ["zip", "cross", "pool", "aliquot", "select", "pick", "spread"], protocol["nodes"])

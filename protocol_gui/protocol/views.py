@@ -170,7 +170,7 @@ def opentrons_protocol(protocol_id):
 
     converter = OpenTrons()
 
-    resp = make_response(converter.convert(protocol_object, current_protocol.name))
+    resp = make_response(converter.convert(protocol_object, current_protocol.name, current_protocol.description))
 
     resp.headers['Content-Type'] = "text"
     resp.headers['Content-Disposition'] = "attachment; filename=" + current_protocol.name + "-opentrons.py"
@@ -201,7 +201,7 @@ def autoprotocol_protocol(protocol_id):
     protocol_object = json.loads(current_protocol.protocol)
 
     converter = AutoProtocol()
-    resp = make_response(converter.convert(protocol_object, current_protocol.name))
+    resp = make_response(converter.convert(protocol_object, current_protocol.name, current_protocol.description))
     resp.headers['Content-Type'] = "text"
     resp.headers['Content-Disposition'] = "attachment; filename=" + current_protocol.name + "-autoprotocol.py"
     return resp
@@ -231,7 +231,7 @@ def english_protocol(protocol_id):
     protocol_object = json.loads(current_protocol.protocol)
 
     converter = English()
-    resp = make_response(converter.convert(protocol_object, current_protocol.name))
+    resp = make_response(converter.convert(protocol_object, current_protocol.name, current_protocol.description))
     resp.headers['Content-Type'] = "text"
     resp.headers['Content-Disposition'] = "attachment; filename=" + current_protocol.name + "-english.md"
     return resp

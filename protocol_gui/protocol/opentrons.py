@@ -9,10 +9,11 @@ from protocol_gui.protocol.converter import Converter
 
 class OpenTrons(Converter):
 
-    def get_header(self, protocol, protocol_name):
+    def get_header(self, protocol, protocol_name, protocol_description):
 
         self.pipette_name = protocol["pipettes"][0]["name"]
-        opentrons_protocol = ""
+        opentrons_protocol = "# This protocol was exported from List of Liquids\n"
+        opentrons_protocol += "# " + protocol_description.replace("\n", "\n#") + "\n\n"
 
         opentrons_protocol += "from opentrons import containers, instruments\n\n"
 

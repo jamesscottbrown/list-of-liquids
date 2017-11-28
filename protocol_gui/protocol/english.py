@@ -2,9 +2,12 @@ from protocol_gui.protocol.converter import Converter
 
 
 class English(Converter):
-    def get_header(self, protocol, name):
+    def get_header(self, protocol, name, protocol_description):
 
         protocol_str = "# %s\n" % name
+
+        protocol_str += "This protocol was exported from List of Liquids\n"
+        protocol_str += " " + protocol_description + "\n\n"
 
         protocol_str += "## Containers\n"
         for container in protocol["containers"]:
