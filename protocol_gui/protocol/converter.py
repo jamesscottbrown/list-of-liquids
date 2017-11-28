@@ -1,8 +1,12 @@
+import json
+
 class Converter:
     def __init__(self):
+        self.protocol = ""
         pass
 
     def convert(self, protocol, protocol_name):
+        self.protocol = protocol
         protocol_str = self.get_header(protocol, protocol_name)
 
         # do a topological sort on the operations graph, and process nodes in a consistent order
@@ -79,9 +83,15 @@ class Converter:
     def get_footer(self, protocol_name):
         return ""
 
-    @staticmethod
-    def get_complete_rows(well_addresses):
-        # TODO: container is now no longer guaranteed to be 96 well plate!
+    def get_complete_rows(self, well_addresses, target_container):
+        # We need to look up the properties of the particular container used
+        with open('./protocol_gui/static/default-containers.json') as c:
+            container_types = json.load(c)["containers"]
+
+        target_container_type = filter(lambda x: x["name"] == target_container, self.protocol["containers"])[0]["type"]
+        target_container_wells = container_types[target_container_type]["locations"].keys()
+        target_container_cols = set(map(lambda x: x[0], target_container_wells))
+        target_container_rows = set(map(lambda x: int(x[1:]), target_container_wells))
 
         # return row numbers for complete rows
         rows = list(set(map(lambda x: x[1:], well_addresses)))
@@ -91,10 +101,10 @@ class Converter:
             addresses = filter(lambda x: x[1:] == row, well_addresses)
 
             columns = map(lambda x: x[0], addresses)
-            if len(set(columns)) == 8:
+            if len(set(columns)) == len(target_container_cols):
                 complete_rows.append(row)
 
-        return complete_rows
+        return complete_rows, target_container_cols, target_container_rows
 
     @staticmethod
     def get_options(link_data):
@@ -336,7 +346,8 @@ class Converter:
         protocol_str = ""
 
         # Look for rows that can be pipetted together
-        for result_row in self.get_complete_rows(locations_result):
+        complete_rows, target_container_cols, target_container_rows = self.get_complete_rows(locations_result, container_target)
+        for result_row in complete_rows:
 
             source_row = source['A' + result_row][1:]
             # check corresponding wells in first source are in a row, and columns are in consistent order with results
@@ -348,7 +359,7 @@ class Converter:
             else:
                 volume = volumes.values()[0]
 
-            for column in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
+            for column in target_container_cols:
                 source_well = source[column + result_row]
 
                 if source_well[1:] != source_row:
@@ -361,9 +372,9 @@ class Converter:
 
             if is_valid and not (container_target == container and source_row == result_row) and not link_data["addToThis"]:
                 protocol_str += self.get_transfer_string(pipette_name, volume, container, source_row,
-                                                         container_target, result_row, self.get_options(link_data))
+                                                         container_target, result_row, self.get_options(link_data), target_container_cols)
 
-                transfers_made.extend(map(lambda x: x + str(result_row), ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']))
+                transfers_made.extend(map(lambda x: x + str(result_row), target_container_cols))
 
         # now do remaining individual transfers,
         # grouping transfers from the same well into distribute operations if permitted

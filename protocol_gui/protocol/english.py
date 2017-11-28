@@ -47,7 +47,7 @@ class English(Converter):
 
         return ", ".join(locations)
 
-    def get_transfer_string(self, pipette_name, volume, container, source_row, container_target, result_row, options_str):
+    def get_transfer_string(self, pipette_name, volume, container, source_row, container_target, result_row, options_str, target_container_cols):
         return "* Transfer %s from row %s of %s to row %s of %s using %s \n" % \
                (volume, source_row, container, result_row, container_target, pipette_name)
 

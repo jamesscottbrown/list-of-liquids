@@ -71,7 +71,7 @@ class OpenTrons(Converter):
     def get_consolidate_string(self, pipette_name, volume_one, container_one, source_str, container_target, target, options_str):
         return "%s.consolidate(%s, %s.wells(%s), %s.well('%s')%s)\n" % (pipette_name, volume_one, container_one, source_str, container_target, target, options_str)
 
-    def get_transfer_string(self, pipette_name, volume, container, source_row, container_target, result_row, options_str):
+    def get_transfer_string(self, pipette_name, volume, container, source_row, container_target, result_row, options_str, target_container_cols):
         return "%s.transfer(%s, %s.rows('%s'), %s.rows('%s')%s)\n" % (
             pipette_name, volume, container, source_row, container_target, result_row, options_str)
 

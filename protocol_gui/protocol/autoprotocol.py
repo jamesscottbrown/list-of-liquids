@@ -110,9 +110,19 @@ def run_protocol:
     def get_consolidate_string(self, pipette_name, volume, container_one, source_str, container_target, target, options_str):
         return "    protocol.consolidate(%s.wells([%s]), %s.well('%s'), '%s:microliter'%s)\n" % (container_one, source_str, container_target, target, volume, options_str)
 
-    def get_transfer_string(self, pipette_name, volume, container, source_row, container_target, result_row, options_str):
-        return "    protocol.transfer(%s.rows(['%s']), %s.rows(['%s']), '%s:microliter'%s)\n" % (
-             container, source_row, container_target, result_row, volume, options_str)
+    def get_transfer_string(self, pipette_name, volume, container, source_row, container_target, result_row, options_str, target_container_cols):
+        operation_str = ""
+        for col in target_container_cols:
+            source_well = col + source_row
+            result_well = col + result_row
+            operation_str += self.get_transfer_well_string(pipette_name, volume, container, source_well, container_target, result_well, options_str)
+
+        source_well_string = ", ".join(map(lambda x: "'" + x + str(source_row) + "'", target_container_cols))
+        result_well_string = ", ".join(map(lambda x: "'" + x + str(result_row) + "'", target_container_cols))
+
+        return "    protocol.transfer(%s.wells([%s]), %s.wells([%s]), '%s:microliter'%s)\n" % (
+             container, source_well_string, container_target, result_well_string, volume, options_str)
+
 
     def get_transfer_well_string(self, pipette_name, volume, container, source_well, container_target, result_well, options_str):
         return "    protocol.transfer(%s.well('%s'), %s.well('%s'), '%s:microliter'%s)\n" % (
@@ -172,6 +182,10 @@ def run_protocol:
 
         else:
             return "    # FIXME: operation '" + operation_type + "' not implemented for AutoProtocol"
+
+    # Over-ride default transfer to not transfer whole rows, since AutoProtocol has no container.row() method
+
+
 
 def convert_schedule(schedule_string):
 
