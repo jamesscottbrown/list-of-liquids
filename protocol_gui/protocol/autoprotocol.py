@@ -6,7 +6,40 @@ class AutoProtocol(Converter):
     def get_header(self, protocol, protocol_name):
 
         protocol_str = "from autoprotocol.util import make_dottable_dict\n\n"
-        protocol_str += "def %s(protocol, params):\n\n" % protocol_name
+        protocol_str += "def %s(protocol, params):\n\n" % self.sanitise_protocol_name(protocol_name)
+
+        for container in protocol["containers"]:
+            protocol_str += '    %s = protocol.ref("%s", cont_type="%s", storage="cold_4")\n' \
+                                  % (self.sanitise_name(container["name"]), self.sanitise_name(container["name"]), container["type"])
+        protocol_str += "\n"
+
+        protocol_str += self.get_volume_assignments(protocol)
+        return protocol_str
+
+    @staticmethod
+    def get_volume_assignments(protocol):
+        protocol_str = ""
+        for resource in protocol["resources"]:
+
+            container_name = resource["data"]["container_name"]
+            container = filter(lambda x: x["name"] == container_name, protocol["containers"])[0]
+
+            # get lowest node id
+            nid = float("inf")
+            for n in protocol["nodes"]:
+                if n["type"] == "resource" and n["data"]["resource"] == resource["label"]:
+                    nid = min([nid, n["id"]])
+
+            locations = []
+            for well_name in container["contents"]:
+                for aliquot in container["contents"][well_name]:
+                    if aliquot["node_id"] == nid:
+                        locations.append(well_name)
+
+            source_str = ", ".join(map(lambda x: "'" + x + "'", locations))
+            protocol_str += '    %s.wells([%s]).set_volume("%s:microliter")\n' \
+                            % (container_name, source_str, resource["data"]["volume"])
+        protocol_str += "\n"
         return protocol_str
 
     @staticmethod
@@ -43,12 +76,30 @@ class AutoProtocol(Converter):
             opts_str = ", " + opts_str
         return opts_str
 
+    @staticmethod
+    def sanitise_protocol_name(name):
+        name = name.replace(' ', '_')
+        name = name.replace('-', '_')
+        name = re.sub('^\d+', '', name) # strip leading digits
+        name = re.sub('^_+', '', name) # strip leading underscores
+        return name
+
     def get_footer(self, protocol_name):
+
+        name = self.sanitise_protocol_name(protocol_name)
         return """
 if __name__ == '__main__':
+    import json
+    from autoprotocol.protocol import Protocol
+    p = Protocol()
+    %s(p, '')
+    print json.dumps(p.as_dict(), indent=2)
+
+def run_protocol:
     from autoprotocol.harness import run
     run(%s, '%s')
-            """ % (protocol_name, protocol_name)
+            """ % (name, name, name)
+
 
     @staticmethod
     def sanitise_name(name):
@@ -57,10 +108,10 @@ if __name__ == '__main__':
         return name
 
     def get_consolidate_string(self, pipette_name, volume, container_one, source_str, container_target, target, options_str):
-        return "    protocol.consolidate(%s.wells(%s), %s.well('%s'), '%s:microliter'%s)\n" % (container_one, source_str, container_target, target, volume, options_str)
+        return "    protocol.consolidate(%s.wells([%s]), %s.well('%s'), '%s:microliter'%s)\n" % (container_one, source_str, container_target, target, volume, options_str)
 
     def get_transfer_string(self, pipette_name, volume, container, source_row, container_target, result_row, options_str):
-        return "    protocol.transfer(%s.rows('%s'), %s.rows('%s'), '%s:microliter'%s)\n" % (
+        return "    protocol.transfer(%s.rows(['%s']), %s.rows(['%s']), '%s:microliter'%s)\n" % (
              container, source_row, container_target, result_row, volume, options_str)
 
     def get_transfer_well_string(self, pipette_name, volume, container, source_well, container_target, result_well, options_str):
@@ -68,19 +119,19 @@ if __name__ == '__main__':
             container, source_well, container_target, result_well, volume, options_str)
 
     def get_distribute_string(self, pipette_name, volume, container, source, container_target, targets_str, options_str):
-        return "    protocol.distribute(%s.well('%s'), %s.wells(%s), '%s:microliter'%s)\n" % (container, source, container_target, targets_str, volume, options_str)
+        return "    protocol.distribute(%s.well('%s'), %s.wells([%s]), '%s:microliter'%s)\n" % (container, source, container_target, targets_str, volume, options_str)
 
     def get_pick_string(self, container, source_wells, container_target, target_wells, min_colonies):
-        return "    protocol.autopick(%s.wells(%s), %s.wells(%s), min_abort=%s)\n" % (container, source_wells, container_target, target_wells, min_colonies)
+        return "    protocol.autopick(%s.wells([%s]), %s.wells([%s]), min_abort=%s)\n" % (container, source_wells, container_target, target_wells, min_colonies)
 
     def get_spread_string(self, container, source_wells, container_target, target_wells, volume):
-        return "    protocol.spread(%s.wells(%s), %s.wells(%s), %s)\n" % (container, source_wells, container_target, target_wells, volume)
+        return "    protocol.spread(%s.wells([%s]), %s.wells([%s]), %s)\n" % (container, source_wells, container_target, target_wells, volume)
 
     def get_process_string(self, node_data, options, well_locations):
         operation_type = node_data["process_type"]
         container = node_data["container_name"]
 
-        wells = "%s.wells(%s)" % (container, well_locations)
+        wells = "%s.wells([%s])" % (container, well_locations)
 
         if operation_type == "spin":
             return "    protocol.spin(%s, %s, %s, flow_direction=None, spin_direction=None)\n" % (container, options["acceleration"], options["duration"])
@@ -111,7 +162,7 @@ if __name__ == '__main__':
                    (container, wells, options["dataref"])
 
         elif operation_type == "gel_separate":
-            return "    protocol.gel_separate(%s.wells(%s), %s, %s, %s, %s, dataref)" % \
+            return "    protocol.gel_separate(%s.wells([%s]), %s, %s, %s, %s, dataref)" % \
                    (container, wells, options["volume"], options["matrix"], options["ladder"], options["duration"], options["dataref"])
             # WHY no container reference?
 

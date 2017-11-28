@@ -38,12 +38,6 @@ class OpenTrons(Converter):
         return opentrons_protocol
 
     @staticmethod
-    def sanitise_name(name):
-        name = name.replace(' ', '_')
-        name = name.replace('-', '_')
-        return name
-
-    @staticmethod
     def get_options(link_data):
         opts = []
 

@@ -423,3 +423,9 @@ class Converter:
             protocol_str = protocol_str_one + protocol_str_two
         protocol_str += "\n"
         return protocol_str
+
+    @staticmethod
+    def sanitise_name(name):
+        name = name.replace(' ', '_')
+        name = name.replace('-', '_')
+        return name
