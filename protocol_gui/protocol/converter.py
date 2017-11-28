@@ -345,36 +345,42 @@ class Converter:
         transfers_made = []
         protocol_str = ""
 
-        # Look for rows that can be pipetted together
+        # Look for complete rows that can be pipetted together
+        target_container_type = filter(lambda x: x["name"] == container_target, self.protocol["containers"])[0]["type"]
+        source_container_type = filter(lambda x: x["name"] == container, self.protocol["containers"])[0]["type"]
+
         complete_rows, target_container_cols, target_container_rows = self.get_complete_rows(locations_result, container_target)
-        for result_row in complete_rows:
+        _, _, source_container_rows = self.get_complete_rows(locations_result, container)
 
-            source_row = source['A' + result_row][1:]
-            # check corresponding wells in first source are in a row, and columns are in consistent order with results
-            is_valid = True
+        if len(source_container_rows) == len(target_container_cols):
 
-            # all volumes must be equal for a multi-well transfer
-            if len(set(volumes.values())) > 1:
-                is_valid = False
-            else:
-                volume = volumes.values()[0]
+            for result_row in complete_rows:
+                source_row = source['A' + result_row][1:]
+                # check corresponding wells in first source are in a row, and columns are in consistent order with results
+                is_valid = True
 
-            for column in target_container_cols:
-                source_well = source[column + result_row]
-
-                if source_well[1:] != source_row:
+                # all volumes must be equal for a multi-well transfer
+                if len(set(volumes.values())) > 1:
                     is_valid = False
-                    break
+                else:
+                    volume = volumes.values()[0]
 
-                if source_well[0] != column:
-                    is_valid = False
-                    break
+                for column in target_container_cols:
+                    source_well = source[column + result_row]
 
-            if is_valid and not (container_target == container and source_row == result_row) and not link_data["addToThis"]:
-                protocol_str += self.get_transfer_string(pipette_name, volume, container, source_row,
-                                                         container_target, result_row, self.get_options(link_data), target_container_cols)
+                    if source_well[1:] != source_row:
+                        is_valid = False
+                        break
 
-                transfers_made.extend(map(lambda x: x + str(result_row), target_container_cols))
+                    if source_well[0] != column:
+                        is_valid = False
+                        break
+
+                if is_valid and not (container_target == container and source_row == result_row) and not link_data["addToThis"]:
+                    protocol_str += self.get_transfer_string(pipette_name, volume, container, source_row,
+                                                             container_target, result_row, self.get_options(link_data), target_container_cols)
+
+                    transfers_made.extend(map(lambda x: x + str(result_row), target_container_cols))
 
         # now do remaining individual transfers,
         # grouping transfers from the same well into distribute operations if permitted
