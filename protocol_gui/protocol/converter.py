@@ -350,9 +350,9 @@ class Converter:
         source_container_type = filter(lambda x: x["name"] == container, self.protocol["containers"])[0]["type"]
 
         complete_rows, target_container_cols, target_container_rows = self.get_complete_rows(locations_result, container_target)
-        _, _, source_container_rows = self.get_complete_rows(locations_result, container)
+        _, source_container_cols, source_container_rows = self.get_complete_rows(locations_result, container)
 
-        if len(source_container_rows) == len(target_container_cols):
+        if len(source_container_cols) == len(target_container_cols):
 
             for result_row in complete_rows:
                 source_row = source['A' + result_row][1:]
