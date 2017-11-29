@@ -6,6 +6,7 @@ A graphical interface for writing laboratory protocols.
 A paper describing this system is currently under review.
 
 [Project homepage](http://sysos.eng.ox.ac.uk/tebio/protocols)
+[Demo installation](http://protocols.jamesscottbrown.com/)
 
 
 Other documentation:
