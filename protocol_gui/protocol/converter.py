@@ -88,7 +88,7 @@ class Converter:
         with open('./protocol_gui/static/default-containers.json') as c:
             container_types = json.load(c)["containers"]
 
-        target_container_type = filter(lambda x: x["name"] == target_container, self.protocol["containers"])[0]["type"]
+        target_container_type = filter(lambda x: self.sanitise_name(x["name"]) == target_container, self.protocol["containers"])[0]["type"]
         target_container_wells = container_types[target_container_type]["locations"].keys()
         target_container_cols = set(map(lambda x: x[0], target_container_wells))
         target_container_rows = set(map(lambda x: int(x[1:]), target_container_wells))
@@ -346,8 +346,8 @@ class Converter:
         protocol_str = ""
 
         # Look for complete rows that can be pipetted together
-        target_container_type = filter(lambda x: x["name"] == container_target, self.protocol["containers"])[0]["type"]
-        source_container_type = filter(lambda x: x["name"] == container, self.protocol["containers"])[0]["type"]
+        target_container_type = filter(lambda x: self.sanitise_name(x["name"]) == container_target, self.protocol["containers"])[0]["type"]
+        source_container_type = filter(lambda x: self.sanitise_name(x["name"]) == container, self.protocol["containers"])[0]["type"]
 
         complete_rows, target_container_cols, target_container_rows = self.get_complete_rows(locations_result, container_target)
         _, source_container_cols, source_container_rows = self.get_complete_rows(locations_result, container)
