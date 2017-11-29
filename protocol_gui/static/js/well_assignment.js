@@ -186,7 +186,7 @@ function listContainerContents(result, div, queryNode) {
 
 function drawContainerDiagram(container) {
 
-    var containerURL = "static/default-containers.json";
+    var containerURL = "../../static/default-containers.json";
 
     d3.json(containerURL, function (error, containerData) {
         container_data = containerData['containers'][container.type];
