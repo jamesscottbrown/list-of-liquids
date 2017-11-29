@@ -6,6 +6,9 @@ class AutoProtocol(Converter):
     def get_header(self, protocol, protocol_name, protocol_description):
 
         protocol_str = "# This protocol was exported from List of Liquids\n"
+        protocol_str += "# Before running, manually update container types to ones supported by AutoProtocol\n"
+        protocol_str += "# (see https://autoprotocol-python.readthedocs.io/en/latest/container_type.html#container-types)\n\n"
+
         protocol_str += "# " + protocol_description.replace("\n", "\n#") + "\n\n"
 
         protocol_str += "from autoprotocol.util import make_dottable_dict\n\n"
