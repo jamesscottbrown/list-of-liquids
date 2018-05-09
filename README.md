@@ -1,9 +1,9 @@
-Laboratory Protocol GUI
+List of Liquids
 =======================
 
 A graphical interface for writing laboratory protocols.
 
-A paper describing this system is currently under review.
+[Pre-print of paper describing this system](https://www.biorxiv.org/content/early/2017/11/30/226852).
 
 [Project homepage](http://sysos.eng.ox.ac.uk/tebio/protocols)
 [Demo installation](http://protocols.jamesscottbrown.com/)
