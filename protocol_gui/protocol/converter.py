@@ -1,4 +1,5 @@
 import json
+import os
 
 class Converter:
     def __init__(self):
@@ -85,7 +86,9 @@ class Converter:
 
     def get_complete_rows(self, well_addresses, target_container):
         # We need to look up the properties of the particular container used
-        with open('./protocol_gui/static/default-containers.json') as c:
+
+        code_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        with open( os.path.join(code_dir, 'static/default-containers.json')) as c:
             container_types = json.load(c)["containers"]
 
         target_container_type = filter(lambda x: self.sanitise_name(x["name"]) == target_container, self.protocol["containers"])[0]["type"]
