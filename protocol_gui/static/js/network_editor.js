@@ -211,21 +211,34 @@ function network_editor() {
                 var yBottom = yTop + this.getBBox().height;
                 var xBottomCorner = d.source.x + (yBottom - d.source.y) * (d.target.x - d.source.x) / (d.target.y - d.source.y);
 
+                var linksToThisNode = links.filter(function(l){return l.source.id == d.source.id});
+                var parentHasOtherChildren = (linksToThisNode.length > 1);
+
+                var linksToChildNode = links.filter(function(l){return l.target.id == d.target.id});
+                var childHasOtherParents = (linksToChildNode.length > 1);
 
                 if (d.source.x > d.target.x) {
                     // arrow directed left:
 
                     // if parent has another child, position text so bottom-right corner of bounding box touches edge
-                    var linksToThisNode = links.filter(function(l){return l.source.id == d.source.id});
-                    if (linksToThisNode.length > 1){
+                    
+                    if (parentHasOtherChildren){
                         return xBottomCorner - this.getBBox().width;
                     }
 
                     // otherwise, position text so upper-left corner of bounding box touches edge
                     return xTopCorner;
                 } else {
-                    // arrow directed right: position text so upper-right corner of bounding box touches edge
-                    return xTopCorner - this.getBBox().width;
+                    // arrow directed right
+
+                    if (childHasOtherParents){
+                        // position text so upper-right corner of bounding box touches edge
+                        return xTopCorner - this.getBBox().width;
+                    }
+
+                    // position text so bottom-left corner of bounding box touches edge
+                    return xBottomCorner;
+
                 }
             });
 
@@ -306,6 +319,7 @@ function network_editor() {
             }
 
             // if two dashed inputs, and one is a resource, kick the resource left
+            /*
             var otherResourceLinks = links.filter(function (d) {
                 return d.target.id == link.target.id && d.source.id != link.source.id && d.source.type == "resource";
             });
@@ -318,6 +332,7 @@ function network_editor() {
                     });
                 }
             }
+            */
 
         }
 
