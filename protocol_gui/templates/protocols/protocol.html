@@ -239,14 +239,20 @@
                 <button class="btn btn-danger" onclick="networkEditor.clearDiagram();">Clear diagram</button>
                 <button class="btn btn-danger" onclick="networkEditor.clearEverything();">Clear everything</button>
                 <button class="btn btn-primary" onclick="networkEditor.save();"><i class="fa fa-floppy-o" aria-hidden="true"></i>Save</button>
-                <button class="btn btn-primary" id="repeatCopy">repeat</button>
-                <button class="btn btn-primary" id="cancelCopyButton" style="visibility: hidden;">cancel</button>
             </div>
             <div id="download-links">
                 <a href="english" download="{{ protocol.name }}.md"><i class="fa fa-download"></i>English</a>
                 <a id="svg-download-link" href="" onclick="return downloadDiagram();" download="{{ protocol.name }}.svg"><i class="fa fa-download"></i>Diagram (SVG)</a>
                 <a href="opentrons" onclick="return validateOpenTrons()" download="{{ protocol.name }}-opentrons.py"><i class="fa fa-download"></i>OpenTrons</a>
                 <a href="autoprotocol" download="{{ protocol.name }}-autoprotocol.py"><i class="fa fa-download"></i>AutoProtocol-python</a>
+            </div>
+
+            <div id="menu-bar">
+                <button class="btn btn-primary" id="repeatCopy">copy</button>
+                <button class="btn btn-primary" id="cancelCopyButton" style="display: none;">cancel</button>
+
+                <button id="repeat-button" class="btn btn-primary">Repeat this node</button>
+                <button id="cancel-repeat-button" class="btn btn-primary" style="display: none">Cancel</button>
             </div>
 
         </div>

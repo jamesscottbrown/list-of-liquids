@@ -1,7 +1,7 @@
 // set up initial nodes and links
-var nodes, lastNodeId, lastResourceId, links, operations, serialiseDiagram;
+var nodes, lastNodeId, lastResourceId, links, operations, repeats, serialiseDiagram;
 var color = d3.scale.category10();
-
+repeats = [];
 
 function network_editor() {
     // set up SVG for D3
@@ -86,6 +86,23 @@ function network_editor() {
             }
         }
 
+        repeats = [];
+        if (obj.repeats){
+            for (i = 0; i < obj.repeats.length; i++) {
+
+                var leaves = [];
+                var repeat = obj.repeats[i];
+
+                for (var j = 0; j < repeat.leaves.length; j++) {
+                    var node = nodes.filter(function (d) {
+                        return d.id == repeat.leaves[j];
+                    })[0];
+                    leaves.push(node);
+                }
+                repeats.push({iterations: repeat.iterations, leaves: leaves});
+            }
+        }
+
         containers = obj.containers;
         pipettes = obj.pipettes;
         resources = obj.resources;
@@ -152,6 +169,10 @@ function network_editor() {
     var drag_line = svg.append('svg:path')
         .attr('class', 'link dragline hidden')
         .attr('d', 'M0,0L0,0');
+
+    var repeatRectangle_group = svg.append('svg:g');
+    var repeatRectangles = repeatRectangle_group.selectAll(".repeat-group");
+    var repeatLabels = repeatRectangle_group.selectAll(".repeat-label");
 
     var operationRectangle_group = svg.append('svg:g');
     var operationRectangles = operationRectangle_group.selectAll(".group");
@@ -264,6 +285,36 @@ function network_editor() {
             .attr("height", function (d) {
                 return getBounds(d).height;
             });
+
+        svg.selectAll(".repeat")
+            .attr("x", function (d) {
+                return getBounds(d).x - 10;
+            })
+            .attr("y", function (d) {
+                return getBounds(d).y - 10 - 15;
+            })
+            .attr("width", function (d) {
+                return getBounds(d).width + 20;
+            })
+            .attr("height", function (d) {
+                return getBounds(d).height + 20 + 15;
+            });
+
+        svg.selectAll(".repeat-label")
+            .attr("x", function (d) {
+                return getBounds(d).x;
+            })
+            .attr("y", function (d) {
+                return getBounds(d).y - 8;
+            })
+            .attr("width", function (d) {
+                return getBounds(d).width;
+            })
+            .attr("height", function (d) {
+                return getBounds(d).height;
+            });
+
+
     }
 
 
@@ -369,6 +420,8 @@ function network_editor() {
         force.constraints(constraints);
 
         redrawOperationRectangles(); // draw groups before nodes so that they are in the background
+        redrawRepeatRectangles();
+
         redrawLinks();
         redrawLinkLabels();
 
@@ -699,6 +752,61 @@ function network_editor() {
         operationRectangles.exit().remove();
     }
 
+    function redrawRepeatRectangles() {
+        repeatRectangles = repeatRectangles.data(repeats);
+
+        repeatRectangles.enter().append("rect")
+            .attr("rx", 8).attr("ry", 8)
+            .attr("class", "repeat")
+            .style("fill", "white") // so context menu works
+            .style("stroke", function (d, i) {
+                return color(i);
+            })
+            .style("stroke-dasharray", "5,5")
+
+        .on('contextmenu',
+            d3.contextMenu(
+                function (d) {
+                    return [{
+                        title: 'Change number of repeats',
+                        action: function () {
+                            var num_repeats = prompt("Enter number of repeats:");
+                            if (num_repeats) {
+                                d.iterations = +num_repeats;
+
+                                d3.selectAll(".repeat-label")
+                                    .text(function(d){ return "x " + d.iterations; });
+
+                            }
+                        }
+                    }, {
+                        title: 'Delete',
+                        action: function (){
+                            repeats.splice(repeats.indexOf(d),1);
+                            redrawRepeatRectangles();
+                        }
+                    }
+                    ];
+
+                }
+        ));
+
+        // remove old operation rectangles
+        repeatRectangles.exit().remove();
+
+
+
+        repeatLabels = repeatLabels.data(repeats);
+
+        repeatLabels.enter().append("text")
+            .attr("class", "repeat-label")
+            .text(function(d){ return "x " + d.iterations; });
+
+        // remove old operation rectangles
+        repeatLabels.exit().remove();
+
+    }
+
     /* Helper functions */
     function getBounds(group) {
         // For some reason, Cola doe snot automatically calculate .bounds for each group,
@@ -908,6 +1016,8 @@ function network_editor() {
 
     /* Copying */
     function startCopy() {
+        cancelRepeat();
+
         selectingGroup = true;
         selectedNodes = [];
 
@@ -915,7 +1025,7 @@ function network_editor() {
             .text("Copy")
             .on("click", endCopy);
 
-        d3.select("#cancelCopyButton").style("visibility", "visible");
+        d3.select("#cancelCopyButton").style("display", "inline-block");
 
         // Un-select all nodes
         selected_node = false;
@@ -930,7 +1040,7 @@ function network_editor() {
             .on("click", startCopy)
             .text("Select nodes for repeat");
 
-        d3.select("#cancelCopyButton").style("visibility", "hidden");
+        d3.select("#cancelCopyButton").style("display", "none");
 
         // copy selected nodes
         var newNode = [];
@@ -987,13 +1097,122 @@ function network_editor() {
             .on("click", startCopy)
             .text("Select nodes to copy");
 
-        d3.select("#cancelCopyButton").style("visibility", "hidden");
+        d3.select("#cancelCopyButton").style("display", "none");
 
         // Un-select all nodes
         selected_node = false;
         selected_link = false;
         recolorLabels();
     }
+
+
+    /* Repeats */
+    function startRepeat() {
+        cancelCopy();
+
+        selectingGroup = true;
+        selectedNodes = [];
+
+        d3.select("#repeat-button")
+            .text("Repeat")
+            .on("click", endRepeat);
+
+        d3.select("#cancel-repeat-button").style("display", "inline-block");
+
+        // Un-select all nodes
+        selected_node = false;
+        selected_link = false;
+        recolorLabels();
+    }
+
+
+
+    function endRepeat() {
+        selectingGroup = false;
+        d3.select("#repeat-button")
+            .on("click", startRepeat)
+            .text("Select nodes to repeat");
+
+        d3.select("#cancel-repeat-button").style("display", "none");
+
+        // TODO: do actual processing
+
+        if (selectedNodes.length === 0){
+            alert("Must have selected nodes to repeat");
+            cancelRepeat();
+            return;
+        }
+
+        // check all selected nodes are processes
+        for (var i = 0; i < selectedNodes.length; i++) {
+
+            var node = nodes.filter( function(d){ return d.id == selectedNodes[i]} )[0];
+
+            if (node.type !== "process"){
+                alert("Can only repeat process nodes");
+                cancelRepeat();
+                return;
+            }
+        }
+
+
+        // check all selected nodes are connected directly (not just indirectly via other nodes)
+        var isolatedNodes = selectedNodes.map(function(node_id){
+            return nodes.filter( function(n){ return n.id == node_id} )[0];
+        });
+
+        var nodesToProcess = [isolatedNodes.pop()];
+
+        while (nodesToProcess.length > 0){
+            var nodeToProcess = nodesToProcess.pop();
+
+            var newNode;
+            for (var i=0; i<links.length; i++){
+                if (links[i].source === nodeToProcess){
+                    newNode = links[i].target;
+                } else if (links[i].target === nodeToProcess){
+                    newNode = links[i].source;
+                }
+
+                if (isolatedNodes.indexOf(newNode) !== -1){
+                    isolatedNodes.splice(isolatedNodes.indexOf(newNode), 1);
+                    nodesToProcess.push(newNode);
+                }
+            }
+        }
+
+        if (isolatedNodes.length > 0){
+            alert("Can only repeat a connected sequence of nodes");
+            cancelRepeat();
+            return;
+        }
+
+
+        // Create iteration
+        var node_objects = selectedNodes.map(function(node_id){
+            return nodes.filter( function(n){ return n.id == node_id} )[0];
+        });
+        repeats.push({iterations: 1, leaves: node_objects}); // TODO: need t copy list?
+
+        redrawRepeatRectangles();
+        tick();
+    }
+
+    function cancelRepeat(){
+        selectingGroup = false;
+        d3.select("#repeat-button")
+            .on("click", startRepeat)
+            .text("Select nodes to repeat");
+
+        d3.select("#cancel-repeat-button").style("display", "none");
+
+        // Un-select all nodes
+        selected_node = false;
+        selected_link = false;
+        recolorLabels();
+    }
+
+
 
 
     /* Functions that edit the graph structure */
@@ -1359,10 +1578,14 @@ function network_editor() {
             operation_list.push({leaves: leaves, data: operations[i].data});
         }
 
+        var repeats_list = repeats.map(function(r){
+            return {iterations: r.iterations, leaves: r.leaves.map(function(n){ return n.id;})};
+        });
 
         return JSON.stringify({
             nodes: node_list, links: link_list, operations: operation_list,
-            containers: containers, pipettes: pipettes, resources: resources
+            containers: containers, pipettes: pipettes, resources: resources,
+            repeats: repeats_list
         });
     };
 
@@ -1424,6 +1647,13 @@ function network_editor() {
     d3.select("#cancelCopyButton")
         .on("click", cancelCopy)
         .text("Cancel copy");
+
+    d3.select("#repeat-button")
+        .on("click", startRepeat)
+        .text("Select nodes to repeat");
+    d3.select("#cancel-repeat-button")
+        .on("click", cancelRepeat)
+        .text("Cancel repeat");
 
 
     return {
