@@ -1128,14 +1128,16 @@ function network_editor() {
 
 
     function endRepeat() {
+        var node_objects = selectedNodes.map(function(node_id){
+            return nodes.filter( function(n){ return n.id == node_id} )[0];
+        });
+
         selectingGroup = false;
         d3.select("#repeat-button")
             .on("click", startRepeat)
             .text("Select nodes to repeat");
 
         d3.select("#cancel-repeat-button").style("display", "none");
-
-        // TODO: do actual processing
 
         if (selectedNodes.length === 0){
             alert("Must have selected nodes to repeat");
@@ -1187,11 +1189,38 @@ function network_editor() {
             return;
         }
 
+        // check that if repeats do not overlap
+        var overlappingRepeats = repeats.filter(function(repeat){
+            for (var i=0; i<node_objects.length; i++){
+                if (repeat.leaves.indexOf(node_objects[i]) !== -1 ){
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        if (overlappingRepeats.length >0){
+            alert("Repeats cannot overlap or be nested.");
+            cancelRepeat();
+            return;
+        }
+
+        // check is overlapping (allowing proper nesting)
+        /*
+        for (var i=0; i<overlappingRepeats.length; i++){
+            for (var j=0; j<overlappingRepeats[i].leaves.length; j++){
+
+                if (selectedNodes.indexOf(overlappingRepeats[i].leaves[j].id) == -1){
+                    alert("Repeats cannot overlap: if this repeat contains a node that is in another repeat, it must include every node in that repeat.");
+                    cancelRepeat();
+                    return;
+                }
+            }
+        }
+        */
+
 
         // Create iteration
-        var node_objects = selectedNodes.map(function(node_id){
-            return nodes.filter( function(n){ return n.id == node_id} )[0];
-        });
         repeats.push({iterations: 1, leaves: node_objects}); // TODO: need t copy list?
 
         redrawRepeatRectangles();
