@@ -1,6 +1,13 @@
 protocol_gui:
   build: .
-  volumes:
-    - .:/code
   ports:
     - "5000:5000"
+  restart: always
+  # volumes:
+  #  - ./dev.db:/code/dev.db
+  environment:
+    FLASK_DEBUG: 0
+    PROTOCOL_GUI_SECRET: something-really-secret
+  working_dir: /code/protocol_gui
+  command: gunicorn -w 4 -b 0.0.0.0:5000 --pythonpath '/code,/code/protocol_gui' 'app:create_app()'
+

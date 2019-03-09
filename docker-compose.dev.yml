@@ -1,0 +1,7 @@
+protocol_gui:
+  build: .
+  dockerfile: Dockerfile.dev
+  # volumes:
+  #  - ./dev.db:/code/dev.db
+  ports:
+    - "5000:5000"

@@ -8,10 +8,10 @@ ADD . /code
 WORKDIR /code
 RUN pip install -r requirements/dev.txt
 
-# Initialize empty prod database
-RUN export FLASK_APP=/code/autoapp.py && export FLASK_DEBUG=0 && flask db init && flask db migrate && flask db upgrade
+# Initialize empty dev database
+RUN export FLASK_APP=/code/autoapp.py && export FLASK_DEBUG=1 && flask db init && flask db migrate && flask db upgrade
 
 ENV FLASK_APP=/code/autoapp.py
-ENV FLASK_DEBUG=0
+ENV FLASK_DEBUG=1
 
 CMD flask run --host=0.0.0.0
