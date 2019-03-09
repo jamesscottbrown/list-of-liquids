@@ -30,7 +30,7 @@ At the terminal, change directory into the cloned repository, and run:
 
 You will then be able to use List of Liquids by opening the URL `http://localhost:5000/` in your web-browser.
 
-Alternative, to run in devleopment mode, run:
+Alternatively, to run in development mode, run:
 
     docker-compose -f docker-compose.dev.yml build
     docker-compose -f docker-compose.dev.yml up
