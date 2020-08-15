@@ -42,7 +42,7 @@ class AutoProtocol(Converter):
                     if aliquot["node_id"] == nid:
                         locations.append(well_name)
 
-            source_str = ", ".join(map(lambda x: "'" + x + "'", locations))
+            source_str = ", ".join(["'" + x + "'" for x in locations])
             protocol_str += '    %s.wells([%s]).set_volume("%s:microliter")\n' \
                             % (container_name, source_str, resource["data"]["volume"])
         protocol_str += "\n"
@@ -123,8 +123,8 @@ def run_protocol:
             result_well = col + result_row
             operation_str += self.get_transfer_well_string(pipette_name, volume, container, source_well, container_target, result_well, options_str)
 
-        source_well_string = ", ".join(map(lambda x: "'" + x + str(source_row) + "'", target_container_cols))
-        result_well_string = ", ".join(map(lambda x: "'" + x + str(result_row) + "'", target_container_cols))
+        source_well_string = ", ".join(["'" + x + str(source_row) + "'" for x in target_container_cols])
+        result_well_string = ", ".join(["'" + x + str(result_row) + "'" for x in target_container_cols])
 
         return "    protocol.transfer(%s.wells([%s]), %s.wells([%s]), '%s:microliter'%s)\n" % (
              container, source_well_string, container_target, result_well_string, volume, options_str)
@@ -212,9 +212,9 @@ def convert_schedule(schedule_string):
         num_repeats = int(m.group(0)[0])
 
         steps = []
-        print "m.groups is ", m.groups()
+        print("m.groups is ", m.groups())
         for step_string in m.groups(0)[1].split(","):
-            print "step_string is", step_string
+            print("step_string is", step_string)
             (temperature, duration) = step_string.split(" for ")
             temperature = temperature.strip()[0:-1] + ":celcius"
 

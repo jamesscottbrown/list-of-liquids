@@ -1,8 +1,8 @@
 #Docker file for local building and serving only
-FROM ubuntu:latest
+FROM python
 MAINTAINER James Scott-Brown <james@jamesscottbrown.com>
 
-RUN apt-get update && apt-get install -y python binutils g++ make sqlite3 python-pip
+RUN apt-get update && apt-get install -y binutils g++ make sqlite3
 
 ADD . /code
 WORKDIR /code

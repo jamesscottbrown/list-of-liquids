@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Database module, including the SQLAlchemy database object and DB-related utilities."""
-from .compat import basestring
+from .compat import str
 from .extensions import db
 
 # Alias common SQLAlchemy names
@@ -19,7 +19,7 @@ class CRUDMixin(object):
 
     def update(self, commit=True, **kwargs):
         """Update specific fields of a record."""
-        for attr, value in kwargs.items():
+        for attr, value in list(kwargs.items()):
             setattr(self, attr, value)
         return commit and self.save() or self
 
@@ -55,7 +55,7 @@ class SurrogatePK(object):
     def get_by_id(cls, record_id):
         """Get record by ID."""
         if any(
-                (isinstance(record_id, basestring) and record_id.isdigit(),
+                (isinstance(record_id, str) and record_id.isdigit(),
                  isinstance(record_id, (int, float))),
         ):
             return cls.query.get(int(record_id))

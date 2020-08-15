@@ -11,7 +11,7 @@ from protocol_gui.utils import flash_errors
 from flask import Blueprint, flash, redirect, render_template, request, url_for, make_response
 from flask_login import login_required, current_user
 
-from urllib import unquote_plus
+from urllib.parse import unquote_plus
 import json
 
 blueprint = Blueprint('protocol', __name__, url_prefix='/protocols', static_folder='../static')
@@ -144,7 +144,7 @@ def save_protocol(protocol_id):
         flash('Not your project!', 'danger')
         return redirect('.')
 
-    current_protocol.protocol = unquote_plus(request.get_data()).decode('utf-8')
+    current_protocol.protocol = request.get_data()
     current_protocol.save()
 
     return "SUCCESS"
@@ -187,9 +187,9 @@ def autoprotocol_protocol(protocol_id):
         return redirect('.')
 
     if current_protocol.public:
-        print "PUBLIC"
+        print("PUBLIC")
     else:
-        print "NOT PUBLIC"
+        print("NOT PUBLIC")
 
     if current_protocol.user != current_user and not current_protocol.public:
         flash('Not your project!', 'danger')
@@ -217,9 +217,9 @@ def english_protocol(protocol_id):
         return redirect('.')
 
     if current_protocol.public:
-        print "PUBLIC"
+        print("PUBLIC")
     else:
-        print "NOT PUBLIC"
+        print("NOT PUBLIC")
 
     if current_protocol.user != current_user and not current_protocol.public:
         flash('Not your project!', 'danger')
@@ -261,7 +261,7 @@ def get_contents(protocol_id):
     result = process_node(protocol_obj, node_id)
     result = collapse_contents(result)
 
-    return json.dumps(map(format_aliquot_contents, result))
+    return json.dumps(list(map(format_aliquot_contents, result)))
 
 
 @blueprint.route('/<int:protocol_id>/checkWellsAssigned', methods=['GET', 'POST'])
@@ -299,7 +299,7 @@ def check_assigned(protocol_id):
 
             num_aliquots = int(resource["data"]["num_wells"])
 
-            if "container_name" not in resource["data"].keys() or not resource["data"]["container_name"]:
+            if "container_name" not in list(resource["data"].keys()) or not resource["data"]["container_name"]:
                 continue
 
             container_name = resource["data"]["container_name"]
@@ -307,7 +307,7 @@ def check_assigned(protocol_id):
                 unassigned_resources.append(node["id"])
 
         elif node["type"] != "process":
-            if "container_name" not in node["data"].keys() or not node["data"]["container_name"]:
+            if "container_name" not in list(node["data"].keys()) or not node["data"]["container_name"]:
                 continue
             container_name = node["data"]["container_name"]
 
