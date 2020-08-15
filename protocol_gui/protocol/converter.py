@@ -11,11 +11,11 @@ class Converter:
         protocol_str = self.get_header(protocol, protocol_name, protocol_description)
 
         # do a topological sort on the operations graph, and process nodes in a consistent order
-        operation_nodes = filter(lambda x: x["type"] in ["zip", "cross", "pool", "aliquot", "select", "pick", "spread"], protocol["nodes"])
-        processed_nodes = filter(lambda x: x["type"] == "resource", protocol["nodes"])
+        operation_nodes = [x for x in protocol["nodes"] if x["type"] in ["zip", "cross", "pool", "aliquot", "select", "pick", "spread"]]
+        processed_nodes = [x for x in protocol["nodes"] if x["type"] == "resource"]
 
         # handle process nodes separately
-        if "operations" in protocol.keys():
+        if "operations" in list(protocol.keys()):
             for operation in protocol["operations"]:
                 parents = set()
 
@@ -27,7 +27,7 @@ class Converter:
                 operation_nodes.append({"parentIds": list(parents), "id": node["id"], "data": node["data"],
                                         "type": "process", "operation": operation})
 
-                print "Added operation", {"parentIds": list(parents), "id": node["id"], "data": node["data"]}
+                print("Added operation", {"parentIds": list(parents), "id": node["id"], "data": node["data"]})
 
 
         while len(operation_nodes) > 0:
@@ -38,7 +38,7 @@ class Converter:
                 for pid in parent_ids:
 
                     # if parent has not been processed, cannot process node yet
-                    if not filter(lambda x: x["id"] == pid, processed_nodes):
+                    if not [x for x in processed_nodes if x["id"] == pid]:
                         can_process_node = False
 
                     # if edge is 'addToThis', we must do any other operations involving the parent first
@@ -66,8 +66,7 @@ class Converter:
         # construct list containing id of all nodes equivalent to parent
         if node["type"] == "resource":
             parent = filter(lambda x: x["id"] == parent_node_id, protocol["nodes"])[0]
-            nodes_equivalent_to_parent = filter(
-                lambda x: x["type"] == "resource" and x["data"]["resource"] == parent["data"]["resource"], protocol["nodes"])
+            nodes_equivalent_to_parent = [x for x in protocol["nodes"] if x["type"] == "resource" and x["data"]["resource"] == parent["data"]["resource"]]
         else:
             nodes_equivalent_to_parent = [parent_node_id]
 
@@ -76,7 +75,7 @@ class Converter:
             if link["source_id"] not in nodes_equivalent_to_parent or link["target_id"] == node_id:
                 continue
 
-            if link["target_id"] not in map(lambda x: x["id"], processed_nodes):
+            if link["target_id"] not in [x["id"] for x in processed_nodes]:
                 return False
 
         return True
@@ -92,18 +91,18 @@ class Converter:
             container_types = json.load(c)["containers"]
 
         target_container_type = filter(lambda x: self.sanitise_name(x["name"]) == target_container, self.protocol["containers"])[0]["type"]
-        target_container_wells = container_types[target_container_type]["locations"].keys()
-        target_container_cols = set(map(lambda x: x[0], target_container_wells))
-        target_container_rows = set(map(lambda x: int(x[1:]), target_container_wells))
+        target_container_wells = list(container_types[target_container_type]["locations"].keys())
+        target_container_cols = set([x[0] for x in target_container_wells])
+        target_container_rows = set([int(x[1:]) for x in target_container_wells])
 
         # return row numbers for complete rows
-        rows = list(set(map(lambda x: x[1:], well_addresses)))
+        rows = list(set([x[1:] for x in well_addresses]))
 
         complete_rows = []
         for row in rows:
-            addresses = filter(lambda x: x[1:] == row, well_addresses)
+            addresses = [x for x in well_addresses if x[1:] == row]
 
-            columns = map(lambda x: x[0], addresses)
+            columns = [x[0] for x in addresses]
             if len(set(columns)) == len(target_container_cols):
                 complete_rows.append(row)
 
@@ -126,7 +125,7 @@ class Converter:
             return Converter.get_locations(protocol, parent)
 
         # process nodes have no container
-        if "container_name" not in node["data"].keys() or not node["data"]["container_name"]:
+        if "container_name" not in list(node["data"].keys()) or not node["data"]["container_name"]:
             return []
 
         container = filter(lambda x: x["name"] == node["data"]["container_name"], protocol["containers"])[0]
@@ -137,7 +136,7 @@ class Converter:
             for contents in container["contents"][well_address]:
                 aliquot_index = int(contents["aliquot_index"])
 
-                print "node:", node
+                print("node:", node)
                 if int(contents["node_id"]) == int(node["id"]):
                     while aliquot_index + 1 > len(locations):
                         locations.append(None)
@@ -149,15 +148,15 @@ class Converter:
 
     def get_parent_nodes(self, node, protocol):
         parent_nodes = []
-        parent_nodes.extend(filter(lambda x: x["id"] == node["parentIds"][0], protocol["nodes"]))
+        parent_nodes.extend([x for x in protocol["nodes"] if x["id"] == node["parentIds"][0]])
         if len(node["parentIds"]) > 1:
-            parent_nodes.extend(filter(lambda x: x["id"] == node["parentIds"][1], protocol["nodes"]))
+            parent_nodes.extend([x for x in protocol["nodes"] if x["id"] == node["parentIds"][1]])
 
         for i in range(0, len(parent_nodes)):
 
             if parent_nodes[i]["type"] == "resource":
                 resources = protocol["resources"]
-                resource = list(filter(lambda r: r["label"] == parent_nodes[i]["data"]["resource"], resources))[0]
+                resource = list([r for r in resources if r["label"] == parent_nodes[i]["data"]["resource"]])[0]
 
                 # replace reference to reference to lowest node_id with same target
                 for n in protocol["nodes"]:
@@ -226,7 +225,7 @@ class Converter:
 
         elif node["type"] == "pool":
             protocol_str = ""
-            source_str = ", ".join(map(lambda x: "'" + x + "'", locations_one))
+            source_str = ", ".join(["'" + x + "'" for x in locations_one])
 
             if len(volumes_one) == 1:
                 volumes_str = volumes_one[0]
@@ -366,7 +365,7 @@ class Converter:
                 if len(set(volumes.values())) > 1:
                     is_valid = False
                 else:
-                    volume = volumes.values()[0]
+                    volume = list(volumes.values())[0]
 
                 for column in target_container_cols:
                     source_well = source[column + result_row]
@@ -383,26 +382,26 @@ class Converter:
                     protocol_str += self.get_transfer_string(pipette_name, volume, container, source_row,
                                                              container_target, result_row, self.get_options(link_data), target_container_cols)
 
-                    transfers_made.extend(map(lambda x: x + str(result_row), target_container_cols))
+                    transfers_made.extend([x + str(result_row) for x in target_container_cols])
 
         # now do remaining individual transfers,
         # grouping transfers from the same well into distribute operations if permitted
         wells_to_fill = locations_result
-        map(lambda x: locations_result.remove(x), transfers_made)
+        list(map(lambda x: locations_result.remove(x), transfers_made))
 
         if link_data["distribute"]:
             transfers = {}
 
             for target_well in wells_to_fill:
                 source_well = source[target_well]
-                if source_well not in transfers.keys():
+                if source_well not in list(transfers.keys()):
                     transfers[source_well] = []
                 transfers[source_well].append(target_well)
 
             for (source, volume) in zip(transfers, volumes):
-                targets_str = ", ".join(map(lambda x: "'" + x + "'", transfers[source]))
+                targets_str = ", ".join(["'" + x + "'" for x in transfers[source]])
 
-                these_volumes = map(lambda x: volumes[x], transfers[source])
+                these_volumes = [volumes[x] for x in transfers[source]]
                 if len(set(these_volumes)) == 1:
                     volume_str = these_volumes[0]
                 else:

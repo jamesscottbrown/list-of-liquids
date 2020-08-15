@@ -41,7 +41,7 @@ class Aliquot:
         return "Aliquot[%s of %s]" % (self.volume, self.resource)
 
     def short_string(self):
-        if isinstance(self.resource, str) or isinstance(self.resource, unicode):
+        if isinstance(self.resource, str) or isinstance(self.resource, str):
             return self.resource
         else:
             return self.resource.short_string()
@@ -92,14 +92,14 @@ def process_node(protocol_obj, node_id):
     nodes = protocol_obj["nodes"]
     links = protocol_obj["links"]
 
-    incident_links = list(filter(lambda l: l["target_id"] == node_id, links))
-    node = list(filter(lambda n: n["id"] == node_id, nodes))[0]
+    incident_links = list([l for l in links if l["target_id"] == node_id])
+    node = list([n for n in nodes if n["id"] == node_id])[0]
     node_data = node["data"]
 
     if node["type"] == "resource":
         # return one aliquot per distinct component, with a volume that is the available volume in well
         resources = protocol_obj["resources"]
-        resource_data = list(filter(lambda r: r["label"] == node_data["resource"], resources))[0]["data"]
+        resource_data = list([r for r in resources if r["label"] == node_data["resource"]])[0]["data"]
 
         num_wells = int(resource_data["num_wells"])
         if num_wells > 1:
@@ -107,13 +107,13 @@ def process_node(protocol_obj, node_id):
         else:
             component_names = [node["label"]]
 
-        return map(lambda x: [Aliquot(x, resource_data["volume"], container=resource_data["container_name"])], component_names)
+        return [[Aliquot(x, resource_data["volume"], container=resource_data["container_name"])] for x in component_names]
 
     elif node["type"] == "zip":
 
         components1 = get_constituent_aliquots(protocol_obj, incident_links[0])
         components2 = get_constituent_aliquots(protocol_obj, incident_links[1])
-        return map(lambda(x, y): x+y, zip(components1, components2)) * int(node["data"]["num_duplicates"])
+        return [x_y[0]+x_y[1] for x_y in zip(components1, components2)] * int(node["data"]["num_duplicates"])
 
     elif node["type"] == "cross":
 
@@ -137,13 +137,13 @@ def process_node(protocol_obj, node_id):
         total_volume = {}
         for component in components:
             for aliquot in component:
-                if aliquot.resource not in total_volume.keys():
+                if aliquot.resource not in list(total_volume.keys()):
                     total_volume[aliquot.resource] = 0
 
                 total_volume[aliquot.resource] += aliquot.volume
 
         res = [[]]
-        for resource in total_volume.keys():
+        for resource in list(total_volume.keys()):
             res[0].append(Aliquot(resource, total_volume[resource]))
 
         return res * int(node["data"]["num_duplicates"])
@@ -171,7 +171,7 @@ def get_constituent_aliquots(protocol_obj, link):
     if link["data"]["addToThis"]:
 
         # subtract volume of any other transfers
-        other_links_from_parent = filter(lambda l: l["source_id"] == link["source_id"] and l["target_id"] != link["target_id"], protocol_obj["links"])
+        other_links_from_parent = [l for l in protocol_obj["links"] if l["source_id"] == link["source_id"] and l["target_id"] != link["target_id"]]
         for other_link in other_links_from_parent:
             to_subtract.append( str(other_link["data"]["volumes"][0]).split(',') )
 
@@ -188,9 +188,9 @@ def get_constituent_aliquots(protocol_obj, link):
         volumes = volume.split(',')
 
         if len(volumes) == len(inputs):
-            input_volume_tuples = zip(inputs, volumes)
+            input_volume_tuples = list(zip(inputs, volumes))
         elif len(inputs) == 1:
-            input_volume_tuples = map(lambda volume: (inputs[0], volume), volumes)
+            input_volume_tuples = [(inputs[0], volume) for volume in volumes]
 
     else:
         for input in inputs:
@@ -202,7 +202,7 @@ def get_constituent_aliquots(protocol_obj, link):
             to_subtract[i] = to_subtract[i] * len(input_volume_tuples)
 
     for i, (input, transfered_volume) in enumerate(input_volume_tuples):
-        total_volume = sum(map(lambda x: float(x.volume), input))  # total volume of mixture of aliquots we are drawing from
+        total_volume = sum([float(x.volume) for x in input])  # total volume of mixture of aliquots we are drawing from
 
         if transfered_volume == "all":
             transfered_volume = total_volume
@@ -238,7 +238,7 @@ def collapse_contents(result):
         well_collapsed_contents = []
         for a in well:
 
-            if a.resource in total_volume.keys():
+            if a.resource in list(total_volume.keys()):
                 total_volume[a.resource] += float(a.volume)
             else:
                 total_volume[a.resource] = float(a.volume)
@@ -253,5 +253,5 @@ def collapse_contents(result):
 
 
 def format_aliquot_contents(contents):
-    x = filter(lambda x: x.volume > 0, contents)
-    return map(lambda aliquot: '{0:.2f}'.format(float(aliquot.volume)) + " of " + aliquot.resource, x)
+    x = [x for x in contents if x.volume > 0]
+    return ['{0:.2f}'.format(float(aliquot.volume)) + " of " + aliquot.resource for aliquot in x]

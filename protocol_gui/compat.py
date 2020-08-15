@@ -5,14 +5,14 @@ import sys
 PY2 = int(sys.version[0]) == 2
 
 if PY2:
-    text_type = unicode  # noqa
+    text_type = str  # noqa
     binary_type = str
-    string_types = (str, unicode)  # noqa
-    unicode = unicode  # noqa
-    basestring = basestring  # noqa
+    string_types = (str, str)  # noqa
+    str = str  # noqa
+    str = str  # noqa
 else:
     text_type = str
     binary_type = bytes
     string_types = (str,)
-    unicode = str
-    basestring = (str, bytes)
+    str = str
+    str = (str, bytes)
