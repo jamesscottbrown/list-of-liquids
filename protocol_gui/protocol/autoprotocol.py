@@ -28,7 +28,7 @@ class AutoProtocol(Converter):
         for resource in protocol["resources"]:
 
             container_name = resource["data"]["container_name"]
-            container = filter(lambda x: x["name"] == container_name, protocol["containers"])[0]
+            container = list(filter(lambda x: x["name"] == container_name, protocol["containers"]))[0]
 
             # get lowest node id
             nid = float("inf")

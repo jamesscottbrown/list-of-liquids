@@ -290,7 +290,7 @@ def check_assigned(protocol_id):
     for node in protocol_obj["nodes"]:
 
         if node["type"] == "resource":
-            resource = filter(lambda x: x["label"] == node["label"], protocol_obj["resources"])[0]
+            resource = list(filter(lambda x: x["label"] == node["label"], protocol_obj["resources"]))[0]
 
             # only process the first node corresponding to each resource
             if resource["id"] in processed_resource_ids:
@@ -319,7 +319,7 @@ def check_assigned(protocol_id):
 
 
 def node_has_unassigned_aliquots(num_aliquots, operation_id, container_name, protocol_obj):
-    container = filter(lambda x: x["name"] == container_name, protocol_obj["containers"])[0]
+    container = list(filter(lambda x: x["name"] == container_name, protocol_obj["containers"]))[0]
 
     aliquots_listed = set()
     for well in container["contents"]:

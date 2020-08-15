@@ -21,7 +21,7 @@ class Converter:
 
                 # aggregate parents across all nodes instantiating this process
                 for leaf in operation["leaves"]:
-                    node = filter(lambda x: x["id"] == leaf["id"], protocol["nodes"])[0]
+                    node = list(filter(lambda x: x["id"] == leaf["id"], protocol["nodes"]))[0]
                     parents = parents.union(node["parentIds"])
 
                 operation_nodes.append({"parentIds": list(parents), "id": node["id"], "data": node["data"],
@@ -65,7 +65,7 @@ class Converter:
 
         # construct list containing id of all nodes equivalent to parent
         if node["type"] == "resource":
-            parent = filter(lambda x: x["id"] == parent_node_id, protocol["nodes"])[0]
+            parent = list(filter(lambda x: x["id"] == parent_node_id, protocol["nodes"]))[0]
             nodes_equivalent_to_parent = [x for x in protocol["nodes"] if x["type"] == "resource" and x["data"]["resource"] == parent["data"]["resource"]]
         else:
             nodes_equivalent_to_parent = [parent_node_id]
@@ -90,7 +90,7 @@ class Converter:
         with open( os.path.join(code_dir, 'static/default-containers.json')) as c:
             container_types = json.load(c)["containers"]
 
-        target_container_type = filter(lambda x: self.sanitise_name(x["name"]) == target_container, self.protocol["containers"])[0]["type"]
+        target_container_type = list(filter(lambda x: self.sanitise_name(x["name"]) == target_container, self.protocol["containers"]))[0]["type"]
         target_container_wells = list(container_types[target_container_type]["locations"].keys())
         target_container_cols = set([x[0] for x in target_container_wells])
         target_container_rows = set([int(x[1:]) for x in target_container_wells])
@@ -121,14 +121,14 @@ class Converter:
 
         if node["type"] == "process":
             parent_node_id = node["parentIds"][0]
-            parent = filter(lambda x: x["id"] == parent_node_id, protocol["nodes"])[0]
+            parent = list(filter(lambda x: x["id"] == parent_node_id, protocol["nodes"]))[0]
             return Converter.get_locations(protocol, parent)
 
         # process nodes have no container
         if "container_name" not in list(node["data"].keys()) or not node["data"]["container_name"]:
             return []
 
-        container = filter(lambda x: x["name"] == node["data"]["container_name"], protocol["containers"])[0]
+        container = list(filter(lambda x: x["name"] == node["data"]["container_name"], protocol["containers"]))[0]
 
         locations = []
         for well_address in container["contents"]:
@@ -172,8 +172,8 @@ class Converter:
         num_duplicates = int(node["data"]["num_duplicates"])
         parent_nodes = self.get_parent_nodes(node, protocol)
 
-        link_one_data = filter(lambda x: x["source_id"] == node["parentIds"][0] and x["target_id"] == node["id"],
-                               protocol["links"])[0]["data"]
+        link_one_data = list(filter(lambda x: x["source_id"] == node["parentIds"][0] and x["target_id"] == node["id"],
+                               protocol["links"]))[0]["data"]
 
         if len(link_one_data["volumes"]) > 0:
             volumes_one = str(link_one_data["volumes"][0]).split(",")
@@ -186,8 +186,8 @@ class Converter:
 
         (link_two_data, container_two, pipette_name_two, locations_two) = (False, False, False, False)
         if len(parent_nodes) > 1:
-            link_two_data = filter(lambda x: x["source_id"] == node["parentIds"][1] and x["target_id"] == node["id"],
-                                   protocol["links"])[0]["data"]
+            link_two_data = list(filter(lambda x: x["source_id"] == node["parentIds"][1] and x["target_id"] == node["id"],
+                                   protocol["links"]))[0]["data"]
             volumes_two = str(link_two_data["volumes"][0]).split(",")
             container_two = self.sanitise_name(parent_nodes[1]["data"]["container_name"])
             pipette_name_two = self.sanitise_name(link_two_data["pipette_name"])
@@ -212,7 +212,7 @@ class Converter:
         if node["type"] == "process":
             # find parent node's well assignments
             container_name = parent_nodes[0]["data"]["container_name"]
-            container_contents = filter(lambda x: x["name"] == container_name, protocol["containers"])[0]["contents"]
+            container_contents = list(filter(lambda x: x["name"] == container_name, protocol["containers"]))[0]["contents"]
 
             well_locations = []
             for well_address in container_contents:
@@ -348,8 +348,8 @@ class Converter:
         protocol_str = ""
 
         # Look for complete rows that can be pipetted together
-        target_container_type = filter(lambda x: self.sanitise_name(x["name"]) == container_target, self.protocol["containers"])[0]["type"]
-        source_container_type = filter(lambda x: self.sanitise_name(x["name"]) == container, self.protocol["containers"])[0]["type"]
+        target_container_type = list(filter(lambda x: self.sanitise_name(x["name"]) == container_target, self.protocol["containers"]))[0]["type"]
+        source_container_type = list(filter(lambda x: self.sanitise_name(x["name"]) == container, self.protocol["containers"]))[0]["type"]
 
         complete_rows, target_container_cols, target_container_rows = self.get_complete_rows(locations_result, container_target)
         _, source_container_cols, source_container_rows = self.get_complete_rows(locations_result, container)
