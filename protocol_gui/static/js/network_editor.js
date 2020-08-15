@@ -38,7 +38,13 @@ function network_editor() {
     var linkToChangeParent = false;
 
     if (protocol_string) {
-        var obj = JSON.parse(protocol_string);
+
+        var obj;
+        if (typeof(protocol_string) === "string"){
+            obj = JSON.parse(protocol_string);
+        } else if (typeof(protocol_string) === "object") {
+            obj = protocol_string;
+        }
 
         nodes = obj.nodes;
 

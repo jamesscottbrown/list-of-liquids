@@ -266,7 +266,7 @@
 {% block js %}
     <script type="text/javascript">
         var csrf_token = "{{ csrf_token() }}";
-        var protocol_string = {{ protocol.protocol | tojson}};
+        var protocol_string = {{ protocol_obj | tojson}};
         var container_types = {{ container_types | tojson }};
     </script>
 

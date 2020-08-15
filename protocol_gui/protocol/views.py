@@ -144,7 +144,7 @@ def save_protocol(protocol_id):
         flash('Not your project!', 'danger')
         return redirect('.')
 
-    current_protocol.protocol = unquote_plus(request.get_data()).decode('utf-8')
+    current_protocol.protocol = request.get_data()
     current_protocol.save()
 
     return "SUCCESS"
