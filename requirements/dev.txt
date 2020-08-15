@@ -2,9 +2,9 @@
 -r prod.txt
 
 # Testing
-pytest==3.0.7
-WebTest==2.0.27
-factory-boy==2.8.1
+pytest==6.0.1
+WebTest==2.0.35
+factory-boy==3.0.1
 
 # Lint and code style
 flake8==3.3.0
